@@ -1,0 +1,65 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Getting Started: Serving Web Content</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link th:href="@{/main.css}" rel="stylesheet" />
+</head>
+<body >
+
+    <p th:text="'Star name:' + ${name} + ' '+ ${class}" />
+    <p th:text="'Age of system: '+ ${age}" />
+    <p th:text="'Lumosity: '+ ${lumosity}" />
+    <p th:text="'Mass (Solar): ' + ${mass}" />
+    <p th:text="'Description:' + ${description} " />
+
+    <h1>System Facts</h1>
+    <table>
+        <tr>
+            <th>No</th>
+            <th>Distance</th>
+            <th>Facts</th>
+
+        </tr>
+        <tr th:each="object, objStat : ${objects}">
+
+            <td th:text="${objStat.count -1 }">1</td>
+            <td th:text="${object.getOrbitalFacts().getOrbitalDistance().doubleValue()}">N/A</td>
+            <td th:switch="${object.stellarObjectType.getLabel()}">
+                <div th:case="'T'">
+                    <span><strong>Mass: </strong></span>
+                    <span th:text="${object.getPresentations().getFacts().get('mass')}">-</span>
+                    <span><strong>Gravity: </strong></span>
+                    <span th:text="${object.getPresentations().getFacts().get('gravity')}">-</span>
+                    <span> g</span>
+                     <span><strong>Calendar: </strong></span>
+                    <span th:text="${object.getPresentations().getFacts().get('orbital period')}">-</span>
+                    <span> years with days of </span>
+                    <span th:text="${object.getPresentations().getFacts().get('rotation period')}">-</span>
+                    <span> hours</span>
+                    <p th:text="${object.toString()}">-</p>
+                </div>
+                <div th:case="'S'">
+                    <span>Mass</span>
+                    <span th:text="${object.getPresentations().getFacts().get('mass')}">-</span>
+
+                    <p th:text="${object.toString()}">-</p>
+                </div>
+                <div th:case="'J'">
+                    <span>Mass: </span>
+                    <span th:text="${object.getPresentations().getFacts().get('mass')}">-</span>
+                    <span>, Diameter: </span>
+                    <span th:text="${object.getPresentations().getFacts().get('radius')}">-</span>
+                    <p th:text="${object.toString()}">-</p>
+                </div>
+                <p th:case="'A'">This is an Asteroid belt</p>
+                <p th:case="*">This is something else</p>
+            </td>
+        </tr>
+    </table>
+
+
+
+</body>
+</html>
