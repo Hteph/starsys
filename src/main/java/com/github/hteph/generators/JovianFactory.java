@@ -19,13 +19,13 @@ import static com.github.hteph.utils.NumberUtilities.sqrt;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class JovianFactory {
 
-    static Planet Generator(String archiveID,
-                            String name,
-                            String description,
-                            String classificationName,
-                            BigDecimal orbitDistance,
-                            char orbitalObjectClass,
-                            Star star) {
+    static Planet get(String archiveID,
+                      String name,
+                      String description,
+                      String classificationName,
+                      BigDecimal orbitDistance,
+                      char orbitalObjectClass,
+                      Star star) {
 
         //String lifeType; // TODO allow for Jovian life in the future
 
@@ -57,8 +57,9 @@ public final class JovianFactory {
             gasGiantBuilder.radius(jovianRadius);
             gasGiantBuilder.mass(BigDecimal.valueOf(mass));
         } else {
-            jovianRadius = Dice._2d6() * 7000;
-            mass = cubed(jovianRadius / 6380d) * (innerZone ? 0.1 * Dice.d10() * 0.025 : 0.08 * Dice.d10() * 0.025);
+            jovianRadius = Dice._2d6() * 7000 + Dice.d10()*100;
+            mass = cubed(jovianRadius / 6380d)
+                    * (innerZone ? 0.1 + (Dice.d10() * 0.025) : 0.08 + (Dice.d10() * 0.025));
             gasGiantBuilder.mass(BigDecimal.valueOf(mass).round(FOUR));
             gasGiantBuilder.radius(jovianRadius);
         }

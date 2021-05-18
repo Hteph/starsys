@@ -16,7 +16,11 @@ public class LifeMethods {
     public static boolean testLife(int baseTemperature,
                                    double atmoPressure,
                                    int hydrosphere,
-                                   Set<AtmosphericGases> atmoshericComposition) {
+                                   Set<AtmosphericGases> atmoshericComposition,
+                                   double age) {
+
+        //setting a limit on how fast life can develop
+        if(age<2) return false;
 
         double lifeIndex = 0;
 
@@ -35,12 +39,12 @@ public class LifeMethods {
         return lifeIndex > 0; //Nod to Gaia-theory, if there is any chance of life it will aways be life present
     }
 
-    public static Breathing findLifeType(Set<AtmosphericGases> atmoshericComposition) {
+    public static Breathing findLifeType(Set<AtmosphericGases> atmoshericComposition, double age) {
         //TODO Allow for alternate gases such as Cl2
         return atmoshericComposition.stream()
                                     .map(AtmosphericGases::getName)
                                     .anyMatch(b -> b.equals("NH3"))
                 ? Breathing.AMMONIA
-                : Breathing.OXYGEN;
+                : age<3?Breathing.PROTO:Breathing.OXYGEN;
     }
 }

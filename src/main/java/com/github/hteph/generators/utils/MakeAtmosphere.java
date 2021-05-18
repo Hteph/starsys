@@ -1,4 +1,4 @@
-package com.github.hteph.generators;
+package com.github.hteph.generators.utils;
 
 import com.github.hteph.repository.objects.AtmosphericGases;
 import com.github.hteph.repository.objects.Planet;
@@ -10,10 +10,30 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
 
-class MakeAtmosphere {
+public class MakeAtmosphere {
+
+    public static void checkAtmo(Set<AtmosphericGases> atmoSet) {
+        var sumOfGasPercentage = atmoSet.stream()
+                                        .map(AtmosphericGases::getPercentageInAtmo)
+                                        .reduce(0, Integer::sum);
+
+        if (sumOfGasPercentage < 100) {
+
+            var currentN2 = atmoSet.stream()
+                                   .filter(g->g.getName().equals("N2"))
+                                   .findAny()
+                                   .map(AtmosphericGases::getPercentageInAtmo)
+                                   .orElse(0);
+            var newN2 = AtmosphericGases.builder()
+                                        .name("N2")
+                                        .percentageInAtmo(currentN2 + 100 - sumOfGasPercentage);
+            atmoSet.add(newN2.build());
+
+        }
+    }
 
     @SuppressWarnings("rawtypes")
-    static TreeSet<AtmosphericGases> createPlanetary(Star star,
+    static public TreeSet<AtmosphericGases> createPlanetary(Star star,
                                                  int baseTemperature,
                                                  String tectonicActivityGroup,
                                                  double radius,

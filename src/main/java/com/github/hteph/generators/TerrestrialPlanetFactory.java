@@ -1,7 +1,7 @@
 package com.github.hteph.generators;
 
-
 import com.github.hteph.generators.utils.LifeMethods;
+import com.github.hteph.generators.utils.MakeAtmosphere;
 import com.github.hteph.repository.objects.AtmosphericGases;
 import com.github.hteph.repository.objects.OrbitalFacts;
 import com.github.hteph.repository.objects.Planet;
@@ -140,14 +140,15 @@ public final class TerrestrialPlanetFactory {
 
         //Rotation - day/night cycle
         if (tidelocked) {
-            rotationalPeriod = orbitalPeriod * 365*24;
+            rotationalPeriod = orbitalPeriod * 365 * 24;
         } else {
             rotationalPeriod = (Dice._3d6() + 12)
-                    * (1 + 0.1 * Math.max(0, (tidalForce * star.getAge().doubleValue() - sqrt(mass))/sumOfLunarTidal));
+                    * (1 + 0.1 * Math.max(0, (tidalForce * star.getAge()
+                                                               .doubleValue() - sqrt(mass)) / sumOfLunarTidal));
 
-            if (Dice.d10()<2) rotationalPeriod = Math.pow(rotationalPeriod, Dice.d3());
+            if (Dice.d10() < 2) rotationalPeriod = Math.pow(rotationalPeriod, Dice.d3());
 
-            if (rotationalPeriod > (orbitalPeriod*365*24) / 2.0) {
+            if (rotationalPeriod > (orbitalPeriod * 365 * 24) / 2.0) {
 
                 double[] resonanceArray = {0.5, 2 / 3.0, 1, 1.5, 2, 2.5, 3, 3.5};
                 double[] eccentricityEffect = {0.1, 0.15, 0.21, 0.39, 0.57, 0.72, 0.87, 0.87};
@@ -156,12 +157,12 @@ public final class TerrestrialPlanetFactory {
 
                 if (resultResonance < 0) {
                     eccentricity = eccentricityEffect[-resultResonance - 2];
-                    rotationalPeriod = resonanceArray[-resultResonance - 2]*24*365;
+                    rotationalPeriod = resonanceArray[-resultResonance - 2] * 24 * 365;
                 } else {
                     resultResonance = Math.min(resultResonance, 6); //TODO there is something fishy here, Edge case of greater than
                     // 0.87 relation still causes problem Should rethink methodology
                     eccentricity = eccentricityEffect[resultResonance];
-                    rotationalPeriod = resonanceArray[-resultResonance]*24*365;
+                    rotationalPeriod = resonanceArray[-resultResonance] * 24 * 365;
                 }
             }
         }
@@ -223,23 +224,32 @@ public final class TerrestrialPlanetFactory {
         }
 
         if (atmoPressure.doubleValue() == 0) atmoshericComposition.clear();
-        if (atmoshericComposition.size() == 0) { //There are edge cases where all of atmo has boiled away
+        if (atmoshericComposition.isEmpty()) { //There are edge cases where all of atmo has boiled away
             atmoPressure = BigDecimal.valueOf(0);
-            planetBuilder.hydrosphereDescription(HydrosphereDescription.REMNANTS);
-            planetBuilder.hydrosphere(0);
+            if (hydrosphereDescription == HydrosphereDescription.LIQUID && hydrosphere > 0) {
+                planetBuilder.hydrosphereDescription(HydrosphereDescription.REMNANTS);
+                planetBuilder.hydrosphere(0);
+            }
+
         }
 
         planetBuilder.atmoPressure(atmoPressure.round(THREE));
         // The composition could be adjusted for the existence of life, so is set below
 
         //Bioshpere
-        hasGaia = LifeMethods.testLife(baseTemperature, atmoPressure.doubleValue(), hydrosphere, atmoshericComposition);
-        if (hasGaia) lifeType = LifeMethods.findLifeType(atmoshericComposition);
+        hasGaia = LifeMethods.testLife(baseTemperature,
+                                       atmoPressure.doubleValue(),
+                                       hydrosphere,
+                                       atmoshericComposition,
+                                       star.getAge().doubleValue());
+
+        if (hasGaia) lifeType = LifeMethods.findLifeType(atmoshericComposition, star.getAge().doubleValue());
         else lifeType = Breathing.NONE;
 
         if (lifeType.equals(Breathing.OXYGEN)) adjustForOxygen(atmoPressure.doubleValue(), atmoshericComposition);
 
         albedo = findAlbedo(IS_INNER_ZONE, atmoPressure.doubleValue(), hydrosphereDescription, hydrosphere);
+        planetBuilder.albedo(BigDecimal.valueOf(albedo).round(TWO));
         double greenhouseGasEffect = findGreenhouseGases(atmoshericComposition, atmoPressure.doubleValue());
 
         greenhouseFactor = 1 + sqrt(atmoPressure.doubleValue()) * 0.01 * (Dice._2d6() - 1)
@@ -252,6 +262,7 @@ public final class TerrestrialPlanetFactory {
         if (lifeType.equals(Breathing.OXYGEN) && baseTemperature < 250) greenhouseFactor *= 1.2;
 
         int surfaceTemp = getSurfaceTemp(baseTemperature, atmoPressure, albedo, greenhouseFactor, hasGaia);
+        if(!atmoshericComposition.isEmpty()) checkAtmo(atmoshericComposition);
         planetBuilder.atmosphericComposition(atmoshericComposition);
         planetBuilder.lifeType(lifeType);
 
@@ -266,12 +277,12 @@ public final class TerrestrialPlanetFactory {
                                                             orbitalPeriod); // sets all the temperature stuff from axial tilt etc etc
         temperatureFacts.surfaceTemp(surfaceTemp);
         //TODO Weather and day night temp cycle
-System.out.println(name+": BaseTemp="+baseTemperature+" EndTemp="+surfaceTemp);
-        int[] polarWinterTemp = temperatureFacts.build().getRangeBandTempWinter();
 
-        if(surfaceTemp+polarWinterTemp[9]>110 && atmoPressure.doubleValue()<2.0) {
+        int[] polarWinterTemp = temperatureFacts.build().getRangeBandTempWinter();
+//Sanity check of water, TODO this could need a bit of more work
+        if (hydrosphere > 0 && surfaceTemp + polarWinterTemp[9] > 380 && atmoPressure.doubleValue() < 2.0) {
             planetBuilder.hydrosphereDescription(HydrosphereDescription.VAPOR)
-                         .hydrosphere(0);
+                         .hydrosphere(1);
         }
 
         planetBuilder.orbitalFacts(orbitalFacts.build());
@@ -413,30 +424,28 @@ System.out.println(name+": BaseTemp="+baseTemperature+" EndTemp="+surfaceTemp);
 
         removeCombustibles(atmoMap);
         atmosphericComposition.clear();
-        checkAtmo(atmoMap);
+
         atmosphericComposition.addAll(atmoMap.values());
     }
 
-    private static void checkAtmo(Map<String, AtmosphericGases> atmoMap) {
-       var sumOfGasPercentage = atmoMap.values()
-                                       .stream()
-                                       .map(AtmosphericGases::getPercentageInAtmo)
-                                       .reduce(0, Integer::sum);
+    private static void checkAtmo(Set<AtmosphericGases> atmoSet) {
+        var sumOfGasPercentage = atmoSet.stream()
+                                        .map(AtmosphericGases::getPercentageInAtmo)
+                                        .reduce(0, Integer::sum);
 
-       if(sumOfGasPercentage<100) {
-           if(atmoMap.containsKey("N2")){
-              var currentN2= atmoMap.remove("N2").getPercentageInAtmo();
-              var newN2 = AtmosphericGases.builder()
-                                          .name("N2")
-                                          .percentageInAtmo(currentN2+100-sumOfGasPercentage);
-              atmoMap.put("N2",newN2.build());
-           }else{
-               var newN2 = AtmosphericGases.builder()
-                                           .name("N2")
-                                           .percentageInAtmo(100-sumOfGasPercentage);
-               atmoMap.put("N2",newN2.build());
-           }
-       }
+        if (sumOfGasPercentage < 100) {
+
+                var currentN2 = atmoSet.stream()
+                                       .filter(g->g.getName().equals("N2"))
+                                       .findAny()
+                                       .map(AtmosphericGases::getPercentageInAtmo)
+                        .orElse(0);
+                var newN2 = AtmosphericGases.builder()
+                                            .name("N2")
+                                            .percentageInAtmo(currentN2 + 100 - sumOfGasPercentage);
+                atmoSet.add(newN2.build());
+
+        }
     }
 
     private static void removeCombustibles(Map<String, AtmosphericGases> atmoMap) {
@@ -671,6 +680,8 @@ System.out.println(name+": BaseTemp="+baseTemperature+" EndTemp="+surfaceTemp);
     }
 
     private static HydrosphereDescription findHydrosphereDescription(boolean InnerZone, int baseTemperature) {
+
+
         HydrosphereDescription tempHydroD;
         if (!InnerZone) {
             tempHydroD = HydrosphereDescription.CRUSTAL;

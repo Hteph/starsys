@@ -2,6 +2,7 @@ package com.github.hteph.generators;
 
 
 import com.github.hteph.generators.utils.LifeMethods;
+import com.github.hteph.generators.utils.MakeAtmosphere;
 import com.github.hteph.repository.objects.AtmosphericGases;
 import com.github.hteph.repository.objects.OrbitalFacts;
 import com.github.hteph.repository.objects.Planet;
@@ -28,6 +29,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 
+import static com.github.hteph.generators.utils.MakeAtmosphere.checkAtmo;
 import static com.github.hteph.utils.NumberUtilities.cubed;
 import static com.github.hteph.utils.NumberUtilities.sqrt;
 import static com.github.hteph.utils.NumberUtilities.squared;
@@ -78,7 +80,8 @@ public final class MoonFactory {
                                 .name(name)
                                 .stellarObjectType(StellarObjectType.MOON)
                                 .description(description)
-                                .classificationName(classificationName);
+                                .classificationName(classificationName)
+                .lunarOrbitDistance(BigDecimal.valueOf(lunarOrbitNumberInPlanetRadii).round(TWO));
 
         var orbitalFacts = OrbitalFacts.builder()
                                        .orbitsAround(orbitingAroundPlanet)
@@ -99,20 +102,22 @@ public final class MoonFactory {
 
         // size may not be all, but here it is set
         //TODO add greater varity for moon objects, depending on planet
-        final int planetRadius = Dice._2d6() * getBaseSize(orbitalObjectClass, orbitingAroundPlanet);
-        moonBuilder.radius(planetRadius);
+        final int moonRadius = Math.min(orbitingAroundPlanet.getRadius()/3,
+                                        Dice._2d6() * getBaseSize(orbitalObjectClass));
+        moonBuilder.radius(moonRadius);
 
         //density
         final double density = getDensity(orbitDistance, centralStar, SNOWLINE);
-        final double mass = cubed(planetRadius / 6380.0) * density;
-        final double gravity = mass / squared((planetRadius / 6380.0));
+        final double mass = cubed(moonRadius / 6380.0) * density;
+        final double gravity = mass / squared((moonRadius / 6380.0));
 
-        lunarOrbitalPeriod = sqrt(cubed((lunarOrbitNumberInPlanetRadii * moonsPlanetsRadii) / 400000) * 793.64 / (moonsPlanetMass + mass));
+        lunarOrbitalPeriod = sqrt(cubed((lunarOrbitNumberInPlanetRadii * moonsPlanetsRadii) / 400000)
+                                          * 793.64 / (moonsPlanetMass + mass));
 
         moonBuilder.mass(BigDecimal.valueOf(mass).round(THREE))
                    .gravity(BigDecimal.valueOf(gravity).round(TWO))
                    .density(BigDecimal.valueOf(density).round(TWO))
-                   .lunarOrbitalPeriod(BigDecimal.valueOf(lunarOrbitalPeriod));
+                   .lunarOrbitalPeriod(BigDecimal.valueOf(lunarOrbitalPeriod).round(THREE));
 
         //Eccentricity and Inclination TODO Are these actually Ok for moons?
 
@@ -157,7 +162,7 @@ public final class MoonFactory {
         }
 
         orbitalFacts.orbitalEccentricity(BigDecimal.valueOf(eccentricity));
-        moonBuilder.rotationalPeriod(BigDecimal.valueOf(rotationalPeriod));
+        moonBuilder.rotationalPeriod(BigDecimal.valueOf(rotationalPeriod).round(THREE));
 
         //TODO tectonics should include moons!
         //TODO c type should have special treatment
@@ -173,7 +178,7 @@ public final class MoonFactory {
                                                                       centralStar,
                                                                       density,
                                                                       mass
-                   )));
+                   )).round(TWO));
 
         //Temperature
         baseTemperature = (int) (255 / sqrt((orbitDistance.doubleValue()
@@ -183,7 +188,7 @@ public final class MoonFactory {
 
         //Hydrosphere
         hydrosphereDescription = findHydrosphereDescription(IS_INNER_ZONE, baseTemperature);
-        hydrosphere = findTheHydrosphere(hydrosphereDescription, planetRadius);
+        hydrosphere = findTheHydrosphere(hydrosphereDescription, moonRadius);
         waterVaporFactor = getWaterVaporFactor(baseTemperature, hydrosphereDescription, hydrosphere);
 
         moonBuilder.hydrosphereDescription(hydrosphereDescription);
@@ -193,7 +198,7 @@ public final class MoonFactory {
         atmoshericComposition = MakeAtmosphere.createPlanetary(centralStar,
                                                                baseTemperature,
                                                                tectonicActivityGroup,
-                                                               planetRadius,
+                                                               moonRadius,
                                                                gravity,
                                                                moonBuilder);
         var tempMoon = moonBuilder.build();
@@ -221,15 +226,23 @@ public final class MoonFactory {
 
         moonBuilder.atmoPressure(atmoPressure);
         // The composition could be adjusted for the existence of life, so is set below
+        double systemAge = ((Star) (orbitingAroundPlanet.getOrbitalFacts().getOrbitsAround()))
+                .getAge()
+                .doubleValue();
 
         //Bioshpere
-        hasGaia = LifeMethods.testLife(baseTemperature, atmoPressure.doubleValue(), hydrosphere, atmoshericComposition);
-        if (hasGaia) lifeType = LifeMethods.findLifeType(atmoshericComposition);
+        hasGaia = LifeMethods.testLife(baseTemperature,
+                                       atmoPressure.doubleValue(),
+                                       hydrosphere,
+                                       atmoshericComposition,
+                                       systemAge);
+        if (hasGaia) lifeType = LifeMethods.findLifeType(atmoshericComposition, systemAge);
         else lifeType = Breathing.NONE;
 
         if (lifeType.equals(Breathing.OXYGEN)) adjustForOxygen(atmoPressure.doubleValue(), atmoshericComposition);
 
         albedo = findAlbedo(IS_INNER_ZONE, atmoPressure.doubleValue(), hydrosphereDescription, hydrosphere);
+        moonBuilder.albedo(BigDecimal.valueOf(albedo).round(TWO));
         double greenhouseGasEffect = findGreenhouseGases(atmoshericComposition, atmoPressure.doubleValue());
 
         greenhouseFactor = 1 + sqrt(atmoPressure.doubleValue()) * 0.01 * (Dice._2d6() - 1)
@@ -242,6 +255,7 @@ public final class MoonFactory {
         if (lifeType.equals(Breathing.OXYGEN) && baseTemperature < 250) greenhouseFactor *= 1.2;
 
         int surfaceTemp = getSurfaceTemp(baseTemperature, atmoPressure, albedo, greenhouseFactor, hasGaia);
+        if(!atmoshericComposition.isEmpty()) checkAtmo(atmoshericComposition);
         moonBuilder.atmosphericComposition(atmoshericComposition);
         moonBuilder.lifeType(lifeType);
 
@@ -317,18 +331,18 @@ public final class MoonFactory {
         return density;
     }
 
-    private static int getBaseSize(char orbitalObjectClass, Planet moonsPlanet) {
+    private static int getBaseSize(char orbitalObjectClass) {
 
         //TODO add greater varity for moon objects, depending on planet
-        int baseSize = 900; //Default for planets
+        int baseSize=10;
         if (orbitalObjectClass == 'M') {
-            List<Integer> baseSizeList = Arrays.asList(100, 200, 300, 400, 500, 600, 700);
-            TableMaker.makeRoll(Dice.d10(), baseSizeList);
-            baseSize = Math.min(baseSize, moonsPlanet.getRadius() / 3);
+            List<Integer> baseSizeList = Arrays.asList(100, 150, 200, 250, 300, 350, 400, 500, 700, 900);
+            baseSize= TableMaker.makeRoll(Dice.d10(), baseSizeList);
+
         } else if (orbitalObjectClass == 'm') {
-            List<Integer> baseSizeList = Arrays.asList(1, 5, 10, 20, 30, 40, 50);
-            TableMaker.makeRoll(Dice.d10(), baseSizeList);
-            baseSize = Math.min(baseSize, moonsPlanet.getRadius() / 3);
+            List<Integer> baseSizeList = Arrays.asList(5, 10, 15, 20, 25, 30, 35, 40, 45, 50);
+            baseSize= TableMaker.makeRoll(Dice.d10(), baseSizeList);
+
         } else if (orbitalObjectClass == 't' || orbitalObjectClass == 'c') baseSize = 90;
         return baseSize;
     }

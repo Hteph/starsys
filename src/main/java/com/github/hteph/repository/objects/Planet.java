@@ -34,6 +34,7 @@ public class Planet extends StellarObject {
     private String tectonicCore;
     private BigDecimal magneticField;
     private String tectonicActivityGroup;
+    private BigDecimal albedo;
 
     private HydrosphereDescription hydrosphereDescription;
     private int hydrosphere;
@@ -99,6 +100,7 @@ public class Planet extends StellarObject {
         facts.put("orbital eccentricity", getOrbitalFacts().getOrbitalEccentricity().toPlainString());
         facts.put("magnetic field", magneticField.toPlainString());
         facts.put("orbital period", getOrbitalFacts().getOrbitalPeriod().toPlainString());
+        facts.put("inclination", getOrbitalFacts().getOrbitalInclination().toPlainString());
 
         if (getStellarObjectType() != StellarObjectType.JOVIAN) {
             facts.put("gravity", gravity.toPlainString());
@@ -123,7 +125,9 @@ public class Planet extends StellarObject {
         }
 
         if (getStellarObjectType() != StellarObjectType.MOON) {
-            if(moonList != null) facts.put("number of moons", String.valueOf(moonList.size()));
+            if(moonList != null && !moonList.isEmpty()){
+                facts.put("number of moons", String.valueOf(moonList.size()));
+            }
             facts.put("tide locked to star", String.valueOf(tideLockedStar));
             if (moonList != null && !moonList.isEmpty()) {
                 presentationBuilder.MoonPresentations(moonList.stream()
@@ -131,7 +135,13 @@ public class Planet extends StellarObject {
                                                               .collect(Collectors.toList()));
             }
         } else {
-            facts.put("planetLocked", String.valueOf(planetLocked));
+            facts.put("name",getName());
+            facts.put("description",getDescription());
+            facts.put("orbitDistance",lunarOrbitDistance.toPlainString());
+            if(planetLocked) facts.put("planetLocked", "Yes");
+            facts.put("lunarOrbitalPeriod", lunarOrbitalPeriod.toPlainString());
+            facts.put("rotation", rotationalPeriod.toPlainString());
+
         }
 
         return presentationBuilder.facts(facts)

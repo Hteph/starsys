@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -82,13 +81,13 @@ public final class StarSystemGenerator {
                 case 'J':
                     if (classificationName == null) classificationName = "Super Jovian";
                     if (description == null) description = "Large Gas Giant";
-                    starSystemList.add(JovianFactory.Generator(star.getArchiveID() + "." + numeral,
-                                                               star.getName() + " " + numeral,
-                                                               description,
-                                                               classificationName,
-                                                               BigDecimal.valueOf(tempObject.getOrbitDistance()),
-                                                               tempObject.getOrbitObject(),
-                                                               star));
+                    starSystemList.add(JovianFactory.get(star.getArchiveID() + "." + numeral,
+                                                         star.getName() + " " + numeral,
+                                                         description,
+                                                         classificationName,
+                                                         BigDecimal.valueOf(tempObject.getOrbitDistance()),
+                                                         tempObject.getOrbitObject(),
+                                                         star));
                     objectCounter++;
                     break;
                 case 't':
@@ -147,7 +146,7 @@ public final class StarSystemGenerator {
     private static void setGeneralOrbitContent(double innerLimit, double snowLine, double outerLimit, TempOrbitalObject tempOrbitalObject) {
         int[] outerNumbersList = {2, 3, 4, 5, 12, 14, 15, 17, 18};
         Character[] outerObjectList = {'E', 'c', 'A', 'j', 'E', 't', 'J', 'T', 'C'};
-        int[] innerNumbersList = {2, 4, 8, 11, 14, 16, 17, 18};
+        int[] innerNumbersList = {2, 4, 8, 9, 14, 16, 17, 18};
         Character[] innerObjectList = {'E', 'A', 't', 'T', 'C', 'E', 'j', 'J'};
 
         if (tempOrbitalObject.getOrbitDistance() > outerLimit || tempOrbitalObject.getOrbitDistance() < innerLimit) {

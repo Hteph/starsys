@@ -1,17 +1,18 @@
 package com.github.hteph.utils;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
+import java.math.MathContext;
 import java.util.Arrays;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class NumberUtilities {
 
-    // Constructor ----------------------------------------------
-
-    private NumberUtilities() {
-
-        //No instances of this class, please
-    }
-
-    //Methods --------------------------------------------------
+    static final MathContext TWO = new MathContext(2);
+    static final MathContext THREE = new MathContext(3);
+    static final MathContext FOUR = new MathContext(4);
+    static final MathContext FIVE = new MathContext(5);
 
     public static double nicefyDouble(double number) {
 

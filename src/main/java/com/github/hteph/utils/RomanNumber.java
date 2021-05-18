@@ -1,8 +1,11 @@
 package com.github.hteph.utils;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 import java.util.TreeMap;
 
-
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class RomanNumber {
 
         private final static TreeMap<Integer, String> map = new TreeMap<Integer, String>();

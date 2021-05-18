@@ -5,7 +5,8 @@ public enum Breathing {
     NONE ("No life"),
     OXYGEN ("Oxygen breathing"),
     AMMONIA ("Ammonia breathers"),
-    CHLORIDE ("Chloride breathers");
+    CHLORIDE ("Chloride breathers"),
+    PROTO ("Developing respiration");
 
     public final String label;
 
