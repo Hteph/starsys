@@ -82,11 +82,12 @@ public final class JovianFactory {
         gasGiantBuilder.rotationalPeriod(BigDecimal.valueOf(rotationalPeriod).round(FOUR));
 
 //Magnetic field
+        //TODO these must be adjusted!
         int[] magneticMassArray = {0, 50, 200, 500};
         Double[] magneticMassArrayMin = {0.1, 0.25, 0.5, 1.5, 1.5};
         Double[] magneticMassArrayMax = {1d, 1.5, 3d, 25d, 25d};
 
-        gasGiantBuilder.magneticField(BigDecimal.valueOf((TableMaker.makeRoll((int) mass, magneticMassArray, magneticMassArrayMax)
+        gasGiantBuilder.magneticField(BigDecimal.valueOf(10*(TableMaker.makeRoll((int) mass, magneticMassArray, magneticMassArrayMax)
                 - TableMaker.makeRoll((int) mass, magneticMassArray, magneticMassArrayMin))
                                                                  / 10.0
                                                                  * Dice.d10()).round(TWO));

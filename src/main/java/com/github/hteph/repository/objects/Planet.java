@@ -25,8 +25,8 @@ public class Planet extends StellarObject {
 
     private BigDecimal mass;
     private int radius;
-    private BigDecimal gravity;
-    private BigDecimal density;
+    private BigDecimal gravity; //g
+    private BigDecimal density; //?
     private BigDecimal axialTilt;
 
     private boolean tideLockedStar;
@@ -57,7 +57,7 @@ public class Planet extends StellarObject {
 
         return atmosphericComposition == null || atmosphericComposition.isEmpty()
                 ? ""
-                : atmosphericComposition.stream().map(AtmosphericGases::toString).collect(Collectors.joining(", "));
+                :"["+ atmosphericComposition.stream().map(AtmosphericGases::toString).collect(Collectors.joining(", "))+"]";
     }
 
     @Override
@@ -96,27 +96,34 @@ public class Planet extends StellarObject {
         facts.put("rotation period", rotationalPeriod.toPlainString());
         facts.put("radius", String.valueOf(radius));
         facts.put("axial tilt", axialTilt.toPlainString());
+        facts.put("orbital eccentricity", getOrbitalFacts().getOrbitalEccentricity().toPlainString());
         facts.put("magnetic field", magneticField.toPlainString());
         facts.put("orbital period", getOrbitalFacts().getOrbitalPeriod().toPlainString());
 
         if (getStellarObjectType() != StellarObjectType.JOVIAN) {
             facts.put("gravity", gravity.toPlainString());
             facts.put("density", density.toPlainString());
+            facts.put("tidelocked", String.valueOf(tideLockedStar));
+
             facts.put("tectonic core", tectonicCore);
             facts.put("tectonic activity group", tectonicActivityGroup);
             facts.put("Hydrosphere description", hydrosphereDescription.label);
             facts.put("hydrosphere", String.valueOf(hydrosphere));
             facts.put("atmospheric composition", getAtmosphericCompositionParsed());
             facts.put("atmospheric pressure", atmoPressure.toPlainString());
-            facts.put("Surface temperature", String.valueOf(temperatureFacts.getSurfaceTemp()));
+            facts.put("Surface temperature", String.valueOf(temperatureFacts.getSurfaceTemp()-273));
 
             facts.put("average rangeband temperature", getStringFromInts(temperatureFacts.getRangeBandTemperature()));
             facts.put("summer rangeband temperature", getStringFromInts(temperatureFacts.getRangeBandTempSummer()));
             facts.put("winter rangeband temperature", getStringFromInts(temperatureFacts.getRangeBandTempWinter()));
+
+            facts.put("pressure",atmoPressure.toPlainString());
+            facts.put("composition",getAtmosphericCompositionParsed());
+            if(lifeType != null && lifeType != Breathing.NONE) facts.put("life type",lifeType.label);
         }
 
         if (getStellarObjectType() != StellarObjectType.MOON) {
-            if(moonList != null) facts.put("number Of Moons", String.valueOf(moonList.size()));
+            if(moonList != null) facts.put("number of moons", String.valueOf(moonList.size()));
             facts.put("tide locked to star", String.valueOf(tideLockedStar));
             if (moonList != null && !moonList.isEmpty()) {
                 presentationBuilder.MoonPresentations(moonList.stream()

@@ -27,7 +27,7 @@ public class AsteroidBelt extends StellarObject{
 	}
 
 	private String parseSizeDistribution(double[] sizeDistribution) {
-		return "average size = "+sizeDistribution [0]+" km, Upper size limit = "+sizeDistribution[1]+ " km";
+		return "Average= "+sizeDistribution [0]+", Upper = "+sizeDistribution[1];
 	}
 
 	@Override

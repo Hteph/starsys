@@ -1,6 +1,7 @@
 package com.github.hteph.generators;
 
 
+import com.github.hteph.generators.utils.LifeMethods;
 import com.github.hteph.repository.objects.AtmosphericGases;
 import com.github.hteph.repository.objects.OrbitalFacts;
 import com.github.hteph.repository.objects.Planet;
@@ -131,7 +132,7 @@ public final class TerrestrialPlanetFactory {
         tidelock = (0.83 + (Dice._2d6() - 2) * 0.03) * tidalForce * star.getAge().doubleValue() / 6.6;
         if (tidelock > 1) {
             tidelocked = true;
-            //TODO Tidelocked planets generally can't have moon, but catched objects should be allowed?
+            //TODO Tidelocked planets generally can't have moon, but caught objects should be allowed?
             planetBuilder.moonList(Collections.emptyList());
         }
 
@@ -141,10 +142,10 @@ public final class TerrestrialPlanetFactory {
         if (tidelocked) {
             rotationalPeriod = orbitalPeriod * 365*24;
         } else {
-            rotationalPeriod = (Dice._3d6() + 8)
-                    * (1 + 0.1 * (tidalForce * star.getAge().doubleValue() - sqrt(mass)));
+            rotationalPeriod = (Dice._3d6() + 12)
+                    * (1 + 0.1 * Math.max(0, (tidalForce * star.getAge().doubleValue() - sqrt(mass))/sumOfLunarTidal));
 
-            if (Dice.d6(2)) rotationalPeriod = Math.pow(rotationalPeriod, Dice.d6());
+            if (Dice.d10()<2) rotationalPeriod = Math.pow(rotationalPeriod, Dice.d3());
 
             if (rotationalPeriod > (orbitalPeriod*365*24) / 2.0) {
 
@@ -182,7 +183,7 @@ public final class TerrestrialPlanetFactory {
                                                                         star,
                                                                         density,
                                                                         mass
-                     )));
+                     )).round(TWO));
 
         //Temperature
         baseTemperature = (int) (255 / sqrt((orbitDistance.doubleValue()
@@ -228,12 +229,12 @@ public final class TerrestrialPlanetFactory {
             planetBuilder.hydrosphere(0);
         }
 
-        planetBuilder.atmoPressure(atmoPressure);
+        planetBuilder.atmoPressure(atmoPressure.round(THREE));
         // The composition could be adjusted for the existence of life, so is set below
 
         //Bioshpere
-        hasGaia = testLife(baseTemperature, atmoPressure.doubleValue(), hydrosphere, atmoshericComposition);
-        if (hasGaia) lifeType = findLifeType(atmoshericComposition);
+        hasGaia = LifeMethods.testLife(baseTemperature, atmoPressure.doubleValue(), hydrosphere, atmoshericComposition);
+        if (hasGaia) lifeType = LifeMethods.findLifeType(atmoshericComposition);
         else lifeType = Breathing.NONE;
 
         if (lifeType.equals(Breathing.OXYGEN)) adjustForOxygen(atmoPressure.doubleValue(), atmoshericComposition);
@@ -265,6 +266,13 @@ public final class TerrestrialPlanetFactory {
                                                             orbitalPeriod); // sets all the temperature stuff from axial tilt etc etc
         temperatureFacts.surfaceTemp(surfaceTemp);
         //TODO Weather and day night temp cycle
+System.out.println(name+": BaseTemp="+baseTemperature+" EndTemp="+surfaceTemp);
+        int[] polarWinterTemp = temperatureFacts.build().getRangeBandTempWinter();
+
+        if(surfaceTemp+polarWinterTemp[9]>110 && atmoPressure.doubleValue()<2.0) {
+            planetBuilder.hydrosphereDescription(HydrosphereDescription.VAPOR)
+                         .hydrosphere(0);
+        }
 
         planetBuilder.orbitalFacts(orbitalFacts.build());
         planetBuilder.temperatureFacts(temperatureFacts.build());
@@ -341,13 +349,13 @@ public final class TerrestrialPlanetFactory {
         // point is 400
         double surfaceTemp;
         if (hasGaia) {
-            surfaceTemp = 400 * (baseTemperature * albedo * greenhouseFactor)
+            surfaceTemp = 400d * (baseTemperature * albedo * greenhouseFactor)
                     / (350d + baseTemperature * albedo * greenhouseFactor);
         } else if (atmoPressure.doubleValue() > 0) {
-            surfaceTemp = 800 * (baseTemperature * albedo * greenhouseFactor)
+            surfaceTemp = 800d * (baseTemperature * albedo * greenhouseFactor)
                     / (400d + baseTemperature * albedo * greenhouseFactor);
         } else {
-            surfaceTemp = 1200 * (baseTemperature * albedo * greenhouseFactor)
+            surfaceTemp = 1200d * (baseTemperature * albedo * greenhouseFactor)
                     / (800d + baseTemperature * albedo * greenhouseFactor);
         }
         return (int) surfaceTemp;
@@ -405,7 +413,30 @@ public final class TerrestrialPlanetFactory {
 
         removeCombustibles(atmoMap);
         atmosphericComposition.clear();
+        checkAtmo(atmoMap);
         atmosphericComposition.addAll(atmoMap.values());
+    }
+
+    private static void checkAtmo(Map<String, AtmosphericGases> atmoMap) {
+       var sumOfGasPercentage = atmoMap.values()
+                                       .stream()
+                                       .map(AtmosphericGases::getPercentageInAtmo)
+                                       .reduce(0, Integer::sum);
+
+       if(sumOfGasPercentage<100) {
+           if(atmoMap.containsKey("N2")){
+              var currentN2= atmoMap.remove("N2").getPercentageInAtmo();
+              var newN2 = AtmosphericGases.builder()
+                                          .name("N2")
+                                          .percentageInAtmo(currentN2+100-sumOfGasPercentage);
+              atmoMap.put("N2",newN2.build());
+           }else{
+               var newN2 = AtmosphericGases.builder()
+                                           .name("N2")
+                                           .percentageInAtmo(100-sumOfGasPercentage);
+               atmoMap.put("N2",newN2.build());
+           }
+       }
     }
 
     private static void removeCombustibles(Map<String, AtmosphericGases> atmoMap) {
@@ -434,15 +465,6 @@ public final class TerrestrialPlanetFactory {
                                               .percentageInAtmo(removedpercentages)
                                               .build());
         }
-    }
-
-    private static Breathing findLifeType(Set<AtmosphericGases> atmoshericComposition) {
-        //TODO Allow for alternate gases such as Cl2
-        return atmoshericComposition.stream()
-                                    .map(AtmosphericGases::getName)
-                                    .anyMatch(b -> b.equals("NH3"))
-                ? Breathing.AMMONIA
-                : Breathing.OXYGEN;
     }
 
     /**
@@ -545,28 +567,6 @@ public final class TerrestrialPlanetFactory {
      * This should be reworked (in conjuction with atmo) to remove CL and F from naturally occuring and instead
      * treat them similar to Oxygen. Also the Ammonia is dependent on free water as written right now
      */
-
-    private static boolean testLife(int baseTemperature,
-                                    double atmoPressure,
-                                    int hydrosphere,
-                                    Set<AtmosphericGases> atmoshericComposition) {
-
-        double lifeIndex = 0;
-
-        if (baseTemperature < 100 || baseTemperature > 450) lifeIndex -= 5;
-        else if (baseTemperature < 250 || baseTemperature > 350) lifeIndex -= 1;
-        else lifeIndex += 3;
-
-        if (atmoPressure < 0.1) lifeIndex -= 10;
-        else if (atmoPressure > 5) lifeIndex -= 1;
-
-        if (hydrosphere < 1) lifeIndex -= 3;
-        else if (hydrosphere > 3) lifeIndex += 1;
-
-        if (atmoshericComposition.stream().anyMatch(s -> s.getName().equals("NH3") && Dice.d6() < 3)) lifeIndex += 4;
-
-        return lifeIndex > 0; //Nod to Gaia-theory, if there is any chance of life it will aways be life present
-    }
 
     private static double findGreenhouseGases(Set<AtmosphericGases> atmoshericComposition, double atmoPressure) {
         double tempGreenhouseGasEffect = 0;

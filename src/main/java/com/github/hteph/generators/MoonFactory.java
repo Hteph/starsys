@@ -1,6 +1,7 @@
 package com.github.hteph.generators;
 
 
+import com.github.hteph.generators.utils.LifeMethods;
 import com.github.hteph.repository.objects.AtmosphericGases;
 import com.github.hteph.repository.objects.OrbitalFacts;
 import com.github.hteph.repository.objects.Planet;
@@ -79,14 +80,12 @@ public final class MoonFactory {
                                 .description(description)
                                 .classificationName(classificationName);
 
-        var orbitalFacts = OrbitalFacts.builder();
-
+        var orbitalFacts = OrbitalFacts.builder()
+                                       .orbitsAround(orbitingAroundPlanet)
+                                       .orbitalPeriod(orbitingAroundPlanet.getOrbitalFacts().getOrbitalPeriod());
 
         moonsPlanetMass = orbitingAroundPlanet.getMass().doubleValue();
         moonsPlanetsRadii = orbitingAroundPlanet.getRadius();
-
-        orbitalFacts.orbitsAround(orbitingAroundPlanet)
-                    .orbitalPeriod(orbitingAroundPlanet.getOrbitalFacts().getOrbitalPeriod());
 
         //TODO sort that equation out
         var moonTidal = (moonsPlanetMass * 26640000 / 333000.0 / Math.pow(moonsPlanetsRadii * lunarOrbitNumberInPlanetRadii * 400 / 149600000, 3));
@@ -109,9 +108,6 @@ public final class MoonFactory {
         final double gravity = mass / squared((planetRadius / 6380.0));
 
         lunarOrbitalPeriod = sqrt(cubed((lunarOrbitNumberInPlanetRadii * moonsPlanetsRadii) / 400000) * 793.64 / (moonsPlanetMass + mass));
-
-
-//        orbitalPeriod = sqrt(cubed(orbitDistance.doubleValue()) / orbitingAround.getMass().doubleValue()); //in earth days
 
         moonBuilder.mass(BigDecimal.valueOf(mass).round(THREE))
                    .gravity(BigDecimal.valueOf(gravity).round(TWO))
@@ -227,8 +223,8 @@ public final class MoonFactory {
         // The composition could be adjusted for the existence of life, so is set below
 
         //Bioshpere
-        hasGaia = testLife(baseTemperature, atmoPressure.doubleValue(), hydrosphere, atmoshericComposition);
-        if (hasGaia) lifeType = findLifeType(atmoshericComposition);
+        hasGaia = LifeMethods.testLife(baseTemperature, atmoPressure.doubleValue(), hydrosphere, atmoshericComposition);
+        if (hasGaia) lifeType = LifeMethods.findLifeType(atmoshericComposition);
         else lifeType = Breathing.NONE;
 
         if (lifeType.equals(Breathing.OXYGEN)) adjustForOxygen(atmoPressure.doubleValue(), atmoshericComposition);
@@ -258,8 +254,8 @@ public final class MoonFactory {
                                                             axialTilt,
                                                             surfaceTemp,
                                                             orbitingAroundPlanet.getOrbitalFacts()
-                                                                  .getOrbitalPeriod()
-                                                                  .doubleValue()); // sets all the temperature stuff from axial tilt etc etc
+                                                                                .getOrbitalPeriod()
+                                                                                .doubleValue()); // sets all the temperature stuff from axial tilt etc etc
         temperatureFacts.surfaceTemp(surfaceTemp);
         //TODO Weather and day night temp cycle
 
@@ -359,16 +355,6 @@ public final class MoonFactory {
         return (int) surfaceTemp;
     }
 
-    private static double calcLunarTidal(double radius, Planet moon) {
-
-        double tidal = moon.getMass().doubleValue() * 26640000
-                / 333000d
-                / cubed(radius * moon.getLunarOrbitDistance().doubleValue() * 400
-                                / 149600000d);
-        moon.setLunarTidal(BigDecimal.valueOf(tidal).round(FIVE));
-        return tidal;
-    }
-
     private static void adjustForOxygen(double atmoPressure, TreeSet<AtmosphericGases> atmosphericComposition) {
 
         Map<String, AtmosphericGases> atmoMap = atmosphericComposition
@@ -449,15 +435,6 @@ public final class MoonFactory {
                                               .percentageInAtmo(removedpercentages)
                                               .build());
         }
-    }
-
-    private static Breathing findLifeType(Set<AtmosphericGases> atmoshericComposition) {
-        //TODO Allow for alternate gases such as Cl2
-        return atmoshericComposition.stream()
-                                    .map(AtmosphericGases::getName)
-                                    .anyMatch(b -> b.equals("NH3"))
-                ? Breathing.AMMONIA
-                : Breathing.OXYGEN;
     }
 
     /**
@@ -557,28 +534,6 @@ public final class MoonFactory {
      * This should be reworked (in conjuction with atmo) to remove CL and F from naturally occuring and instead
      * treat them similar to Oxygen. Also the Ammonia is dependent on free water as written right now
      */
-
-    private static boolean testLife(int baseTemperature,
-                                    double atmoPressure,
-                                    int hydrosphere,
-                                    Set<AtmosphericGases> atmoshericComposition) {
-
-        double lifeIndex = 0;
-
-        if (baseTemperature < 100 || baseTemperature > 450) lifeIndex -= 5;
-        else if (baseTemperature < 250 || baseTemperature > 350) lifeIndex -= 1;
-        else lifeIndex += 3;
-
-        if (atmoPressure < 0.1) lifeIndex -= 10;
-        else if (atmoPressure > 5) lifeIndex -= 1;
-
-        if (hydrosphere < 1) lifeIndex -= 3;
-        else if (hydrosphere > 3) lifeIndex += 1;
-
-        if (atmoshericComposition.stream().anyMatch(s -> s.getName().equals("NH3") && Dice.d6() < 3)) lifeIndex += 4;
-
-        return lifeIndex > 0; //Nod to Gaia-theory, if there is any chance of life it will aways be life present
-    }
 
     private static double findGreenhouseGases(Set<AtmosphericGases> atmoshericComposition, double atmoPressure) {
         double tempGreenhouseGasEffect = 0;

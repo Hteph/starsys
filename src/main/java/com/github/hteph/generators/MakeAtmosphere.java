@@ -24,7 +24,7 @@ class MakeAtmosphere {
 
         startAtmosphereFromTemperature(baseTemperature, tectonicActivityGroup, makeAtmoshpere);
 
-        if (tectonicActivityGroup.equals("Extreme") && Dice.d6() < 3) {
+        if (tectonicActivityGroup.equals("Extreme") && Dice.d6() < 4) {
             makeAtmoshpere.add("SO2");
             makeAtmoshpere.add("H2S");
             if (Dice.d6() < 2) makeAtmoshpere.add("H2SO4");

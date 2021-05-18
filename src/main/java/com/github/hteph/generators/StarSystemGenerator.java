@@ -27,7 +27,7 @@ public final class StarSystemGenerator {
 
     public static ArrayList<StellarObject> Generator(Star star) {
 
-        List<StellarObject> systemObjects = new ArrayList<>();
+        //TODO should move away from the primitives and ENUM
 
         final double INNER_LIMIT = Math.max(0.2 * star.getMass().doubleValue(),
                                             0.0088 * sqrt(star.getLuminosity().doubleValue()));
@@ -59,6 +59,13 @@ public final class StarSystemGenerator {
         }
         tempOrbitalObjects.forEach(s -> setGeneralOrbitContent(INNER_LIMIT, SNOW_LINE, OUTER_LIMIT, s));
 
+        //If object is a Brown Dwarf is is easiest to remove the Super Jovians
+        if(star.getMass().doubleValue()<0.05) tempOrbitalObjects.forEach(s ->{
+            if(s.getOrbitObject()== 'J') s.setOrbitObject('j');
+        } );
+
+        System.out.println("Jovians = "+tempOrbitalObjects.stream().filter(s -> s.getOrbitObject() =='j' || s.getOrbitObject() =='J').count());
+
         //Detailed bodies
         //TODO This should be moved to a method
         int objectCounter = 1;
@@ -74,7 +81,7 @@ public final class StarSystemGenerator {
                     description = "A Gas Giant";
                 case 'J':
                     if (classificationName == null) classificationName = "Super Jovian";
-                    if (description == null) description = "A truly massive Gas Giant, dominating the whole system";
+                    if (description == null) description = "Large Gas Giant";
                     starSystemList.add(JovianFactory.Generator(star.getArchiveID() + "." + numeral,
                                                                star.getName() + " " + numeral,
                                                                description,
@@ -86,13 +93,13 @@ public final class StarSystemGenerator {
                     break;
                 case 't':
                     classificationName = "Planetoid";
-                    description = "Small Terrestial";
+                    description = "Small Terrestrial";
                 case 'C':
-                    if (classificationName == null) classificationName = "Caught Terrestial";
-                    if (description == null) description = "Large Terrestial, but from not originated in this system";
+                    if (classificationName == null) classificationName = "Caught Terrestrial";
+                    if (description == null) description = "Large Terrestrial (caugth)";
                 case 'T':
-                    if (classificationName == null) classificationName = "Terrestial";
-                    if (description == null) description = "Large Terrestial";
+                    if (classificationName == null) classificationName = "Terrestrial";
+                    if (description == null) description = "Large Terrestrial";
                     starSystemList.add(TerrestrialPlanetFactory.generate(star.getArchiveID() + "." + numeral,
                                                                          star.getName() + " " + numeral,
                                                                          description,
@@ -106,7 +113,7 @@ public final class StarSystemGenerator {
 
                 case 'c': //TODO this should use a special generator to allow for strange stuff as hulks, ancient
                     // stations etc etc
-                    description = "Smaller than a planet, but not one of those asteroids, and not from here to start with";
+                    description = "Small caught object";
                     starSystemList.add(TerrestrialPlanetFactory.generate(star.getArchiveID() + "." + numeral,
                                                                          star.getName() + " " + numeral,
                                                                          description,
@@ -119,8 +126,8 @@ public final class StarSystemGenerator {
                     break;
                 case 'A':
                     starSystemList.add(GenerateAsteroidBelt.generator(star.getArchiveID() + ".A" + objectCounter,
-                                                                         "Asterioidbelt " + astroidBeltCounter,
-                                                                         "A bunch of blocks",
+                                                                         "Belt " + astroidBeltCounter,
+                                                                         "Asteroid belt",
                                                                          tempObject,
                                                                          star,
                                                                          tempOrbitalObjects));
@@ -138,7 +145,7 @@ public final class StarSystemGenerator {
     }
 
     private static void setGeneralOrbitContent(double innerLimit, double snowLine, double outerLimit, TempOrbitalObject tempOrbitalObject) {
-        int[] outerNumbersList = {2, 3, 4, 5, 9, 10, 15, 17, 18};
+        int[] outerNumbersList = {2, 3, 4, 5, 12, 14, 15, 17, 18};
         Character[] outerObjectList = {'E', 'c', 'A', 'j', 'E', 't', 'J', 'T', 'C'};
         int[] innerNumbersList = {2, 4, 8, 11, 14, 16, 17, 18};
         Character[] innerObjectList = {'E', 'A', 't', 'T', 'C', 'E', 'j', 'J'};

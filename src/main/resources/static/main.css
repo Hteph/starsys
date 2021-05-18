@@ -1,0 +1,16 @@
+th, td {
+    border: 1px solid lightcoral;
+    padding: 5px;
+}
+
+
+table {
+    border-radius: 5px;
+    border-collapse: collapse;
+    border: 1px double lightcoral;
+}
+
+th {
+    background-color: lightcyan;
+    border-top: none;
+}
