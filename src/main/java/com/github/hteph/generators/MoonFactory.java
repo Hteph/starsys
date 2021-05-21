@@ -231,6 +231,7 @@ public final class MoonFactory {
                 .doubleValue();
 
         //Bioshpere
+        System.out.println(name);
         hasGaia = LifeMethods.testLife(baseTemperature,
                                        atmoPressure.doubleValue(),
                                        hydrosphere,
@@ -336,14 +337,14 @@ public final class MoonFactory {
         //TODO add greater varity for moon objects, depending on planet
         int baseSize=10;
         if (orbitalObjectClass == 'M') {
-            List<Integer> baseSizeList = Arrays.asList(100, 150, 200, 250, 300, 350, 400, 500, 700, 900);
+            List<Integer> baseSizeList = Arrays.asList(150, 200, 300, 400, 500, 600, 700, 800, 850, 900);
             baseSize= TableMaker.makeRoll(Dice.d10(), baseSizeList);
 
         } else if (orbitalObjectClass == 'm') {
-            List<Integer> baseSizeList = Arrays.asList(5, 10, 15, 20, 25, 30, 35, 40, 45, 50);
+            List<Integer> baseSizeList = Arrays.asList(5, 10, 15, 20, 25, 30, 40, 50, 60, 75);
             baseSize= TableMaker.makeRoll(Dice.d10(), baseSizeList);
 
-        } else if (orbitalObjectClass == 't' || orbitalObjectClass == 'c') baseSize = 90;
+        } else if (orbitalObjectClass == 'c') baseSize = 90;
         return baseSize;
     }
 

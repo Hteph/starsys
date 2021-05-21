@@ -26,10 +26,11 @@ public class Planet extends StellarObject {
     private BigDecimal mass;
     private int radius;
     private BigDecimal gravity; //g
-    private BigDecimal density; //?
+    private BigDecimal density; //Earth normal
     private BigDecimal axialTilt;
 
     private boolean tideLockedStar;
+    private boolean resonanceOrbitalPeriod;
     private BigDecimal rotationalPeriod;
     private String tectonicCore;
     private BigDecimal magneticField;
@@ -53,6 +54,7 @@ public class Planet extends StellarObject {
     private String classificationName;
 
     private Breathing lifeType;
+    private Biosphere life;
 
     public String getAtmosphericCompositionParsed() {
 
@@ -100,6 +102,8 @@ public class Planet extends StellarObject {
         facts.put("orbital eccentricity", getOrbitalFacts().getOrbitalEccentricity().toPlainString());
         facts.put("magnetic field", magneticField.toPlainString());
         facts.put("orbital period", getOrbitalFacts().getOrbitalPeriod().toPlainString());
+
+        facts.put("resonance", String.valueOf(resonanceOrbitalPeriod));
         facts.put("inclination", getOrbitalFacts().getOrbitalInclination().toPlainString());
 
         if (getStellarObjectType() != StellarObjectType.JOVIAN) {
@@ -137,7 +141,10 @@ public class Planet extends StellarObject {
         } else {
             facts.put("name",getName());
             facts.put("description",getDescription());
-            facts.put("orbitDistance",lunarOrbitDistance.toPlainString());
+
+            int calc = (int) lunarOrbitDistance.doubleValue()
+                    * ((Planet)(getOrbitalFacts().getOrbitsAround())).radius *2;
+            facts.put("orbitDistance",String.valueOf(calc));
             if(planetLocked) facts.put("planetLocked", "Yes");
             facts.put("lunarOrbitalPeriod", lunarOrbitalPeriod.toPlainString());
             facts.put("rotation", rotationalPeriod.toPlainString());

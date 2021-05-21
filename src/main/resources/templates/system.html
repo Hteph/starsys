@@ -13,7 +13,7 @@
 <table>
     <tr>
         <th>No</th>
-        <th>Distance</th>
+        <th>Distance [AU]</th>
         <th>Description</th>
         <th>Name</th>
         <th>Celestial Facts</th>
@@ -25,7 +25,12 @@
     <tr th:each="object, objStat : ${objects}">
 
         <td th:text="${objStat.count -1 }">1</td>
-        <td th:text="${object.getOrbitalFacts().getOrbitalDistance().doubleValue()}">N/A</td>
+        <td th:if="${object.stellarObjectType.getLabel() == 'A'}">
+            <span th:text="${object.getPresentations().getFacts().get('width')}">N/A</span>
+        </td>
+         <td th:unless="${object.stellarObjectType.getLabel() == 'A'}">
+            <span th:text="${object.getOrbitalFacts().getOrbitalDistance().doubleValue()}">N/A</span>
+        </td>
         <td th:text="${object.getDescription()}">N/A</td>
         <td th:text="${object.getName()}">N/A</td>
         <!--Celestial facts-->
@@ -44,6 +49,7 @@
                 <span th:text="${object.getPresentations().getFacts().get('rotation period')}">-</span>
                 <span> hours</span>
                 <span th:if="${object.getPresentations().getFacts().get('tidelocked') == 'true'}">(tide locked to star)</span>
+                <span th:if="${object.getPresentations().getFacts().get('resonance') == 'true'}">(tide locked to star)</span>
                 <br/>
                 <span><b>Orbital eccentricity: </b></span>
                 <span th:text="${object.getPresentations().getFacts().get('orbital eccentricity')}">-</span>
@@ -74,6 +80,13 @@
                 <span><b>Radius: </b></span>
                 <span th:text="${object.getPresentations().getFacts().get('radius')}">-</span>
                 <span> km</span>
+                <br/>
+                <span><b>Calendar: </b></span>
+                <span th:text="${object.getPresentations().getFacts().get('orbital period')}">-</span>
+                <span> years with days of </span>
+                <span th:text="${object.getPresentations().getFacts().get('rotation period')}">-</span>
+                <span> hours</span>
+                <br/>
                 <div th:if="${#maps.containsKey(object.getPresentations().getFacts(), 'number of moons')}">
                     <b> Number of moons: </b>
                     <span th:text="${object.getPresentations().getFacts().get('number of moons')}">-</span>
@@ -163,7 +176,7 @@
 </table>
 
 <!--Moons-->
-<h2>Planets Moons Facts</h2>
+<h2 th:if="${hasMoons}">Moon Facts</h2>
 <div th:each="object, objStat : ${objects}">
 
     <div th:if="${#maps.containsKey(object.getPresentations().getFacts(), 'number of moons')}">
@@ -172,7 +185,7 @@
         <table>
             <tr>
                 <th>No</th>
-                <th>Distance</th>
+                <th>Distance [km]</th>
                 <th>Description</th>
                 <th>Name</th>
                 <th>Celestial Facts</th>

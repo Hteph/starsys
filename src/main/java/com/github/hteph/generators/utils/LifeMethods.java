@@ -20,7 +20,7 @@ public class LifeMethods {
                                    double age) {
 
         //setting a limit on how fast life can develop
-        if(age<2) return false;
+        if (age < 2) return false;
 
         double lifeIndex = 0;
 
@@ -32,19 +32,23 @@ public class LifeMethods {
         else if (atmoPressure > 5) lifeIndex -= 1;
 
         if (hydrosphere < 1) lifeIndex -= 3;
-        else if (hydrosphere > 3) lifeIndex += 1;
+        else if (hydrosphere > 3) lifeIndex += 3;
 
-        if (atmoshericComposition.stream().anyMatch(s -> s.getName().equals("NH3") && Dice.d6() < 3)) lifeIndex += 4;
+        if (baseTemperature>370)
+            if (atmoshericComposition.stream().anyMatch(s -> s.getName().equals("NH3") && Dice.d6() < 4))
+                lifeIndex += 4;
 
         return lifeIndex > 0; //Nod to Gaia-theory, if there is any chance of life it will aways be life present
     }
 
     public static Breathing findLifeType(Set<AtmosphericGases> atmoshericComposition, double age) {
+
+
         //TODO Allow for alternate gases such as Cl2
         return atmoshericComposition.stream()
                                     .map(AtmosphericGases::getName)
                                     .anyMatch(b -> b.equals("NH3"))
                 ? Breathing.AMMONIA
-                : age<3?Breathing.PROTO:Breathing.OXYGEN;
+                : age < 3 ? Breathing.PROTO : Breathing.OXYGEN;
     }
 }

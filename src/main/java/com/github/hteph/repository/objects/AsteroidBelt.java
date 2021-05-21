@@ -1,6 +1,7 @@
 package com.github.hteph.repository.objects;
 
 import com.github.hteph.repository.objects.wrappers.Presentations;
+import com.github.hteph.utils.NumberUtilities;
 import lombok.Data;
 import lombok.experimental.SuperBuilder;
 
@@ -35,7 +36,10 @@ public class AsteroidBelt extends StellarObject{
 
 		HashMap<String, String> facts = new HashMap<>();
 
-		facts.put("width",asteroidBeltWidth.toString());
+		var divisor = BigDecimal.valueOf(2);
+		var innerWidth = getOrbitalFacts().getOrbitalDistance().subtract(asteroidBeltWidth.divide(divisor, NumberUtilities.TWO));
+		var outerWidth = getOrbitalFacts().getOrbitalDistance().add(asteroidBeltWidth.divide(divisor, NumberUtilities.TWO));
+		facts.put("width",innerWidth.toPlainString()+" - "+outerWidth.toPlainString());
 		facts.put("type", asteroidBeltType);
 		facts.put("size distribution", parseSizeDistribution(sizeDistribution));
 

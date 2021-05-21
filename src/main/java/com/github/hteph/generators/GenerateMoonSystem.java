@@ -87,26 +87,13 @@ public class GenerateMoonSystem {
                                      double orbitNumberInPlanetRadii,
                                      long index,
                                      char size) {
-
-        final int ASCII_STARTING_NUMBER = 97;
-        final int ASCII_ENDING_NUMBER = 122;
-        char asciiNumber;
-        char asciiNumber2;
+        //TODO make a more fun identifier
         String identifier;
 
-        if (ASCII_STARTING_NUMBER + index > ASCII_ENDING_NUMBER) {
-            asciiNumber = (char) (ASCII_STARTING_NUMBER + (int) (index / ASCII_STARTING_NUMBER));
-            asciiNumber2 = (char) (ASCII_STARTING_NUMBER + (int) (index-28) % ASCII_STARTING_NUMBER);
-            identifier = "" + asciiNumber + asciiNumber2;
 
-
-            if(index > 54){
-                identifier = "0" + index;
-            }
-
-        } else {
-            identifier = "" + (char) (ASCII_STARTING_NUMBER + index);
-        }
+        if (index < 26) identifier = "" + (char) ('a' + index);
+        else if (index < 26 * 2) identifier = "" + (char) ('a' + index / 26) + (char) ('a' + index % 26);
+        else identifier = "" +(char) ('a' + index)+ (int) (Math.random() * 10000);
 
         String desc = size == 'm' ? "Minor Moon" : "Major Moon";
 

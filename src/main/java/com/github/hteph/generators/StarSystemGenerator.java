@@ -1,5 +1,6 @@
 package com.github.hteph.generators;
 
+import com.github.hteph.repository.objects.Planet;
 import com.github.hteph.repository.objects.Star;
 import com.github.hteph.repository.objects.StellarObject;
 import com.github.hteph.repository.objects.TempOrbitalObject;

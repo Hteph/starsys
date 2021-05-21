@@ -76,11 +76,10 @@ public final class JovianFactory {
         orbitalFacts.orbitalInclination(BigDecimal.valueOf(eccentryMod * (Dice._2d6()) / (1 + mass / 10.0))
                                                   .round(THREE));
 //Rotational Period
-        double tidalForce = star.getMass()
-                                          .doubleValue() * 26640000 / cubed(orbitDistance.doubleValue() * 400);
-        double rotationalPeriod = (Dice._2d6() + 8) * (1 + 0.1 * (tidalForce * star.getAge().doubleValue() - sqrt(mass)));
-        if (Dice.d6() < 2) rotationalPeriod = Math.pow(rotationalPeriod, Dice.d6());
-        gasGiantBuilder.rotationalPeriod(BigDecimal.valueOf(rotationalPeriod).round(FOUR));
+
+        double rotationalPeriod = (Dice._2d6() + 8) +Dice.d10()/2d;
+
+        gasGiantBuilder.rotationalPeriod(BigDecimal.valueOf(rotationalPeriod).round(THREE));
 
 //Magnetic field
         //TODO these must be adjusted!

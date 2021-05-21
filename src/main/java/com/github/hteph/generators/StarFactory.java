@@ -51,13 +51,16 @@ public final class StarFactory {
         //TODO allow for multiple Starsystems, ie archiveID not hardcoded
 
         String starName;
-        try {
-            starName = randomNameGenerator.compose((3 + Dice.d6()));
-        } catch (Exception e) {
-            starName = "Unknown";
-            System.out.println("++++++++++Name failed+++++++++++++");
+        if(systemName.equals("random")) {
+            try {
+                starName = randomNameGenerator.compose((3 + Dice.d6()));
+            } catch (Exception e) {
+                starName = "Unknown";
+                log.warn("++++++++++Name failed+++++++++++++");
+            }
+        } else{
+            starName = systemName;
         }
-
         //For now there can only be one star in each system
         var orbitalFacts = OrbitalFacts.builder()
                                        .orbitalDistance(BigDecimal.ZERO)

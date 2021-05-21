@@ -9,30 +9,10 @@ import java.util.Arrays;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class NumberUtilities {
 
-    static final MathContext TWO = new MathContext(2);
-    static final MathContext THREE = new MathContext(3);
-    static final MathContext FOUR = new MathContext(4);
-    static final MathContext FIVE = new MathContext(5);
-
-    public static double nicefyDouble(double number) {
-
-
-        if (number < 0) number = (Math.round(number * 1000)) / 1000.0;
-        else if (number < 100) number = (Math.round(number * 100)) / 100.0;
-        else number = (Math.pow(10, Math.log10(number) - 2) * (int) number / Math.pow(10, Math.log10(number) - 2));
-
-        return number;
-    }
-
-    public static Object chooseFromVector(Object[] arrayOfThings, int[] distArray, int diceRoll) {
-
-        int retVal = Arrays.binarySearch(distArray, diceRoll);
-
-        if (retVal < 0) retVal = -retVal - 2;
-
-        return arrayOfThings[retVal];
-
-    }
+    public static final MathContext TWO = new MathContext(2);
+    public static final MathContext THREE = new MathContext(3);
+    public static final MathContext FOUR = new MathContext(4);
+    public static final MathContext FIVE = new MathContext(5);
 
     public static double squared(Double number) {
 

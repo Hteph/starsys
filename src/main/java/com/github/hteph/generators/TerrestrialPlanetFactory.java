@@ -3,6 +3,7 @@ package com.github.hteph.generators;
 import com.github.hteph.generators.utils.LifeMethods;
 import com.github.hteph.generators.utils.MakeAtmosphere;
 import com.github.hteph.repository.objects.AtmosphericGases;
+import com.github.hteph.repository.objects.Biosphere;
 import com.github.hteph.repository.objects.OrbitalFacts;
 import com.github.hteph.repository.objects.Planet;
 import com.github.hteph.repository.objects.Star;
@@ -142,28 +143,42 @@ public final class TerrestrialPlanetFactory {
         if (tidelocked) {
             rotationalPeriod = orbitalPeriod * 365 * 24;
         } else {
-            rotationalPeriod = (Dice._3d6() + 12)
-                    * (1 + 0.1 * Math.max(0, (tidalForce * star.getAge()
-                                                               .doubleValue() - sqrt(mass)) / sumOfLunarTidal));
+            double tidalEffects = (1 + 0.1 * Math.max(0, (tidalForce * star.getAge().doubleValue() - sqrt(mass))));
+            rotationalPeriod = (Dice._3d6() + 12 + Dice.d10()/10d) *tidalEffects ;
+            System.out.println("start rotation: "+rotationalPeriod);
+            System.out.println("tidal effects: "+tidalEffects);
 
-            if (Dice.d10() < 2) rotationalPeriod = Math.pow(rotationalPeriod, Dice.d3());
 
-            if (rotationalPeriod > (orbitalPeriod * 365 * 24) / 2.0) {
+            if (Dice.d10() < 2){
+                System.out.println("deviant rotation: "+rotationalPeriod);
+                rotationalPeriod = Math.pow(rotationalPeriod, Dice.d3()+Dice.d10()/10.0);
+                System.out.println("Becomes: "+rotationalPeriod);
 
+            }
+
+            final double ORBITAL_PERIOD_HOURS = orbitalPeriod * 365 * 24;
+
+            if (rotationalPeriod > (ORBITAL_PERIOD_HOURS) / 2.0) {
+                planetBuilder.resonanceOrbitalPeriod(true);
+                //TODO update this to TableMaker
+                System.out.println("start rotation: "+rotationalPeriod);
                 double[] resonanceArray = {0.5, 2 / 3.0, 1, 1.5, 2, 2.5, 3, 3.5};
                 double[] eccentricityEffect = {0.1, 0.15, 0.21, 0.39, 0.57, 0.72, 0.87, 0.87};
 
-                int resultResonance = Arrays.binarySearch(resonanceArray, rotationalPeriod / orbitalPeriod);
+                int resultResonance = Arrays.binarySearch(resonanceArray, rotationalPeriod / ORBITAL_PERIOD_HOURS);
 
+                System.out.println("resonance: "+resultResonance);
                 if (resultResonance < 0) {
                     eccentricity = eccentricityEffect[-resultResonance - 2];
-                    rotationalPeriod = resonanceArray[-resultResonance - 2] * 24 * 365;
+                    rotationalPeriod = resonanceArray[-resultResonance - 2]*ORBITAL_PERIOD_HOURS;
                 } else {
                     resultResonance = Math.min(resultResonance, 6); //TODO there is something fishy here, Edge case of greater than
                     // 0.87 relation still causes problem Should rethink methodology
                     eccentricity = eccentricityEffect[resultResonance];
-                    rotationalPeriod = resonanceArray[-resultResonance] * 24 * 365;
+                    rotationalPeriod = resonanceArray[-resultResonance]*ORBITAL_PERIOD_HOURS;
                 }
+
+                System.out.println("reulting rotation: "+ rotationalPeriod);
             }
         }
 
@@ -237,6 +252,7 @@ public final class TerrestrialPlanetFactory {
         // The composition could be adjusted for the existence of life, so is set below
 
         //Bioshpere
+        System.out.println(name);
         hasGaia = LifeMethods.testLife(baseTemperature,
                                        atmoPressure.doubleValue(),
                                        hydrosphere,
@@ -264,6 +280,11 @@ public final class TerrestrialPlanetFactory {
         int surfaceTemp = getSurfaceTemp(baseTemperature, atmoPressure, albedo, greenhouseFactor, hasGaia);
         if(!atmoshericComposition.isEmpty()) checkAtmo(atmoshericComposition);
         planetBuilder.atmosphericComposition(atmoshericComposition);
+
+        if(lifeType != Breathing.NONE) {
+            var biosphere = Biosphere.builder().respiration(lifeType);
+            planetBuilder.life(biosphere.build());
+        }
         planetBuilder.lifeType(lifeType);
 
         //Climate -------------------------------------------------------
@@ -280,9 +301,17 @@ public final class TerrestrialPlanetFactory {
 
         int[] polarWinterTemp = temperatureFacts.build().getRangeBandTempWinter();
 //Sanity check of water, TODO this could need a bit of more work
-        if (hydrosphere > 0 && surfaceTemp + polarWinterTemp[9] > 380 && atmoPressure.doubleValue() < 2.0) {
+        if (hydrosphere > 0
+                && surfaceTemp + polarWinterTemp[9] > 380 //TODO find the maximum liquid sea from pressure and latidtude formula % = 50(1-sin(latitude))
+                && MakeAtmosphere.checkBoilingpoint(surfaceTemp,atmoPressure.doubleValue())) {
             planetBuilder.hydrosphereDescription(HydrosphereDescription.VAPOR)
                          .hydrosphere(1);
+        }else if(hydrosphereDescription == HydrosphereDescription.ICE_SHEET && surfaceTemp + polarWinterTemp[9] > 274){
+            planetBuilder.hydrosphereDescription(HydrosphereDescription.LIQUID);
+        } else if((hydrosphereDescription == HydrosphereDescription.LIQUID
+                || hydrosphereDescription == HydrosphereDescription.VAPOR)
+                && hydrosphere == 0){
+            planetBuilder.hydrosphereDescription(HydrosphereDescription.REMNANTS);
         }
 
         planetBuilder.orbitalFacts(orbitalFacts.build());
@@ -345,8 +374,8 @@ public final class TerrestrialPlanetFactory {
 
     private static int getBaseSize(char orbitalObjectClass) {
 
-        int baseSize = 900; //Default for planets
-        if (orbitalObjectClass == 't' || orbitalObjectClass == 'c') baseSize = 90;
+        int baseSize = 900+Dice.d10()*10; //Default for planets
+        if (orbitalObjectClass == 't' || orbitalObjectClass == 'c') baseSize = 90+Dice.d10();
         return baseSize;
     }
 

@@ -12,6 +12,30 @@ import java.util.TreeSet;
 
 public class MakeAtmosphere {
 
+
+    public static boolean checkBoilingpoint(int temperature, double pressure){
+
+        if(temperature<274) return false;
+
+        if(temperature>640) return true;
+
+        double A;
+        double B;
+        double C;
+
+        if(temperature<374){
+            A=8.07131;
+            B=1730.63;
+            C=233.426;
+        } else {
+            A=8.14019;
+            B=1810.94;
+            C=244.485;
+        }
+
+        return pressure>Math.pow(10,A-(B/(C+(temperature-274))));
+    }
+
     public static void checkAtmo(Set<AtmosphericGases> atmoSet) {
         var sumOfGasPercentage = atmoSet.stream()
                                         .map(AtmosphericGases::getPercentageInAtmo)
