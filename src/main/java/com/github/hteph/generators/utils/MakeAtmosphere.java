@@ -13,7 +13,7 @@ import java.util.TreeSet;
 public class MakeAtmosphere {
 
 
-    public static boolean checkBoilingpoint(int temperature, double pressure){
+    public static boolean isAboveBoilingpoint(int temperature, double pressure){
 
         if(temperature<274) return false;
 

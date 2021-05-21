@@ -144,15 +144,15 @@ public final class TerrestrialPlanetFactory {
             rotationalPeriod = orbitalPeriod * 365 * 24;
         } else {
             double tidalEffects = (1 + 0.1 * Math.max(0, (tidalForce * star.getAge().doubleValue() - sqrt(mass))));
-            rotationalPeriod = (Dice._3d6() + 12 + Dice.d10()/10d) *tidalEffects ;
-            System.out.println("start rotation: "+rotationalPeriod);
-            System.out.println("tidal effects: "+tidalEffects);
+            rotationalPeriod = (Dice._3d6() + 12 + Dice.d10() / 10d) * tidalEffects;
+            System.out.println("start rotation: " + rotationalPeriod);
+            System.out.println("tidal effects: " + tidalEffects);
 
 
-            if (Dice.d10() < 2){
-                System.out.println("deviant rotation: "+rotationalPeriod);
-                rotationalPeriod = Math.pow(rotationalPeriod, Dice.d3()+Dice.d10()/10.0);
-                System.out.println("Becomes: "+rotationalPeriod);
+            if (Dice.d10() < 2) {
+                System.out.println("deviant rotation: " + rotationalPeriod);
+                rotationalPeriod = Math.pow(rotationalPeriod, Dice.d3() + Dice.d10() / 10.0);
+                System.out.println("Becomes: " + rotationalPeriod);
 
             }
 
@@ -161,24 +161,24 @@ public final class TerrestrialPlanetFactory {
             if (rotationalPeriod > (ORBITAL_PERIOD_HOURS) / 2.0) {
                 planetBuilder.resonanceOrbitalPeriod(true);
                 //TODO update this to TableMaker
-                System.out.println("start rotation: "+rotationalPeriod);
+                System.out.println("start rotation: " + rotationalPeriod);
                 double[] resonanceArray = {0.5, 2 / 3.0, 1, 1.5, 2, 2.5, 3, 3.5};
                 double[] eccentricityEffect = {0.1, 0.15, 0.21, 0.39, 0.57, 0.72, 0.87, 0.87};
 
                 int resultResonance = Arrays.binarySearch(resonanceArray, rotationalPeriod / ORBITAL_PERIOD_HOURS);
 
-                System.out.println("resonance: "+resultResonance);
+                System.out.println("resonance: " + resultResonance);
                 if (resultResonance < 0) {
                     eccentricity = eccentricityEffect[-resultResonance - 2];
-                    rotationalPeriod = resonanceArray[-resultResonance - 2]*ORBITAL_PERIOD_HOURS;
+                    rotationalPeriod = resonanceArray[-resultResonance - 2] * ORBITAL_PERIOD_HOURS;
                 } else {
                     resultResonance = Math.min(resultResonance, 6); //TODO there is something fishy here, Edge case of greater than
                     // 0.87 relation still causes problem Should rethink methodology
                     eccentricity = eccentricityEffect[resultResonance];
-                    rotationalPeriod = resonanceArray[-resultResonance]*ORBITAL_PERIOD_HOURS;
+                    rotationalPeriod = resonanceArray[-resultResonance] * ORBITAL_PERIOD_HOURS;
                 }
 
-                System.out.println("reulting rotation: "+ rotationalPeriod);
+                System.out.println("reulting rotation: " + rotationalPeriod);
             }
         }
 
@@ -278,14 +278,16 @@ public final class TerrestrialPlanetFactory {
         if (lifeType.equals(Breathing.OXYGEN) && baseTemperature < 250) greenhouseFactor *= 1.2;
 
         int surfaceTemp = getSurfaceTemp(baseTemperature, atmoPressure, albedo, greenhouseFactor, hasGaia);
-        if(!atmoshericComposition.isEmpty()) checkAtmo(atmoshericComposition);
+        if (!atmoshericComposition.isEmpty()) checkAtmo(atmoshericComposition);
         planetBuilder.atmosphericComposition(atmoshericComposition);
 
-        if(lifeType != Breathing.NONE) {
+        if (lifeType != Breathing.NONE) {
             var biosphere = Biosphere.builder().respiration(lifeType);
             planetBuilder.life(biosphere.build());
         }
+        //TODO Legacy to be removed
         planetBuilder.lifeType(lifeType);
+
 
         //Climate -------------------------------------------------------
         // sets all the temperature stuff from axial tilt etc etc
@@ -298,25 +300,82 @@ public final class TerrestrialPlanetFactory {
                                                             orbitalPeriod); // sets all the temperature stuff from axial tilt etc etc
         temperatureFacts.surfaceTemp(surfaceTemp);
         //TODO Weather and day night temp cycle
+        double[] dayNight = setDayNightTemp(baseTemperature,
+                                            star.getLuminosity().doubleValue(),
+                                            orbitDistance.doubleValue(),
+                                            atmoPressure.doubleValue());
 
-        int[] polarWinterTemp = temperatureFacts.build().getRangeBandTempWinter();
-//Sanity check of water, TODO this could need a bit of more work
-        if (hydrosphere > 0
-                && surfaceTemp + polarWinterTemp[9] > 380 //TODO find the maximum liquid sea from pressure and latidtude formula % = 50(1-sin(latitude))
-                && MakeAtmosphere.checkBoilingpoint(surfaceTemp,atmoPressure.doubleValue())) {
-            planetBuilder.hydrosphereDescription(HydrosphereDescription.VAPOR)
-                         .hydrosphere(1);
-        }else if(hydrosphereDescription == HydrosphereDescription.ICE_SHEET && surfaceTemp + polarWinterTemp[9] > 274){
-            planetBuilder.hydrosphereDescription(HydrosphereDescription.LIQUID);
-        } else if((hydrosphereDescription == HydrosphereDescription.LIQUID
-                || hydrosphereDescription == HydrosphereDescription.VAPOR)
-                && hydrosphere == 0){
-            planetBuilder.hydrosphereDescription(HydrosphereDescription.REMNANTS);
-        }
+
+        int[] latitudeWinterTemp = temperatureFacts.build().getRangeBandTempWinter();
+        int[] latitudeSummerTemp = temperatureFacts.build().getRangeBandTempSummer();
+//Sanity check of water
+        checkHydrographics(hydrosphereDescription, hydrosphere, atmoPressure, planetBuilder, surfaceTemp, latitudeWinterTemp, latitudeSummerTemp);
 
         planetBuilder.orbitalFacts(orbitalFacts.build());
         planetBuilder.temperatureFacts(temperatureFacts.build());
         return planetBuilder.build();
+    }
+
+    private static double[] setDayNightTemp(int baseTemperature, double luminosity, double orbitDistance, double atmoPressure) {
+
+        double[] pressureArray = new double[]{0.09,0.4,0.75,1.4,2.4,750};
+        double[] degreePerHourArray = new double[]{1,0.9,0.8,0.6,0.5,0.4,0.2};
+        double[] maxTempFactor = new double[]{0.1,0.3,0.8,1.5,2.5,4.0,5.0};
+
+        int index = Arrays.binarySearch(pressureArray,atmoPressure);
+
+
+        return new double[0];
+    }
+
+    private static void checkHydrographics(HydrosphereDescription hydrosphereDescription, int hydrosphere, BigDecimal atmoPressure, Planet.PlanetBuilder<?, ? extends Planet.PlanetBuilder<?, ?>> planetBuilder, int surfaceTemp, int[] latitudeWinterTemp, int[] latitudeSummerTemp) {
+        if (hydrosphere > 0 && surfaceTemp > 274 && atmoPressure.doubleValue()>0) {
+            if (MakeAtmosphere.isAboveBoilingpoint(surfaceTemp + latitudeWinterTemp[9], atmoPressure.doubleValue())) {
+
+                planetBuilder.hydrosphereDescription(HydrosphereDescription.VAPOR)
+                             .hydrosphere(1);
+            } else if (MakeAtmosphere.isAboveBoilingpoint(surfaceTemp, atmoPressure.doubleValue())) {
+                int[] latitudeForLiquid = findThresholdForLiquid(surfaceTemp, atmoPressure.doubleValue(), latitudeWinterTemp, latitudeSummerTemp);
+                if (50 * (1 - Math.sin(10 * latitudeForLiquid[0])) < hydrosphere) {
+                    planetBuilder.hydrosphere((int) (50 * (1 - Math.sin(10 * latitudeForLiquid[0]))));
+                }
+                if (latitudeForLiquid[0] > latitudeForLiquid[1]) {
+                    planetBuilder.hydrosphereDescription(HydrosphereDescription.BOILING);
+                }
+            }
+        } else if (hydrosphere > 0 && hydrosphereDescription == HydrosphereDescription.ICE_SHEET
+                && surfaceTemp + latitudeWinterTemp[4] > 274) {
+            System.out.println("Ice to Liquid, latitude40 winter temp: "+ latitudeWinterTemp[4]);
+            planetBuilder.hydrosphereDescription(HydrosphereDescription.LIQUID);
+        } else if (hydrosphere == 0
+                && (hydrosphereDescription == HydrosphereDescription.LIQUID
+                || hydrosphereDescription == HydrosphereDescription.ICE_SHEET)) {
+            planetBuilder.hydrosphereDescription(HydrosphereDescription.REMNANTS);
+        }
+        if(atmoPressure.doubleValue()==0 && hydrosphere >0){
+            planetBuilder.hydrosphereDescription(HydrosphereDescription.REMNANTS)
+                         .hydrosphere(0);
+        }
+    }
+
+    private static int[] findThresholdForLiquid(int surfaceTemp, double atmoPressure, int[] latitudeWinterTemp, int[] latitudeSummerTemp) {
+        int[] polarSeaLimit = new int[2];
+        for (int i = 0; i < latitudeWinterTemp.length; i++) {
+
+            if (!MakeAtmosphere.isAboveBoilingpoint(surfaceTemp + latitudeWinterTemp[i], atmoPressure)) {
+                polarSeaLimit[0] = i;
+                break;
+            }
+        }
+        for (int i = 0; i < latitudeSummerTemp.length; i++) {
+
+            if (!MakeAtmosphere.isAboveBoilingpoint(surfaceTemp + latitudeSummerTemp[i], atmoPressure)) {
+                polarSeaLimit[1] = i;
+                break;
+            }
+        }
+
+        return polarSeaLimit;
     }
 
     private static int getWaterVaporFactor(int baseTemperature, HydrosphereDescription hydrosphereDescription, int hydrosphere) {
@@ -374,8 +433,8 @@ public final class TerrestrialPlanetFactory {
 
     private static int getBaseSize(char orbitalObjectClass) {
 
-        int baseSize = 900+Dice.d10()*10; //Default for planets
-        if (orbitalObjectClass == 't' || orbitalObjectClass == 'c') baseSize = 90+Dice.d10();
+        int baseSize = 900 + Dice.d10() * 10; //Default for planets
+        if (orbitalObjectClass == 't' || orbitalObjectClass == 'c') baseSize = 90 + Dice.d10();
         return baseSize;
     }
 
@@ -464,15 +523,15 @@ public final class TerrestrialPlanetFactory {
 
         if (sumOfGasPercentage < 100) {
 
-                var currentN2 = atmoSet.stream()
-                                       .filter(g->g.getName().equals("N2"))
-                                       .findAny()
-                                       .map(AtmosphericGases::getPercentageInAtmo)
-                        .orElse(0);
-                var newN2 = AtmosphericGases.builder()
-                                            .name("N2")
-                                            .percentageInAtmo(currentN2 + 100 - sumOfGasPercentage);
-                atmoSet.add(newN2.build());
+            var currentN2 = atmoSet.stream()
+                                   .filter(g -> g.getName().equals("N2"))
+                                   .findAny()
+                                   .map(AtmosphericGases::getPercentageInAtmo)
+                                   .orElse(0);
+            var newN2 = AtmosphericGases.builder()
+                                        .name("N2")
+                                        .percentageInAtmo(currentN2 + 100 - sumOfGasPercentage);
+            atmoSet.add(newN2.build());
 
         }
     }
@@ -517,6 +576,7 @@ public final class TerrestrialPlanetFactory {
                                                                                          double axialTilt,
                                                                                          double surfaceTemp,
                                                                                          double orbitalPeriod) {
+
 
         double[][] temperatureRangeBand = new double[][]{ // First is Low Moderation atmos, then Average etc
                 {1.10, 1.07, 1.05, 1.03, 1.00, 0.97, 0.93, 0.87, 0.78, 0.68},

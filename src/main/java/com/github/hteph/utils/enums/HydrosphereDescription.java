@@ -7,7 +7,8 @@ public enum HydrosphereDescription {
     VAPOR("Vapor transient"),
     LIQUID("Liquid"),
     ICE_SHEET("Ice sheet"),
-    REMNANTS("Remnant");
+    REMNANTS("Remnant"),
+    BOILING("Boiling seas");
 
     public final String label;
 

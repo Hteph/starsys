@@ -41,7 +41,7 @@ public final class StarSystemGenerator {
         starSystemList.add(0, star);
 
         //TODO how many orbits? This code makes no sense! changed, but still need revision
-        final int NUMBER_OF_ORBITS = Dice._2d6() + (int) sqrt(star.getMass().doubleValue()) - 2;
+        final int NUMBER_OF_ORBITS = Dice._3d6() + (int) sqrt(star.getMass().doubleValue()) - 3;
 
         double startValue = 0.05 * squared(star.getMass().doubleValue()) * (Dice._2d6());
         var orbitalDistances = DoubleStream.iterate(startValue, v -> 0.1 + v * 1.1 + (Dice.d10() * 0.1))
