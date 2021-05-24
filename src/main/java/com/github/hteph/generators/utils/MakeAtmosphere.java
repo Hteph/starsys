@@ -3,14 +3,132 @@ package com.github.hteph.generators.utils;
 import com.github.hteph.repository.objects.AtmosphericGases;
 import com.github.hteph.repository.objects.Planet;
 import com.github.hteph.repository.objects.Star;
+import com.github.hteph.repository.objects.TemperatureFacts;
 import com.github.hteph.utils.Dice;
+import com.github.hteph.utils.NumberUtilities;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.DoubleStream;
+
+import static com.github.hteph.utils.NumberUtilities.sqrt;
 
 public class MakeAtmosphere {
+
+    public static TemperatureFacts.TemperatureFactsBuilder setAllKindOfLocalTemperature(double atmoPressure,
+                                                                                        int hydrosphere,
+                                                                                        double rotationalPeriod,
+                                                                                        double axialTilt,
+                                                                                        double surfaceTemp,
+                                                                                        double orbitalPeriod) {
+
+
+        double[][] temperatureRangeBand = new double[][]{ // First is Low Moderation atmos, then Average etc
+                {1.10, 1.07, 1.05, 1.03, 1.00, 0.97, 0.93, 0.87, 0.78, 0.68},
+                {1.05, 1.04, 1.03, 1.02, 1.00, 0.98, 0.95, 0.90, 0.82, 0.75},
+                {1.02, 1.02, 1.02, 1.01, 1.00, 0.99, 0.98, 0.95, 0.91, 0.87},
+                {1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00}
+        };
+
+        double[] summerTemperature = new double[10];
+        double[] winterTemperature = new double[10];
+        double[] latitudeTemperature = new double[10];
+        double[] baseTemperature = new double[10];
+
+        int testModeration = 0;
+        testModeration += (hydrosphere - 60) / 10;
+        testModeration += (atmoPressure < 0.1) ? -3 : 1;
+        testModeration += (int) atmoPressure;
+        testModeration += (rotationalPeriod < 10) ? -3 : 1;
+        testModeration += (int) (Math.sqrt(rotationalPeriod / 24)); //Shouldn't this be negative?
+        testModeration += (int) (10 / axialTilt);
+
+        String atmoModeration;
+        if (atmoPressure == 0) atmoModeration = "No";
+        else if (atmoPressure > 10) atmoModeration = "Extreme";
+        else if (testModeration < -2) atmoModeration = "Low";
+        else if (testModeration > 2) atmoModeration = "High";
+        else atmoModeration = "Average";
+
+        int atmoIndex;
+        switch (atmoModeration) {
+            case "High":
+                atmoIndex = 2;
+                break;
+            case "Average":
+                atmoIndex = 1;
+                break;
+            case "Extreme":
+                atmoIndex = 3;
+                break;
+            default:
+                atmoIndex = 0;
+                break;
+        }
+
+        for (int i = 0; i < 10; i++) {
+            latitudeTemperature[i] = temperatureRangeBand[atmoIndex][i] * surfaceTemp;
+        }
+
+        for (int i = 0; i < 10; i++) {
+            baseTemperature[i] = latitudeTemperature[i] - 274;
+        }
+
+        for (int i = 0; i < 10; i++) {
+
+            double seasonEffect = 1;
+            // This part is supposed to shift the rangebands for summer /winter effects, it makes an
+            // (to me unproven) assumption that winter temperatures at the poles is not changed by seasonal effects
+            // this feels odd but I have to delve further into the science before I dismiss it.
+            // the effect occurs from the intersection of axial tilt effects and rangeband effects in a way that
+            //makes me suspect it is unintentional.
+            int axialTiltEffect = (int) (axialTilt / 10);
+            int summer = Math.max(0, i - axialTiltEffect);
+            int winter = Math.min(9, i + axialTiltEffect);
+
+            if (i < 3 && axialTiltEffect < 4) seasonEffect *= 0.75;
+            if (i > 8 && axialTiltEffect > 3) seasonEffect *= 2;
+            if (orbitalPeriod < 0.25 && !atmoModeration.equals("Low")) seasonEffect *= 0.75;
+            if (orbitalPeriod > 3 && !atmoModeration.equals("High") && axialTilt > 40) seasonEffect *= 1.5;
+
+            summerTemperature[i] = (int) (latitudeTemperature[summer] - latitudeTemperature[i]) * seasonEffect;
+            winterTemperature[i] = (int) (latitudeTemperature[winter] - latitudeTemperature[i]) * seasonEffect;
+        }
+        return TemperatureFacts.builder()
+                               .rangeBandTemperature(DoubleStream.of(baseTemperature)
+                                                                 .mapToInt(t -> (int) Math.ceil(t))
+                                                                 .toArray())
+                               .rangeBandTempSummer(DoubleStream.of(summerTemperature)
+                                                                .mapToInt(t -> (int) Math.ceil(t))
+                                                                .toArray())
+                               .rangeBandTempWinter(DoubleStream.of(winterTemperature)
+                                                                .mapToInt(t -> (int) Math.ceil(t))
+                                                                .toArray());
+    }
+
+    public static void setDayNightTemp(TemperatureFacts.TemperatureFactsBuilder tempTempFacts, int baseTemperature, double luminosity, double orbitDistance, double atmoPressure, double rotationPeriod) {
+
+        //Assymerical sigmoidal:  5-parameter logistic (5PL)
+        var increasePerHourFactor = -1.554015 + (0.9854966 - -1.554015)/Math.pow(1 + Math.pow(atmoPressure/19056230d,0.5134927),1094.463);
+        var maxDayIncreaseMultiple = 7.711577 + (0.2199364 - 7.711577)/Math.pow(1 + Math.pow(atmoPressure/2017503d,1.004679),757641.3);
+        var incomingRadiation = luminosity/sqrt(orbitDistance);
+
+        var daytimeMax = Math.min(incomingRadiation*increasePerHourFactor*rotationPeriod/2d,baseTemperature*incomingRadiation*maxDayIncreaseMultiple);
+
+        var decresePerHour =  -0.5906138 + (19.28838 - -0.5906138)/Math.pow(1 + Math.pow(atmoPressure/291099200d,0.5804294),172207.2);
+        var maxNigthDecreaseMultiple = 0.03501408 + (0.7690167 - 0.03501408)/Math.pow(1 + Math.pow(atmoPressure/6815738d,0.7782145),322006.2);
+
+        var nighttimeMin =- Math.min(decresePerHour*rotationPeriod/2d,maxNigthDecreaseMultiple*baseTemperature);
+
+        System.out.println("+"+daytimeMax+"/"+nighttimeMin);
+        System.out.println("[+"+increasePerHourFactor+"/"+decresePerHour+"]");
+        tempTempFacts.nightTempMod(BigDecimal.valueOf(nighttimeMin).round(NumberUtilities.TWO));
+        tempTempFacts.dayTempMod(BigDecimal.valueOf(daytimeMax).round(NumberUtilities.TWO));
+
+    }
 
 
     public static boolean isAboveBoilingpoint(int temperature, double pressure){
