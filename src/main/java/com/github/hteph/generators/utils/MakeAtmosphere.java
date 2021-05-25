@@ -4,19 +4,270 @@ import com.github.hteph.repository.objects.AtmosphericGases;
 import com.github.hteph.repository.objects.Planet;
 import com.github.hteph.repository.objects.Star;
 import com.github.hteph.repository.objects.TemperatureFacts;
+import com.github.hteph.tables.TableMaker;
 import com.github.hteph.utils.Dice;
 import com.github.hteph.utils.NumberUtilities;
+import com.github.hteph.utils.enums.HydrosphereDescription;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 
 import static com.github.hteph.utils.NumberUtilities.sqrt;
 
 public class MakeAtmosphere {
+
+    public static void checkHydrographics(HydrosphereDescription hydrosphereDescription,
+                                           int hydrosphere,
+                                           BigDecimal atmoPressure,
+                                           Planet.PlanetBuilder<?, ? extends Planet.PlanetBuilder<?, ?>> planetBuilder,
+                                           int surfaceTemp,
+                                           int[] latitudeWinterTemp,
+                                           int[] latitudeSummerTemp) {
+        if (hydrosphere > 0 && surfaceTemp > 274 && atmoPressure.doubleValue() > 0) {
+            if (MakeAtmosphere.isAboveBoilingpoint(surfaceTemp + latitudeWinterTemp[9], atmoPressure.doubleValue())) {
+
+                planetBuilder.hydrosphereDescription(HydrosphereDescription.VAPOR)
+                             .hydrosphere(1);
+            } else if (MakeAtmosphere.isAboveBoilingpoint(surfaceTemp, atmoPressure.doubleValue())) {
+                int[] latitudeForLiquid = findThresholdForLiquid(surfaceTemp, atmoPressure.doubleValue(), latitudeWinterTemp, latitudeSummerTemp);
+                if (50 * (1 - Math.sin(10 * latitudeForLiquid[0])) < hydrosphere) {
+                    planetBuilder.hydrosphere((int) (50 * (1 - Math.sin(10 * latitudeForLiquid[0]))));
+                }
+                if (latitudeForLiquid[0] > latitudeForLiquid[1]) {
+                    planetBuilder.hydrosphereDescription(HydrosphereDescription.BOILING);
+                    planetBuilder.description("Storm World");
+                }
+            }
+        } else if (hydrosphere > 0 && hydrosphereDescription == HydrosphereDescription.ICE_SHEET
+                && surfaceTemp + latitudeWinterTemp[4] > 274) {
+            System.out.println("Ice to Liquid, latitude40 winter temp: " + latitudeWinterTemp[4]);
+            planetBuilder.hydrosphereDescription(HydrosphereDescription.LIQUID);
+        } else if (hydrosphere == 0
+                && (hydrosphereDescription == HydrosphereDescription.LIQUID
+                || hydrosphereDescription == HydrosphereDescription.ICE_SHEET)) {
+            planetBuilder.hydrosphereDescription(HydrosphereDescription.REMNANTS);
+        }
+        if (atmoPressure.doubleValue() == 0 && hydrosphere > 0) {
+            planetBuilder.hydrosphereDescription(HydrosphereDescription.REMNANTS)
+                         .hydrosphere(0);
+        }
+    }
+
+    private static int[] findThresholdForLiquid(int surfaceTemp, double atmoPressure, int[] latitudeWinterTemp, int[] latitudeSummerTemp) {
+        int[] polarSeaLimit = new int[2];
+        for (int i = 0; i < latitudeWinterTemp.length; i++) {
+
+            if (!MakeAtmosphere.isAboveBoilingpoint(surfaceTemp + latitudeWinterTemp[i], atmoPressure)) {
+                polarSeaLimit[0] = i;
+                break;
+            }
+        }
+        for (int i = 0; i < latitudeSummerTemp.length; i++) {
+
+            if (!MakeAtmosphere.isAboveBoilingpoint(surfaceTemp + latitudeSummerTemp[i], atmoPressure)) {
+                polarSeaLimit[1] = i;
+                break;
+            }
+        }
+
+        return polarSeaLimit;
+    }
+
+    public static void adjustForOxygen(double atmoPressure, TreeSet<AtmosphericGases> atmosphericComposition) {
+
+        Map<String, AtmosphericGases> atmoMap = atmosphericComposition
+                .stream()
+                .collect(Collectors.toMap(AtmosphericGases::getName, x -> x));
+
+        int oxygenMax = Math.max(50, (int) (Dice._3d6() * 2 / atmoPressure)); //This could be a bit more involved and interesting
+
+        if (atmoMap.containsKey("CO2")) {
+            if (atmoMap.get("CO2").getPercentageInAtmo() > oxygenMax) {
+                AtmosphericGases co2 = atmoMap.get("CO2");
+                atmoMap.remove("CO2");
+                atmoMap.put("O2", AtmosphericGases.builder().name("O2").percentageInAtmo(oxygenMax).build());
+                //perhaps the remnant CO should be put in as N2 instead?
+                atmoMap.put("CO2", AtmosphericGases.builder()
+                                                   .name("CO2")
+                                                   .percentageInAtmo(co2.getPercentageInAtmo() - oxygenMax)
+                                                   .build());
+
+            } else {
+                AtmosphericGases co2 = atmoMap.get("CO2");
+                atmoMap.remove("CO2");
+                atmoMap.put("O2", AtmosphericGases.builder()
+                                                  .name("O2")
+                                                  .percentageInAtmo(co2.getPercentageInAtmo())
+                                                  .build());
+            }
+        } else { //if no CO2 we just find the largest and take from that
+            AtmosphericGases gas = atmosphericComposition.pollFirst();
+            if (gas != null) {
+                if (gas.getPercentageInAtmo() < oxygenMax) {
+                    atmoMap.put("O2", AtmosphericGases.builder()
+                                                      .name("O2")
+                                                      .percentageInAtmo(gas.getPercentageInAtmo())
+                                                      .build());
+                } else {
+                    atmoMap.put("O2", AtmosphericGases.builder()
+                                                      .name("O2")
+                                                      .percentageInAtmo(oxygenMax)
+                                                      .build());
+                    atmoMap.put(gas.getName(), AtmosphericGases.builder()
+                                                               .name("O2")
+                                                               .percentageInAtmo(gas.getPercentageInAtmo() -
+                                                                                         oxygenMax)
+                                                               .build());
+                }
+            }
+        }
+
+        removeCombustibles(atmoMap);
+        atmosphericComposition.clear();
+
+        atmosphericComposition.addAll(atmoMap.values());
+    }
+
+    public static int findTheHydrosphere(HydrosphereDescription hydrosphereDescription, int radius) {
+
+        //         zeroHydro = () -> 0;
+        //         superficialHydro = () -> Dice.d10()/2;
+        //         vLowHydro = Dice::d10;
+        //         lowHydro = () -> Dice.d10() + 10;
+        //         mediumHydro = () -> Dice.d20() + 20;
+        //         highHydro = () -> Dice.d20()+ Dice.d20()+ Dice.d20() +37;
+        //         vHighHydro = () -> 100;
+
+        List<Supplier<Integer>> hydroList = Arrays.asList(() -> Dice.d10() / 2,
+                                                          () -> Dice.d10() / 2 + 5,
+                                                          () -> Dice.d10() + 10,
+                                                          () -> Dice.d20() + 20,
+                                                          () -> Dice.d20() + Dice.d20() + Dice.d20() + 37,
+                                                          () -> 100);
+        int[] wetSmallPlanetHydro = {2, 5, 9, 10, 12, 13};
+        int[] wetMediumPlanetHydro = {2, 4, 7, 9, 11, 12};
+        int[] wetLargePlanetHydro = {0, 2, 3, 4, 7, 12};
+
+        Integer tempHydro = 0;
+
+        if (hydrosphereDescription.equals(HydrosphereDescription.LIQUID)
+                || hydrosphereDescription.equals(HydrosphereDescription.ICE_SHEET)) {
+            if (radius < 2000) {
+                tempHydro = TableMaker.makeRoll(Dice._2d6(), wetSmallPlanetHydro, hydroList).get();
+            } else if (radius < 4000) {
+                tempHydro = TableMaker.makeRoll(Dice._2d6(), wetMediumPlanetHydro, hydroList).get();
+            } else if (radius < 7000) {
+                tempHydro = TableMaker.makeRoll(Dice._2d6(), wetLargePlanetHydro, hydroList).get();
+            }
+        } else if (hydrosphereDescription.equals(HydrosphereDescription.CRUSTAL)) tempHydro = 100;
+        else if (hydrosphereDescription.equals(HydrosphereDescription.REMNANTS)) tempHydro = Dice.d6() / 2;
+
+        tempHydro = Math.min(100, tempHydro);
+
+        return tempHydro;
+    }
+
+    public static HydrosphereDescription findHydrosphereDescription(boolean InnerZone, int baseTemperature) {
+        HydrosphereDescription tempHydroD;
+        if (!InnerZone) {
+            tempHydroD = HydrosphereDescription.CRUSTAL;
+        } else if (baseTemperature > 500) {
+            tempHydroD = HydrosphereDescription.NONE;
+        } else if (baseTemperature > 370) {
+            tempHydroD = HydrosphereDescription.VAPOR;
+        } else if (baseTemperature > 245) {
+            tempHydroD = HydrosphereDescription.LIQUID;
+        } else {
+            tempHydroD = HydrosphereDescription.ICE_SHEET;
+        }
+        return tempHydroD;
+    }
+
+    public static int getWaterVaporFactor(int baseTemperature, HydrosphereDescription hydrosphereDescription, int hydrosphere) {
+        int waterVaporFactor;
+        if (hydrosphereDescription.equals(HydrosphereDescription.LIQUID)
+                || hydrosphereDescription.equals(HydrosphereDescription.ICE_SHEET)) {
+            waterVaporFactor = (int) Math.max(0, (baseTemperature - 240) / 100.0 * hydrosphere * (Dice._2d6() - 1));
+        } else {
+            waterVaporFactor = 0;
+        }
+        return waterVaporFactor;
+    }
+
+    public static void removeCombustibles(Map<String, AtmosphericGases> atmoMap) {
+        int removedpercentages = 0;
+        if (atmoMap.containsKey("CH4")) {
+            removedpercentages += atmoMap.get("CH4").getPercentageInAtmo();
+            atmoMap.remove("CH4");
+        }
+        if (atmoMap.containsKey("H2")) {
+            removedpercentages += atmoMap.get("H2").getPercentageInAtmo();
+            atmoMap.remove("H2");
+        }
+//        There are indications that ammonia may be present in an oxygen atmosphere
+        // so this is removed for now
+//        if (atmoMap.containsKey("NH3")) {
+//            removedpercentages += atmoMap.get("NH3").getPercentageInAtmo();
+//            atmoMap.remove("NH3");
+//        }
+        if (removedpercentages > 0) {
+            if (atmoMap.containsKey("N2")) {
+                removedpercentages += atmoMap.get("N2").getPercentageInAtmo();
+                atmoMap.remove("N2");
+            }
+            atmoMap.put("N2", AtmosphericGases.builder()
+                                              .name("N2")
+                                              .percentageInAtmo(removedpercentages)
+                                              .build());
+        }
+    }
+
+    public static double findGreenhouseGases(Set<AtmosphericGases> atmoshericComposition,
+                                             double atmoPressure,
+                                             int baseTemperature,
+                                             HydrosphereDescription hydrosphereDescription,
+                                             int hydrosphere) {
+        double tempGreenhouseGasEffect = 0;
+
+        for (AtmosphericGases gas : atmoshericComposition) {
+
+            switch (gas.getName()) {
+                case "CO2":
+                    tempGreenhouseGasEffect += gas.getPercentageInAtmo() * atmoPressure;
+                    break;
+                case "CH4":
+                    tempGreenhouseGasEffect += gas.getPercentageInAtmo() * atmoPressure * 4;
+                    break;
+                case "SO2":
+                case "NH3":
+                case "NO2":
+                case "H2S":
+                    tempGreenhouseGasEffect += gas.getPercentageInAtmo() * atmoPressure * 8;
+                    break;
+                case "H2SO4":
+                    tempGreenhouseGasEffect += gas.getPercentageInAtmo() * atmoPressure * 16;
+                    break;
+                default:
+                    tempGreenhouseGasEffect += gas.getPercentageInAtmo() * atmoPressure * 0;
+                    break;
+            }
+        }
+
+        var waterVaporFactor = MakeAtmosphere.getWaterVaporFactor(baseTemperature, hydrosphereDescription, hydrosphere);
+
+        return 1 + sqrt(atmoPressure) * 0.01 * (Dice._2d6() - 1)
+                + sqrt(tempGreenhouseGasEffect) * 0.1
+                + waterVaporFactor * 0.1;
+    }
 
     public static TemperatureFacts.TemperatureFactsBuilder setAllKindOfLocalTemperature(double atmoPressure,
                                                                                         int hydrosphere,
@@ -24,7 +275,6 @@ public class MakeAtmosphere {
                                                                                         double axialTilt,
                                                                                         double surfaceTemp,
                                                                                         double orbitalPeriod) {
-
 
         double[][] temperatureRangeBand = new double[][]{ // First is Low Moderation atmos, then Average etc
                 {1.10, 1.07, 1.05, 1.03, 1.00, 0.97, 0.93, 0.87, 0.78, 0.68},

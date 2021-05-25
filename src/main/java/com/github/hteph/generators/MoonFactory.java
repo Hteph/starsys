@@ -30,6 +30,9 @@ import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 
 import static com.github.hteph.generators.utils.MakeAtmosphere.checkAtmo;
+import static com.github.hteph.generators.utils.MakeAtmosphere.findHydrosphereDescription;
+import static com.github.hteph.generators.utils.MakeAtmosphere.findTheHydrosphere;
+import static com.github.hteph.generators.utils.MakeAtmosphere.getWaterVaporFactor;
 import static com.github.hteph.utils.NumberUtilities.cubed;
 import static com.github.hteph.utils.NumberUtilities.sqrt;
 import static com.github.hteph.utils.NumberUtilities.squared;
@@ -58,11 +61,9 @@ public final class MoonFactory {
         int baseTemperature;
         HydrosphereDescription hydrosphereDescription;
         int hydrosphere;
-        int waterVaporFactor;
         TreeSet<AtmosphericGases> atmoshericComposition;
         BigDecimal atmoPressure;
         double albedo;
-        double greenhouseFactor;
         String tectonicActivityGroup;
 
         double moonsPlanetMass = 0;
@@ -189,7 +190,6 @@ public final class MoonFactory {
         //Hydrosphere
         hydrosphereDescription = findHydrosphereDescription(IS_INNER_ZONE, baseTemperature);
         hydrosphere = findTheHydrosphere(hydrosphereDescription, moonRadius);
-        waterVaporFactor = getWaterVaporFactor(baseTemperature, hydrosphereDescription, hydrosphere);
 
         moonBuilder.hydrosphereDescription(hydrosphereDescription);
         moonBuilder.hydrosphere(hydrosphere);
@@ -244,11 +244,11 @@ public final class MoonFactory {
 
         albedo = findAlbedo(IS_INNER_ZONE, atmoPressure.doubleValue(), hydrosphereDescription, hydrosphere);
         moonBuilder.albedo(BigDecimal.valueOf(albedo).round(TWO));
-        double greenhouseGasEffect = findGreenhouseGases(atmoshericComposition, atmoPressure.doubleValue());
-
-        greenhouseFactor = 1 + sqrt(atmoPressure.doubleValue()) * 0.01 * (Dice._2d6() - 1)
-                + sqrt(greenhouseGasEffect) * 0.1
-                + waterVaporFactor * 0.1;
+        double greenhouseFactor = MakeAtmosphere.findGreenhouseGases(atmoshericComposition,
+                                                                        atmoPressure.doubleValue(),
+                                                                        baseTemperature,
+                                                                        hydrosphereDescription,
+                                                                        hydrosphere);
 
         //TODO Here adding some Gaia moderation factor (needs tweaking probably) moving a bit more towards
         // water/carbon ideal
@@ -263,31 +263,20 @@ public final class MoonFactory {
         //Climate -------------------------------------------------------
         // sets all the temperature stuff from axial tilt etc etc TODO should take the special circumstances of moons too
 
-        var temperatureFacts = setAllKindOfLocalTemperature(atmoPressure.doubleValue(),
+        var temperatureFacts = MakeAtmosphere.setAllKindOfLocalTemperature(atmoPressure.doubleValue(),
                                                             hydrosphere,
                                                             rotationalPeriod,
                                                             axialTilt,
                                                             surfaceTemp,
                                                             orbitingAroundPlanet.getOrbitalFacts()
                                                                                 .getOrbitalPeriod()
-                                                                                .doubleValue()); // sets all the temperature stuff from axial tilt etc etc
+                                                                                .doubleValue());
         temperatureFacts.surfaceTemp(surfaceTemp);
         //TODO Weather and day night temp cycle
 
         moonBuilder.orbitalFacts(orbitalFacts.build());
         moonBuilder.temperatureFacts(temperatureFacts.build());
         return moonBuilder.build();
-    }
-
-    private static int getWaterVaporFactor(int baseTemperature, HydrosphereDescription hydrosphereDescription, int hydrosphere) {
-        int waterVaporFactor;
-        if (hydrosphereDescription.equals(HydrosphereDescription.LIQUID)
-                || hydrosphereDescription.equals(HydrosphereDescription.ICE_SHEET)) {
-            waterVaporFactor = (int) Math.max(0, (baseTemperature - 240) / 100.0 * hydrosphere * (Dice._2d6() - 1));
-        } else {
-            waterVaporFactor = 0;
-        }
-        return waterVaporFactor;
     }
 
     private static double getMagneticField(double rotationalPeriod, String tectonicCore, String tectonicActivityGroup, Star orbitingAround, double density, double mass) {
@@ -419,164 +408,9 @@ public final class MoonFactory {
             }
         }
 
-        removeCombustibles(atmoMap);
+        MakeAtmosphere.removeCombustibles(atmoMap);
         atmosphericComposition.clear();
         atmosphericComposition.addAll(atmoMap.values());
-    }
-
-    private static void removeCombustibles(Map<String, AtmosphericGases> atmoMap) {
-        int removedpercentages = 0;
-        if (atmoMap.containsKey("CH4")) {
-            removedpercentages += atmoMap.get("CH4").getPercentageInAtmo();
-            atmoMap.remove("CH4");
-        }
-        if (atmoMap.containsKey("H2")) {
-            removedpercentages += atmoMap.get("H2").getPercentageInAtmo();
-            atmoMap.remove("H2");
-        }
-//        There are indications that ammonia may be present in an oxygen atmosphere
-        // so this is removed for now
-//        if (atmoMap.containsKey("NH3")) {
-//            removedpercentages += atmoMap.get("NH3").getPercentageInAtmo();
-//            atmoMap.remove("NH3");
-//        }
-        if (removedpercentages > 0) {
-            if (atmoMap.containsKey("N2")) {
-                removedpercentages += atmoMap.get("N2").getPercentageInAtmo();
-                atmoMap.remove("N2");
-            }
-            atmoMap.put("N2", AtmosphericGases.builder()
-                                              .name("N2")
-                                              .percentageInAtmo(removedpercentages)
-                                              .build());
-        }
-    }
-
-    /**
-     * /*TODO
-     * great season variations from the orbital eccentricity and multiple stars system
-     * day night variation estimation, is interesting for worlds with short year/long days
-     */
-
-    private static TemperatureFacts.TemperatureFactsBuilder setAllKindOfLocalTemperature(double atmoPressure, int hydrosphere,
-                                                                                         double rotationalPeriod, double axialTilt, double surfaceTemp,
-                                                                                         double orbitalPeriod) {
-
-        double[][] temperatureRangeBand = new double[][]{ // First is Low Moderation atmos, then Average etc
-                {1.10, 1.07, 1.05, 1.03, 1.00, 0.97, 0.93, 0.87, 0.78, 0.68},
-                {1.05, 1.04, 1.03, 1.02, 1.00, 0.98, 0.95, 0.90, 0.82, 0.75},
-                {1.02, 1.02, 1.02, 1.01, 1.00, 0.99, 0.98, 0.95, 0.91, 0.87},
-                {1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00}
-        };
-
-        double[] summerTemperature = new double[10];
-        double[] winterTemperature = new double[10];
-        double[] latitudeTemperature = new double[10];
-        double[] baseTemperature = new double[10];
-
-        int testModeration = 0;
-        testModeration += (hydrosphere - 60) / 10;
-        testModeration += (atmoPressure < 0.1) ? -3 : 1;
-        testModeration += (int) atmoPressure;
-        testModeration += (rotationalPeriod < 10) ? -3 : 1;
-        testModeration += (int) (Math.sqrt(rotationalPeriod / 24)); //Shouldn't this be negative?
-        testModeration += (int) (10 / axialTilt);
-
-        String atmoModeration;
-        if (atmoPressure == 0) atmoModeration = "No";
-        else if (atmoPressure > 10) atmoModeration = "Extreme";
-        else if (testModeration < -2) atmoModeration = "Low";
-        else if (testModeration > 2) atmoModeration = "High";
-        else atmoModeration = "Average";
-
-        int atmoIndex;
-        switch (atmoModeration) {
-            case "High":
-                atmoIndex = 2;
-                break;
-            case "Average":
-                atmoIndex = 1;
-                break;
-            case "Extreme":
-                atmoIndex = 3;
-                break;
-            default:
-                atmoIndex = 0;
-                break;
-        }
-
-        for (int i = 0; i < 10; i++) {
-            latitudeTemperature[i] = temperatureRangeBand[atmoIndex][i] * surfaceTemp;
-        }
-
-        for (int i = 0; i < 10; i++) {
-            baseTemperature[i] = latitudeTemperature[i] - 274;
-        }
-
-        for (int i = 0; i < 10; i++) {
-
-            double seasonEffect = 1;
-            // This part is supposed to shift the rangebands for summer /winter effects, it makes an
-            // (to me unproven) assumption that winter temperatures at the poles is not changed by seasonal effects
-            // this feels odd but I have to delve further into the science before I dismiss it.
-            // the effect occurs from the intersection of axial tilt effects and rangeband effects in a way that
-            //makes me suspect it is unintentional.
-            int axialTiltEffect = (int) (axialTilt / 10);
-            int summer = Math.max(0, i - axialTiltEffect);
-            int winter = Math.min(9, i + axialTiltEffect);
-
-            if (i < 3 && axialTiltEffect < 4) seasonEffect *= 0.75;
-            if (i > 8 && axialTiltEffect > 3) seasonEffect *= 2;
-            if (orbitalPeriod < 0.25 && !atmoModeration.equals("Low")) seasonEffect *= 0.75;
-            if (orbitalPeriod > 3 && !atmoModeration.equals("High") && axialTilt > 40) seasonEffect *= 1.5;
-
-            summerTemperature[i] = (int) (latitudeTemperature[summer] - latitudeTemperature[i]) * seasonEffect;
-            winterTemperature[i] = (int) (latitudeTemperature[winter] - latitudeTemperature[i]) * seasonEffect;
-        }
-        var temperatureFacts = TemperatureFacts.builder();
-        return temperatureFacts.rangeBandTemperature(DoubleStream.of(baseTemperature)
-                                                                 .mapToInt(t -> (int) Math.ceil(t))
-                                                                 .toArray())
-                               .rangeBandTempSummer(DoubleStream.of(summerTemperature)
-                                                                .mapToInt(t -> (int) Math.ceil(t))
-                                                                .toArray())
-                               .rangeBandTempWinter(DoubleStream.of(winterTemperature)
-                                                                .mapToInt(t -> (int) Math.ceil(t))
-                                                                .toArray());
-    }
-
-    /*TODO
-     * This should be reworked (in conjuction with atmo) to remove CL and F from naturally occuring and instead
-     * treat them similar to Oxygen. Also the Ammonia is dependent on free water as written right now
-     */
-
-    private static double findGreenhouseGases(Set<AtmosphericGases> atmoshericComposition, double atmoPressure) {
-        double tempGreenhouseGasEffect = 0;
-
-        for (AtmosphericGases gas : atmoshericComposition) {
-
-            switch (gas.getName()) {
-                case "CO2":
-                    tempGreenhouseGasEffect += gas.getPercentageInAtmo() * atmoPressure;
-                    break;
-                case "CH4":
-                    tempGreenhouseGasEffect += gas.getPercentageInAtmo() * atmoPressure * 4;
-                    break;
-                case "SO2":
-                case "NH3":
-                case "NO2":
-                case "H2S":
-                    tempGreenhouseGasEffect += gas.getPercentageInAtmo() * atmoPressure * 8;
-                    break;
-                case "H2SO4":
-                    tempGreenhouseGasEffect += gas.getPercentageInAtmo() * atmoPressure * 16;
-                    break;
-                default:
-                    tempGreenhouseGasEffect += gas.getPercentageInAtmo() * atmoPressure * 0;
-                    break;
-            }
-        }
-        return tempGreenhouseGasEffect;
     }
 
     private static double findAlbedo(boolean InnerZone,
@@ -613,60 +447,7 @@ public final class MoonFactory {
         return TableMaker.makeRoll(Dice._2d6() + mod, randAlbedoArray, albedoBase) + (Dice.d10() - 1) * 0.01;
     }
 
-    private static int findTheHydrosphere(HydrosphereDescription hydrosphereDescription, int radius) {
 
-        //         zeroHydro = () -> 0;
-        //         superficialHydro = () -> Dice.d10()/2;
-        //         vLowHydro = Dice::d10;
-        //         lowHydro = () -> Dice.d10() + 10;
-        //         mediumHydro = () -> Dice.d20() + 20;
-        //         highHydro = () -> Dice.d20()+ Dice.d20()+ Dice.d20() +37;
-        //         vHighHydro = () -> 100;
-
-        List<Supplier<Integer>> hydroList = Arrays.asList(() -> Dice.d10() / 2,
-                                                          () -> Dice.d10() / 2 + 5,
-                                                          () -> Dice.d10() + 10,
-                                                          () -> Dice.d20() + 20,
-                                                          () -> Dice.d20() + Dice.d20() + Dice.d20() + 37,
-                                                          () -> 100);
-        int[] wetSmallPlanetHydro = {2, 5, 9, 10, 12, 13};
-        int[] wetMediumPlanetHydro = {2, 4, 7, 9, 11, 12};
-        int[] wetLargePlanetHydro = {0, 2, 3, 4, 7, 12};
-
-        Integer tempHydro = 0;
-
-        if (hydrosphereDescription.equals(HydrosphereDescription.LIQUID)
-                || hydrosphereDescription.equals(HydrosphereDescription.ICE_SHEET)) {
-            if (radius < 2000) {
-                tempHydro = TableMaker.makeRoll(Dice._2d6(), wetSmallPlanetHydro, hydroList).get();
-            } else if (radius < 4000) {
-                tempHydro = TableMaker.makeRoll(Dice._2d6(), wetMediumPlanetHydro, hydroList).get();
-            } else if (radius < 7000) {
-                tempHydro = TableMaker.makeRoll(Dice._2d6(), wetLargePlanetHydro, hydroList).get();
-            }
-        } else if (hydrosphereDescription.equals(HydrosphereDescription.CRUSTAL)) tempHydro = 100;
-        else if (hydrosphereDescription.equals(HydrosphereDescription.REMNANTS)) tempHydro = Dice.d6() / 2;
-
-        tempHydro = Math.min(100, tempHydro);
-
-        return tempHydro;
-    }
-
-    private static HydrosphereDescription findHydrosphereDescription(boolean InnerZone, int baseTemperature) {
-        HydrosphereDescription tempHydroD;
-        if (!InnerZone) {
-            tempHydroD = HydrosphereDescription.CRUSTAL;
-        } else if (baseTemperature > 500) {
-            tempHydroD = HydrosphereDescription.NONE;
-        } else if (baseTemperature > 370) {
-            tempHydroD = HydrosphereDescription.VAPOR;
-        } else if (baseTemperature > 245) {
-            tempHydroD = HydrosphereDescription.LIQUID;
-        } else {
-            tempHydroD = HydrosphereDescription.ICE_SHEET;
-        }
-        return tempHydroD;
-    }
 
     private static String findTectonicGroup(boolean InnerZone, double density) {
 

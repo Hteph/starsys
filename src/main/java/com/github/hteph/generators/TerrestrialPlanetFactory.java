@@ -31,6 +31,9 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 
+import static com.github.hteph.generators.utils.MakeAtmosphere.checkHydrographics;
+import static com.github.hteph.generators.utils.MakeAtmosphere.findGreenhouseGases;
+import static com.github.hteph.generators.utils.MakeAtmosphere.getWaterVaporFactor;
 import static com.github.hteph.utils.NumberUtilities.cubed;
 import static com.github.hteph.utils.NumberUtilities.sqrt;
 import static com.github.hteph.utils.NumberUtilities.squared;
@@ -62,11 +65,9 @@ public final class TerrestrialPlanetFactory {
         int baseTemperature;
         HydrosphereDescription hydrosphereDescription;
         int hydrosphere;
-        int waterVaporFactor;
         TreeSet<AtmosphericGases> atmoshericComposition;
         BigDecimal atmoPressure;
         double albedo;
-        double greenhouseFactor;
         String tectonicActivityGroup;
 
         boolean hasGaia;
@@ -208,9 +209,8 @@ public final class TerrestrialPlanetFactory {
         //base temp is an value of little use beyond this generator and is not propagated to the planet object
 
         //Hydrosphere
-        hydrosphereDescription = findHydrosphereDescription(IS_INNER_ZONE, baseTemperature);
-        hydrosphere = findTheHydrosphere(hydrosphereDescription, planetRadius);
-        waterVaporFactor = getWaterVaporFactor(baseTemperature, hydrosphereDescription, hydrosphere);
+        hydrosphereDescription = MakeAtmosphere.findHydrosphereDescription(IS_INNER_ZONE, baseTemperature);
+        hydrosphere = MakeAtmosphere.findTheHydrosphere(hydrosphereDescription, planetRadius);
 
         planetBuilder.hydrosphereDescription(hydrosphereDescription);
         planetBuilder.hydrosphere(hydrosphere);
@@ -262,15 +262,15 @@ public final class TerrestrialPlanetFactory {
         if (hasGaia) lifeType = LifeMethods.findLifeType(atmoshericComposition, star.getAge().doubleValue());
         else lifeType = Breathing.NONE;
 
-        if (lifeType.equals(Breathing.OXYGEN)) adjustForOxygen(atmoPressure.doubleValue(), atmoshericComposition);
+        if (lifeType.equals(Breathing.OXYGEN)) MakeAtmosphere.adjustForOxygen(atmoPressure.doubleValue(), atmoshericComposition);
 
         albedo = findAlbedo(IS_INNER_ZONE, atmoPressure.doubleValue(), hydrosphereDescription, hydrosphere);
         planetBuilder.albedo(BigDecimal.valueOf(albedo).round(TWO));
-        double greenhouseGasEffect = findGreenhouseGases(atmoshericComposition, atmoPressure.doubleValue());
-
-        greenhouseFactor = 1 + sqrt(atmoPressure.doubleValue()) * 0.01 * (Dice._2d6() - 1)
-                + sqrt(greenhouseGasEffect) * 0.1
-                + waterVaporFactor * 0.1;
+        double greenhouseFactor = findGreenhouseGases(atmoshericComposition,
+                                                      atmoPressure.doubleValue(),
+                                                      baseTemperature,
+                                                      hydrosphereDescription,
+                                                      hydrosphere);
 
         //TODO Here adding some Gaia moderation factor (needs tweaking probably) moving a bit more towards
         // water/carbon ideal
@@ -311,7 +311,13 @@ public final class TerrestrialPlanetFactory {
         int[] latitudeWinterTemp = temperatureFacts.build().getRangeBandTempWinter();
         int[] latitudeSummerTemp = temperatureFacts.build().getRangeBandTempSummer();
 //Sanity check of water
-        checkHydrographics(hydrosphereDescription, hydrosphere, atmoPressure, planetBuilder, surfaceTemp, latitudeWinterTemp, latitudeSummerTemp);
+        checkHydrographics(hydrosphereDescription,
+                           hydrosphere,
+                           atmoPressure,
+                           planetBuilder,
+                           surfaceTemp,
+                           latitudeWinterTemp,
+                           latitudeSummerTemp);
 
         planetBuilder.orbitalFacts(orbitalFacts.build());
         planetBuilder.temperatureFacts(temperatureFacts.build());
@@ -319,73 +325,6 @@ public final class TerrestrialPlanetFactory {
     }
 
 
-    private static void checkHydrographics(HydrosphereDescription hydrosphereDescription,
-                                           int hydrosphere,
-                                           BigDecimal atmoPressure,
-                                           Planet.PlanetBuilder<?, ? extends Planet.PlanetBuilder<?, ?>> planetBuilder,
-                                           int surfaceTemp,
-                                           int[] latitudeWinterTemp,
-                                           int[] latitudeSummerTemp) {
-        if (hydrosphere > 0 && surfaceTemp > 274 && atmoPressure.doubleValue() > 0) {
-            if (MakeAtmosphere.isAboveBoilingpoint(surfaceTemp + latitudeWinterTemp[9], atmoPressure.doubleValue())) {
-
-                planetBuilder.hydrosphereDescription(HydrosphereDescription.VAPOR)
-                             .hydrosphere(1);
-            } else if (MakeAtmosphere.isAboveBoilingpoint(surfaceTemp, atmoPressure.doubleValue())) {
-                int[] latitudeForLiquid = findThresholdForLiquid(surfaceTemp, atmoPressure.doubleValue(), latitudeWinterTemp, latitudeSummerTemp);
-                if (50 * (1 - Math.sin(10 * latitudeForLiquid[0])) < hydrosphere) {
-                    planetBuilder.hydrosphere((int) (50 * (1 - Math.sin(10 * latitudeForLiquid[0]))));
-                }
-                if (latitudeForLiquid[0] > latitudeForLiquid[1]) {
-                    planetBuilder.hydrosphereDescription(HydrosphereDescription.BOILING);
-                    planetBuilder.description("Storm World");
-                }
-            }
-        } else if (hydrosphere > 0 && hydrosphereDescription == HydrosphereDescription.ICE_SHEET
-                && surfaceTemp + latitudeWinterTemp[4] > 274) {
-            System.out.println("Ice to Liquid, latitude40 winter temp: " + latitudeWinterTemp[4]);
-            planetBuilder.hydrosphereDescription(HydrosphereDescription.LIQUID);
-        } else if (hydrosphere == 0
-                && (hydrosphereDescription == HydrosphereDescription.LIQUID
-                || hydrosphereDescription == HydrosphereDescription.ICE_SHEET)) {
-            planetBuilder.hydrosphereDescription(HydrosphereDescription.REMNANTS);
-        }
-        if (atmoPressure.doubleValue() == 0 && hydrosphere > 0) {
-            planetBuilder.hydrosphereDescription(HydrosphereDescription.REMNANTS)
-                         .hydrosphere(0);
-        }
-    }
-
-    private static int[] findThresholdForLiquid(int surfaceTemp, double atmoPressure, int[] latitudeWinterTemp, int[] latitudeSummerTemp) {
-        int[] polarSeaLimit = new int[2];
-        for (int i = 0; i < latitudeWinterTemp.length; i++) {
-
-            if (!MakeAtmosphere.isAboveBoilingpoint(surfaceTemp + latitudeWinterTemp[i], atmoPressure)) {
-                polarSeaLimit[0] = i;
-                break;
-            }
-        }
-        for (int i = 0; i < latitudeSummerTemp.length; i++) {
-
-            if (!MakeAtmosphere.isAboveBoilingpoint(surfaceTemp + latitudeSummerTemp[i], atmoPressure)) {
-                polarSeaLimit[1] = i;
-                break;
-            }
-        }
-
-        return polarSeaLimit;
-    }
-
-    private static int getWaterVaporFactor(int baseTemperature, HydrosphereDescription hydrosphereDescription, int hydrosphere) {
-        int waterVaporFactor;
-        if (hydrosphereDescription.equals(HydrosphereDescription.LIQUID)
-                || hydrosphereDescription.equals(HydrosphereDescription.ICE_SHEET)) {
-            waterVaporFactor = (int) Math.max(0, (baseTemperature - 240) / 100.0 * hydrosphere * (Dice._2d6() - 1));
-        } else {
-            waterVaporFactor = 0;
-        }
-        return waterVaporFactor;
-    }
 
     private static double getMagneticField(double rotationalPeriod, String tectonicCore, String tectonicActivityGroup, Star orbitingAround, double density, double mass) {
         double magneticField;
@@ -459,61 +398,6 @@ public final class TerrestrialPlanetFactory {
     }
 
 
-    private static void adjustForOxygen(double atmoPressure, TreeSet<AtmosphericGases> atmosphericComposition) {
-
-        Map<String, AtmosphericGases> atmoMap = atmosphericComposition
-                .stream()
-                .collect(Collectors.toMap(AtmosphericGases::getName, x -> x));
-
-        int oxygenMax = Math.max(50, (int) (Dice._3d6() * 2 / atmoPressure)); //This could be a bit more involved and interesting
-
-        if (atmoMap.containsKey("CO2")) {
-            if (atmoMap.get("CO2").getPercentageInAtmo() > oxygenMax) {
-                AtmosphericGases co2 = atmoMap.get("CO2");
-                atmoMap.remove("CO2");
-                atmoMap.put("O2", AtmosphericGases.builder().name("O2").percentageInAtmo(oxygenMax).build());
-                //perhaps the remnant CO should be put in as N2 instead?
-                atmoMap.put("CO2", AtmosphericGases.builder()
-                                                   .name("CO2")
-                                                   .percentageInAtmo(co2.getPercentageInAtmo() - oxygenMax)
-                                                   .build());
-
-            } else {
-                AtmosphericGases co2 = atmoMap.get("CO2");
-                atmoMap.remove("CO2");
-                atmoMap.put("O2", AtmosphericGases.builder()
-                                                  .name("O2")
-                                                  .percentageInAtmo(co2.getPercentageInAtmo())
-                                                  .build());
-            }
-        } else { //if no CO2 we just find the largest and take from that
-            AtmosphericGases gas = atmosphericComposition.pollFirst();
-            if (gas != null) {
-                if (gas.getPercentageInAtmo() < oxygenMax) {
-                    atmoMap.put("O2", AtmosphericGases.builder()
-                                                      .name("O2")
-                                                      .percentageInAtmo(gas.getPercentageInAtmo())
-                                                      .build());
-                } else {
-                    atmoMap.put("O2", AtmosphericGases.builder()
-                                                      .name("O2")
-                                                      .percentageInAtmo(oxygenMax)
-                                                      .build());
-                    atmoMap.put(gas.getName(), AtmosphericGases.builder()
-                                                               .name("O2")
-                                                               .percentageInAtmo(gas.getPercentageInAtmo() -
-                                                                                         oxygenMax)
-                                                               .build());
-                }
-            }
-        }
-
-        removeCombustibles(atmoMap);
-        atmosphericComposition.clear();
-
-        atmosphericComposition.addAll(atmoMap.values());
-    }
-
     private static void checkAtmo(Set<AtmosphericGases> atmoSet) {
         var sumOfGasPercentage = atmoSet.stream()
                                         .map(AtmosphericGases::getPercentageInAtmo)
@@ -534,75 +418,12 @@ public final class TerrestrialPlanetFactory {
         }
     }
 
-    private static void removeCombustibles(Map<String, AtmosphericGases> atmoMap) {
-        int removedpercentages = 0;
-        if (atmoMap.containsKey("CH4")) {
-            removedpercentages += atmoMap.get("CH4").getPercentageInAtmo();
-            atmoMap.remove("CH4");
-        }
-        if (atmoMap.containsKey("H2")) {
-            removedpercentages += atmoMap.get("H2").getPercentageInAtmo();
-            atmoMap.remove("H2");
-        }
-//        There are indications that ammonia may be present in an oxygen atmosphere
-        // so this is removed for now
-//        if (atmoMap.containsKey("NH3")) {
-//            removedpercentages += atmoMap.get("NH3").getPercentageInAtmo();
-//            atmoMap.remove("NH3");
-//        }
-        if (removedpercentages > 0) {
-            if (atmoMap.containsKey("N2")) {
-                removedpercentages += atmoMap.get("N2").getPercentageInAtmo();
-                atmoMap.remove("N2");
-            }
-            atmoMap.put("N2", AtmosphericGases.builder()
-                                              .name("N2")
-                                              .percentageInAtmo(removedpercentages)
-                                              .build());
-        }
-    }
-
-    /**
-     * /*TODO
-     * great season variations from the orbital eccentricity and multiple stars system
-     * day night variation estimation, is interesting for worlds with short year/long days
-     */
-
-
-
     /*TODO
      * This should be reworked (in conjuction with atmo) to remove CL and F from naturally occuring and instead
      * treat them similar to Oxygen. Also the Ammonia is dependent on free water as written right now
      */
 
-    private static double findGreenhouseGases(Set<AtmosphericGases> atmoshericComposition, double atmoPressure) {
-        double tempGreenhouseGasEffect = 0;
 
-        for (AtmosphericGases gas : atmoshericComposition) {
-
-            switch (gas.getName()) {
-                case "CO2":
-                    tempGreenhouseGasEffect += gas.getPercentageInAtmo() * atmoPressure;
-                    break;
-                case "CH4":
-                    tempGreenhouseGasEffect += gas.getPercentageInAtmo() * atmoPressure * 4;
-                    break;
-                case "SO2":
-                case "NH3":
-                case "NO2":
-                case "H2S":
-                    tempGreenhouseGasEffect += gas.getPercentageInAtmo() * atmoPressure * 8;
-                    break;
-                case "H2SO4":
-                    tempGreenhouseGasEffect += gas.getPercentageInAtmo() * atmoPressure * 16;
-                    break;
-                default:
-                    tempGreenhouseGasEffect += gas.getPercentageInAtmo() * atmoPressure * 0;
-                    break;
-            }
-        }
-        return tempGreenhouseGasEffect;
-    }
 
     private static double findAlbedo(boolean InnerZone,
                                      double atmoPressure,
