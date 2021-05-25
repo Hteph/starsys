@@ -1,13 +1,14 @@
 
 body {
-    color: #2c395c;
+    color: darkblue;
 
-    background-color: rgba(222,222,210,0.3)
+    background-color: black;
 
 }
 
 th, td {
-    border: 1px solid #a92717;
+    background-color: white;
+    border: 1px solid crimson;
     padding: 5px;
 }
 
@@ -15,11 +16,39 @@ th, td {
 table {
     border-collapse: collapse;
     width: 95%;
+
 }
 
 th {
-    background-color: rgba(162,160,179,0.5);
+    background-color: lightcyan;
 
 }
 
- /*highlight color : #b9a727*/
+h1, h2 {
+    color: lightcyan;
+}
+
+.accordion {
+    background-color: lightcyan;
+    color: #444;
+    cursor: pointer;
+    padding: 18px;
+    width: 95%;
+    text-align: left;
+    border: none;
+    outline: none;
+    transition: 0.4s;
+}
+
+/* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
+.active, .accordion:hover {
+    background-color: lightgreen;
+}
+
+/* Style the accordion panel. Note: hidden by default */
+.panel {
+    padding: 0 18px;
+    background-color: black;
+    display: none;
+    overflow: hidden;
+}

@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 
 import static com.github.hteph.generators.utils.MakeAtmosphere.checkAtmo;
+import static com.github.hteph.generators.utils.MakeAtmosphere.checkHydrographics;
 import static com.github.hteph.generators.utils.MakeAtmosphere.findHydrosphereDescription;
 import static com.github.hteph.generators.utils.MakeAtmosphere.findTheHydrosphere;
 import static com.github.hteph.generators.utils.MakeAtmosphere.getWaterVaporFactor;
@@ -273,6 +274,14 @@ public final class MoonFactory {
                                                                                 .doubleValue());
         temperatureFacts.surfaceTemp(surfaceTemp);
         //TODO Weather and day night temp cycle
+
+        checkHydrographics(hydrosphereDescription,
+                           hydrosphere,
+                           atmoPressure,
+                           moonBuilder,
+                           surfaceTemp,
+                           temperatureFacts.build().getRangeBandTempWinter(),
+                           temperatureFacts.build().getRangeBandTempSummer());
 
         moonBuilder.orbitalFacts(orbitalFacts.build());
         moonBuilder.temperatureFacts(temperatureFacts.build());

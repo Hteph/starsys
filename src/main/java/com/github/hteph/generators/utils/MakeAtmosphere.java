@@ -25,6 +25,26 @@ import static com.github.hteph.utils.NumberUtilities.sqrt;
 
 public class MakeAtmosphere {
 
+    private static void checkAtmo(TreeSet<AtmosphericGases> atmoSet) {
+        atmoSet.forEach(gas -> System.out.println("Gas: "+gas.getName()+" "+gas.getPercentageInAtmo()+" %"));
+        var sumOfGasPercentage = atmoSet.stream()
+                                        .map(AtmosphericGases::getPercentageInAtmo)
+                                        .reduce(0, Integer::sum);
+        if (sumOfGasPercentage < 100) {
+
+            var currentN2 = atmoSet.stream()
+                                   .filter(g -> g.getName().equals("N2"))
+                                   .findAny()
+                                   .map(AtmosphericGases::getPercentageInAtmo)
+                                   .orElse(0);
+            var newN2 = AtmosphericGases.builder()
+                                        .name("N2")
+                                        .percentageInAtmo(currentN2 + 100 - sumOfGasPercentage);
+            atmoSet.add(newN2.build());
+            atmoSet.forEach(gas -> System.out.println("Gas: "+gas.getName()+" "+gas.getPercentageInAtmo()+" %"));
+        }
+    }
+
     public static void checkHydrographics(HydrosphereDescription hydrosphereDescription,
                                            int hydrosphere,
                                            BigDecimal atmoPressure,

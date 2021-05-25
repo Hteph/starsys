@@ -7,7 +7,6 @@ import com.github.hteph.repository.objects.Biosphere;
 import com.github.hteph.repository.objects.OrbitalFacts;
 import com.github.hteph.repository.objects.Planet;
 import com.github.hteph.repository.objects.Star;
-import com.github.hteph.repository.objects.TemperatureFacts;
 import com.github.hteph.tables.FindAtmoPressure;
 import com.github.hteph.tables.TableMaker;
 import com.github.hteph.tables.TectonicActivityTable;
@@ -24,16 +23,12 @@ import java.math.MathContext;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.DoubleStream;
 
 import static com.github.hteph.generators.utils.MakeAtmosphere.checkHydrographics;
 import static com.github.hteph.generators.utils.MakeAtmosphere.findGreenhouseGases;
-import static com.github.hteph.generators.utils.MakeAtmosphere.getWaterVaporFactor;
 import static com.github.hteph.utils.NumberUtilities.cubed;
 import static com.github.hteph.utils.NumberUtilities.sqrt;
 import static com.github.hteph.utils.NumberUtilities.squared;
@@ -262,7 +257,8 @@ public final class TerrestrialPlanetFactory {
         if (hasGaia) lifeType = LifeMethods.findLifeType(atmoshericComposition, star.getAge().doubleValue());
         else lifeType = Breathing.NONE;
 
-        if (lifeType.equals(Breathing.OXYGEN)) MakeAtmosphere.adjustForOxygen(atmoPressure.doubleValue(), atmoshericComposition);
+        if (lifeType.equals(Breathing.OXYGEN))
+            MakeAtmosphere.adjustForOxygen(atmoPressure.doubleValue(), atmoshericComposition);
 
         albedo = findAlbedo(IS_INNER_ZONE, atmoPressure.doubleValue(), hydrosphereDescription, hydrosphere);
         planetBuilder.albedo(BigDecimal.valueOf(albedo).round(TWO));
@@ -278,7 +274,7 @@ public final class TerrestrialPlanetFactory {
         if (lifeType.equals(Breathing.OXYGEN) && baseTemperature < 250) greenhouseFactor *= 1.2;
 
         int surfaceTemp = getSurfaceTemp(baseTemperature, atmoPressure, albedo, greenhouseFactor, hasGaia);
-        if (!atmoshericComposition.isEmpty()) checkAtmo(atmoshericComposition);
+        if (!atmoshericComposition.isEmpty()) MakeAtmosphere.checkAtmo(atmoshericComposition);
         planetBuilder.atmosphericComposition(atmoshericComposition);
 
         if (lifeType != Breathing.NONE) {
@@ -293,11 +289,11 @@ public final class TerrestrialPlanetFactory {
         // sets all the temperature stuff from axial tilt etc etc
 
         var temperatureFacts = MakeAtmosphere.setAllKindOfLocalTemperature(atmoPressure.doubleValue(),
-                                                            hydrosphere,
-                                                            rotationalPeriod,
-                                                            axialTilt,
-                                                            surfaceTemp,
-                                                            orbitalPeriod); // sets all the temperature stuff from axial tilt etc etc
+                                                                           hydrosphere,
+                                                                           rotationalPeriod,
+                                                                           axialTilt,
+                                                                           surfaceTemp,
+                                                                           orbitalPeriod); // sets all the temperature stuff from axial tilt etc etc
         temperatureFacts.surfaceTemp(surfaceTemp);
         //TODO Weather and day night temp cycle
         MakeAtmosphere.setDayNightTemp(temperatureFacts,
@@ -308,22 +304,19 @@ public final class TerrestrialPlanetFactory {
                                        rotationalPeriod);
 
 
-        int[] latitudeWinterTemp = temperatureFacts.build().getRangeBandTempWinter();
-        int[] latitudeSummerTemp = temperatureFacts.build().getRangeBandTempSummer();
 //Sanity check of water
         checkHydrographics(hydrosphereDescription,
                            hydrosphere,
                            atmoPressure,
                            planetBuilder,
                            surfaceTemp,
-                           latitudeWinterTemp,
-                           latitudeSummerTemp);
+                           temperatureFacts.build().getRangeBandTempWinter(),
+                           temperatureFacts.build().getRangeBandTempSummer());
 
         planetBuilder.orbitalFacts(orbitalFacts.build());
         planetBuilder.temperatureFacts(temperatureFacts.build());
         return planetBuilder.build();
     }
-
 
 
     private static double getMagneticField(double rotationalPeriod, String tectonicCore, String tectonicActivityGroup, Star orbitingAround, double density, double mass) {
@@ -397,32 +390,10 @@ public final class TerrestrialPlanetFactory {
         return (int) surfaceTemp;
     }
 
-
-    private static void checkAtmo(Set<AtmosphericGases> atmoSet) {
-        var sumOfGasPercentage = atmoSet.stream()
-                                        .map(AtmosphericGases::getPercentageInAtmo)
-                                        .reduce(0, Integer::sum);
-
-        if (sumOfGasPercentage < 100) {
-
-            var currentN2 = atmoSet.stream()
-                                   .filter(g -> g.getName().equals("N2"))
-                                   .findAny()
-                                   .map(AtmosphericGases::getPercentageInAtmo)
-                                   .orElse(0);
-            var newN2 = AtmosphericGases.builder()
-                                        .name("N2")
-                                        .percentageInAtmo(currentN2 + 100 - sumOfGasPercentage);
-            atmoSet.add(newN2.build());
-
-        }
-    }
-
     /*TODO
      * This should be reworked (in conjuction with atmo) to remove CL and F from naturally occuring and instead
      * treat them similar to Oxygen. Also the Ammonia is dependent on free water as written right now
      */
-
 
 
     private static double findAlbedo(boolean InnerZone,

@@ -69,6 +69,8 @@ public class GenerateMoonSystem {
 
 
         double startDistance = 3 + 150 / (1.0 * sizeList.size()) * (Dice._2d6() - 2) / 10.0;
+
+        //TODO distance formula falls apart when there is many many moons
         return StreamUtils.zipWithIndex(DoubleStream
                                                 .iterate(startDistance, d -> d + 1 + 150 / (1.0 * sizeList.size()) * (Dice
                                                         ._2d6() - 2) / 10.0)
@@ -92,7 +94,7 @@ public class GenerateMoonSystem {
 
 
         if (index < 26) identifier = "" + (char) ('a' + index);
-        else if (index < 26 * 2) identifier = "" + (char) ('a' + index / 26) + (char) ('a' + index % 26);
+        else if (index < 26 * 2) identifier = "" + (char) ('a' + (index / 26)-1) + (char) ('a' + index % 26);
         else identifier = "" +(char) ('a' + index)+ (int) (Math.random() * 10000);
 
         String desc = size == 'm' ? "Minor Moon" : "Major Moon";

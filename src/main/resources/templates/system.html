@@ -5,6 +5,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link th:href="@{/main.css}" rel="stylesheet"/>
+
 </head>
 <body>
 
@@ -19,8 +20,6 @@
         <th>Celestial Facts</th>
         <th>Planetary Facts</th>
         <th>Atmospheric Facts</th>
-
-
     </tr>
     <tr th:each="object, objStat : ${objects}">
 
@@ -28,7 +27,7 @@
         <td th:if="${object.stellarObjectType.getLabel() == 'A'}">
             <span th:text="${object.getPresentations().getFacts().get('width')}">N/A</span>
         </td>
-         <td th:unless="${object.stellarObjectType.getLabel() == 'A'}">
+        <td th:unless="${object.stellarObjectType.getLabel() == 'A'}">
             <span th:text="${object.getOrbitalFacts().getOrbitalDistance().doubleValue()}">N/A</span>
         </td>
         <td th:text="${object.getDescription()}">N/A</td>
@@ -53,7 +52,7 @@
                 <br/>
                 <span><b>Orbital eccentricity: </b></span>
                 <span th:text="${object.getPresentations().getFacts().get('orbital eccentricity')}">-</span>
-                 <span><b>Orbital inclination: </b></span>
+                <span><b>Orbital inclination: </b></span>
                 <span th:text="${object.getPresentations().getFacts().get('inclination')}">-</span>
                 <div th:if="${#maps.containsKey(object.getPresentations().getFacts(), 'number of moons')}">
                     <b> Number of moons: </b>
@@ -170,105 +169,129 @@
 
     </tr>
 </table>
+<br/>
+<div th:if="${hasMoons}">
+<button class="accordion">Moon Facts</button>
 
-<!--Moons-->
-<h2 th:if="${hasMoons}">Moon Facts</h2>
-<div th:each="object, objStat : ${objects}">
-
-    <div th:if="${#maps.containsKey(object.getPresentations().getFacts(), 'number of moons')}">
+<div class="panel">
 
 
-        <table>
-            <tr>
-                <th>No</th>
-                <th>Distance [km]</th>
-                <th>Description</th>
-                <th>Name</th>
-                <th>Celestial Facts</th>
-                <th>Planetary Facts</th>
-                <th>Atmospheric Facts</th>
+    <!--Moons-->
+    <!--    <h2 th:if="${hasMoons}">Moon Facts</h2>-->
+    <div th:each="object, objStat : ${objects}">
 
-            </tr>
+        <div th:if="${#maps.containsKey(object.getPresentations().getFacts(), 'number of moons')}">
 
-            <tr th:each="moon, moonStat : ${object.getPresentations().getMoonPresentations()}">
-                <td th:text="${moonStat.count }">-</td>
 
-                <td th:text="${moon.getFacts().get('orbitDistance')}">N/A</td>
-                <td th:text="${moon.getFacts().get('description')}">N/A</td>
-                <td th:text="${moon.getFacts().get('name')}">N/A</td>
-                <td>
-                    <span><b>Mass: </b></span>
-                    <span th:text="${moon.getFacts().get('mass')}">-</span>
-                    <span> Earth Mass </span>
+            <table>
+                <tr>
+                    <th>No</th>
+                    <th>Distance [km]</th>
+                    <th>Description</th>
+                    <th>Name</th>
+                    <th>Celestial Facts</th>
+                    <th>Planetary Facts</th>
+                    <th>Atmospheric Facts</th>
 
-                    <span><b>Radius: </b></span>
-                    <span th:text="${moon.getFacts().get('radius')}">-</span>
-                    <span> km</span>
-                    <br/>
-                    <span><b>Lunar period: </b></span>
-                    <span th:text="${moon.getFacts().get('lunarOrbitalPeriod')}">-</span>
-                    <span> hours</span>
-                    <span th:if="${#maps.containsKey(moon.getFacts(), 'planetLocked')}">
+                </tr>
+
+                <tr th:each="moon, moonStat : ${object.getPresentations().getMoonPresentations()}">
+                    <td th:text="${moonStat.count }">-</td>
+
+                    <td th:text="${moon.getFacts().get('orbitDistance')}">N/A</td>
+                    <td th:text="${moon.getFacts().get('description')}">N/A</td>
+                    <td th:text="${moon.getFacts().get('name')}">N/A</td>
+                    <td>
+                        <span><b>Mass: </b></span>
+                        <span th:text="${moon.getFacts().get('mass')}">-</span>
+                        <span> Earth Mass </span>
+
+                        <span><b>Radius: </b></span>
+                        <span th:text="${moon.getFacts().get('radius')}">-</span>
+                        <span> km</span>
+                        <br/>
+                        <span><b>Lunar period: </b></span>
+                        <span th:text="${moon.getFacts().get('lunarOrbitalPeriod')}">-</span>
+                        <span> hours</span>
+                        <span th:if="${#maps.containsKey(moon.getFacts(), 'planetLocked')}">
                         (Planet locked)
                     </span>
-                    <span th:unless="${#maps.containsKey(moon.getFacts(), 'planetLocked')}">
+                        <span th:unless="${#maps.containsKey(moon.getFacts(), 'planetLocked')}">
                         <span><b>Lunar rotation: </b></span>
                         <span th:text="${moon.getFacts().get('rotation')}">-</span>
                         <span> hours</span>
                     </span>
-                    <br/>
+                        <br/>
 
-                </td>
-                <td>
-                    <span><b>Core: </b></span>
-                    <span th:text="${moon.getFacts().get('tectonic core')}">-</span>
-                    <span><b>Tectonics: </b></span>
-                    <span th:text="${moon.getFacts().get('tectonic activity group')}">-</span>
-                    <br/>
-                    <span><b>Density: </b></span>
-                    <span th:text="${moon.getFacts().get('density')}">-</span>
-                    <span> Earth Normal </span>
-                    <span><b>Gravity: </b></span>
-                    <span th:text="${moon.getFacts().get('gravity')}">-</span>
-                    <span> g</span>
-                    <br/>
-                    <span><b>Axial Tilt: </b></span>
-                    <span th:text="${moon.getFacts().get('axial tilt')}">-</span>
-                    <span> degrees </span>
-                    <span><b>Magnetic field: </b></span>
-                    <span th:text="${moon.getFacts().get('magnetic field')}">-</span>
-                    <span> Earth Normal </span>
-                    <br/>
-                    <span><b>Hydrospheric description: </b></span>
-                    <span th:text="${moon.getFacts().get('Hydrosphere description')}">-</span>
-                    (<span th:text="${moon.getFacts().get('hydrosphere')}">-</span>%)
-                    <br/>
-                    <span><b>Average Surface Temperature: : </b></span>
-                    <span th:text="${moon.getFacts().get('Surface temperature')}">-</span>
-                    <span> C </span>
-                </td>
-                <td>
-                    <span><b>Surface Pressure: </b></span>
-                    <span th:text="${moon.getFacts().get('pressure')}">-</span>
-                    <span> atm</span>
-                    <br/>
-                    <span th:text="${moon.getFacts().get('composition')}">-</span>
-                    <br/>
-                    <div th:if="${#maps.containsKey(moon.getFacts(), 'life type')}">
-                        <b> Biosphere: </b>
-                        <span th:text="${moon.getFacts().get('life type')}">-</span>
-                    </div>
-                </td>
+                    </td>
+                    <td>
+                        <span><b>Core: </b></span>
+                        <span th:text="${moon.getFacts().get('tectonic core')}">-</span>
+                        <span><b>Tectonics: </b></span>
+                        <span th:text="${moon.getFacts().get('tectonic activity group')}">-</span>
+                        <br/>
+                        <span><b>Density: </b></span>
+                        <span th:text="${moon.getFacts().get('density')}">-</span>
+                        <span> Earth Normal </span>
+                        <span><b>Gravity: </b></span>
+                        <span th:text="${moon.getFacts().get('gravity')}">-</span>
+                        <span> g</span>
+                        <br/>
+                        <span><b>Axial Tilt: </b></span>
+                        <span th:text="${moon.getFacts().get('axial tilt')}">-</span>
+                        <span> degrees </span>
+                        <span><b>Magnetic field: </b></span>
+                        <span th:text="${moon.getFacts().get('magnetic field')}">-</span>
+                        <span> Earth Normal </span>
+                        <br/>
+                        <span><b>Hydrospheric description: </b></span>
+                        <span th:text="${moon.getFacts().get('Hydrosphere description')}">-</span>
+                        (<span th:text="${moon.getFacts().get('hydrosphere')}">-</span>%)
+                        <br/>
+                        <span><b>Average Surface Temperature: : </b></span>
+                        <span th:text="${moon.getFacts().get('Surface temperature')}">-</span>
+                        <span> C </span>
+                    </td>
+                    <td>
+                        <span><b>Surface Pressure: </b></span>
+                        <span th:text="${moon.getFacts().get('pressure')}">-</span>
+                        <span> atm</span>
+                        <br/>
+                        <span th:text="${moon.getFacts().get('composition')}">-</span>
+                        <br/>
+                        <div th:if="${#maps.containsKey(moon.getFacts(), 'life type')}">
+                            <b> Biosphere: </b>
+                            <span th:text="${moon.getFacts().get('life type')}">-</span>
+                        </div>
+                    </td>
 
-            </tr>
-        </table>
-        <br/>
+                </tr>
+            </table>
+            <br/>
 
+        </div>
+    </div>
     </div>
 
 
 </div>
 
+<script>
+    var acc = document.getElementsByClassName("accordion");
+    var i;
+
+    for (i = 0; i < acc.length; i++) {
+        acc[i].addEventListener("click", function () {
+            this.classList.toggle("active");
+            var panel = this.nextElementSibling;
+            if (panel.style.display === "block") {
+                panel.style.display = "none";
+            } else {
+                panel.style.display = "block";
+            }
+        });
+    }
+</script>
 
 </body>
 </html>

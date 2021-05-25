@@ -36,17 +36,19 @@ public final class StarFactory {
         }
         double diameter = Math.pow(mass, 2 / 3.0);//Solar relative units
         double lumosity = Math.pow(mass, 3.5); //Solar relative units
-        String starClass = StarClassificationTable.findStarClass(temperature) + " IV";
+        String starClass = StarClassificationTable.findStarClass(temperature) + " V";
         double maxAge = 10 * Math.pow(1 / mass, 2.5);
         double age = (0.3 + Math.random() * 0.6) * Math.min(maxAge, 13);// in billion of earth years
-        double halfAgeBalance = 2 * age / maxAge;
-        lumosity *= Math.pow(halfAgeBalance, 0.5);
-        diameter *= Math.pow(halfAgeBalance, 1 / 3.0);
+
+//TODO suspended this as it seems to be a bit overzealus in ingreasing the lumosity
+//        double halfAgeBalance = 2 * age / maxAge;
+//        lumosity *= Math.pow(halfAgeBalance, 0.5);
+//        diameter *= Math.pow(halfAgeBalance, 1 / 3.0);
 
         //TODO abundance should be done nicer!
         int abundance = generateAbundance(age);
 
-        String description = " A star of " + starClass + " type";
+        String description =  starClass ;
 
         //TODO allow for multiple Starsystems, ie archiveID not hardcoded
 
