@@ -98,7 +98,7 @@ public final class StarFactory {
 //        int testDice =Dice._3d6()-3;
 //        double randN =testDice/(15.0+Math.random()/10); //turning the dice roll into a continous sligthly skewed randomnumber.
 //        mass = 0.045/(0.001+Math.pow(randN,5)); // <-----------------------------------------MOST IMPORTANT STARTING POINT
-        return 0.01 + (Dice.aLotOfd3(6) * Math.random() * Math.random() * Math.random());
+        return 0.01 + ((Dice.aLotOfd3(6)-3) * Math.random() * Math.random() * Math.random());
     }
 
 }

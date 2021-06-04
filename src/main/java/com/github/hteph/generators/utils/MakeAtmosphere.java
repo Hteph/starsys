@@ -25,8 +25,10 @@ import static com.github.hteph.utils.NumberUtilities.sqrt;
 
 public class MakeAtmosphere {
 
-    private static void checkAtmo(TreeSet<AtmosphericGases> atmoSet) {
-        atmoSet.forEach(gas -> System.out.println("Gas: "+gas.getName()+" "+gas.getPercentageInAtmo()+" %"));
+    private static final String SUBSCRIPT_TWO = "\u2082";
+
+    public static void checkAtmo(TreeSet<AtmosphericGases> atmoSet) {
+        atmoSet.forEach(gas -> System.out.println("Start Gas: "+gas.getName()+" "+gas.getPercentageInAtmo()+" %"));
         var sumOfGasPercentage = atmoSet.stream()
                                         .map(AtmosphericGases::getPercentageInAtmo)
                                         .reduce(0, Integer::sum);
@@ -39,9 +41,10 @@ public class MakeAtmosphere {
                                    .orElse(0);
             var newN2 = AtmosphericGases.builder()
                                         .name("N2")
-                                        .percentageInAtmo(currentN2 + 100 - sumOfGasPercentage);
+                                        .percentageInAtmo(currentN2 + 99 - sumOfGasPercentage);
             atmoSet.add(newN2.build());
-            atmoSet.forEach(gas -> System.out.println("Gas: "+gas.getName()+" "+gas.getPercentageInAtmo()+" %"));
+            atmoSet.add(AtmosphericGases.builder().name("Other").percentageInAtmo(1).build());
+            atmoSet.forEach(gas -> System.out.println("End Gas: "+gas.getName()+" "+gas.getPercentageInAtmo()+" %"));
         }
     }
 
@@ -52,7 +55,10 @@ public class MakeAtmosphere {
                                            int surfaceTemp,
                                            int[] latitudeWinterTemp,
                                            int[] latitudeSummerTemp) {
-        if (hydrosphere > 0 && surfaceTemp > 274 && atmoPressure.doubleValue() > 0) {
+        if (hydrosphere > 0
+                && surfaceTemp > 274
+                && atmoPressure.doubleValue() > 0
+                && hydrosphereDescription == HydrosphereDescription.LIQUID) {
             if (MakeAtmosphere.isAboveBoilingpoint(surfaceTemp + latitudeWinterTemp[9], atmoPressure.doubleValue())) {
 
                 planetBuilder.hydrosphereDescription(HydrosphereDescription.VAPOR)
@@ -108,7 +114,7 @@ public class MakeAtmosphere {
                 .stream()
                 .collect(Collectors.toMap(AtmosphericGases::getName, x -> x));
 
-        int oxygenMax = Math.max(50, (int) (Dice._3d6() * 2 / atmoPressure)); //This could be a bit more involved and interesting
+        int oxygenMax = Math.max(18+Dice.d10(), (int) (Dice._3d6() * 2 / atmoPressure)); //This could be a bit more involved and interesting
 
         if (atmoMap.containsKey("CO2")) {
             if (atmoMap.get("CO2").getPercentageInAtmo() > oxygenMax) {
@@ -125,7 +131,7 @@ public class MakeAtmosphere {
                 AtmosphericGases co2 = atmoMap.get("CO2");
                 atmoMap.remove("CO2");
                 atmoMap.put("O2", AtmosphericGases.builder()
-                                                  .name("O2")
+                                                  .name("O"+SUBSCRIPT_TWO)
                                                   .percentageInAtmo(co2.getPercentageInAtmo())
                                                   .build());
             }
@@ -424,26 +430,6 @@ public class MakeAtmosphere {
         return pressure>Math.pow(10,A-(B/(C+(temperature-274))));
     }
 
-    public static void checkAtmo(Set<AtmosphericGases> atmoSet) {
-        var sumOfGasPercentage = atmoSet.stream()
-                                        .map(AtmosphericGases::getPercentageInAtmo)
-                                        .reduce(0, Integer::sum);
-
-        if (sumOfGasPercentage < 100) {
-
-            var currentN2 = atmoSet.stream()
-                                   .filter(g->g.getName().equals("N2"))
-                                   .findAny()
-                                   .map(AtmosphericGases::getPercentageInAtmo)
-                                   .orElse(0);
-            var newN2 = AtmosphericGases.builder()
-                                        .name("N2")
-                                        .percentageInAtmo(currentN2 + 100 - sumOfGasPercentage);
-            atmoSet.add(newN2.build());
-
-        }
-    }
-
     @SuppressWarnings("rawtypes")
     static public TreeSet<AtmosphericGases> createPlanetary(Star star,
                                                  int baseTemperature,
@@ -480,7 +466,7 @@ public class MakeAtmosphere {
         //This should really be done with a bit more thought and just not random.
 
         int[] part = new int[makeAtmoshpere.size()];
-        part[0] = (5 * (Dice._2d6()) + 30); //size of primary gas
+        part[0] = (5 * (Dice._2d6()) + 33); //size of primary gas
         int percentage = 100 - part[0];
 
         for (int i = 1; i < part.length; i++) {

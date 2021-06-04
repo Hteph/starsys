@@ -11,6 +11,9 @@
 
 
 <h1>System Facts</h1>
+<p>This lists the major, organised objects in the system. in addition to these there are thousands of small objects in
+irregular orbits. If you need one just take a look at the outermost objects of a gas giant.
+</p>
 <table>
     <tr>
         <th>No</th>
@@ -23,11 +26,11 @@
     </tr>
     <tr th:each="object, objStat : ${objects}">
 
-        <td th:text="${objStat.count -1 }">1</td>
-        <td th:if="${object.stellarObjectType.getLabel() == 'A'}">
+        <td style="text-align:center" th:text="${objStat.count -1 }">1</td>
+        <td style="text-align:center" th:if="${object.stellarObjectType.getLabel() == 'A'}">
             <span th:text="${object.getPresentations().getFacts().get('width')}">N/A</span>
         </td>
-        <td th:unless="${object.stellarObjectType.getLabel() == 'A'}">
+        <td style="text-align:center" th:unless="${object.stellarObjectType.getLabel() == 'A'}">
             <span th:text="${object.getOrbitalFacts().getOrbitalDistance().doubleValue()}">N/A</span>
         </td>
         <td th:text="${object.getDescription()}">N/A</td>
@@ -196,9 +199,9 @@
                 </tr>
 
                 <tr th:each="moon, moonStat : ${object.getPresentations().getMoonPresentations()}">
-                    <td th:text="${moonStat.count }">-</td>
+                    <td style="text-align:center" th:text="${moonStat.count }">-</td>
 
-                    <td th:text="${moon.getFacts().get('orbitDistance')}">N/A</td>
+                    <td style="text-align:center" th:text="${moon.getFacts().get('orbitDistance')}">N/A</td>
                     <td th:text="${moon.getFacts().get('description')}">N/A</td>
                     <td th:text="${moon.getFacts().get('name')}">N/A</td>
                     <td>

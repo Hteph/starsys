@@ -1,54 +1,56 @@
 
 body {
-    color: darkblue;
+    color: black;
 
-    background-color: black;
+    background-color: white;
 
 }
 
-th, td {
-    background-color: white;
-    border: 1px solid crimson;
+table {
+    border-collapse:separate;
+    border:double rgba(148, 49, 38 ,1) 10px;
+    border-radius:10px;
+    -moz-border-radius:10px;
+    width:1600px;
+}
+
+td, th {
+    border-left:solid rgba(148, 49, 38 ,1) 1px;
+    border-top:solid rgba(148, 49, 38 ,1) 1px;
     padding: 5px;
 }
 
-
-table {
-    border-collapse: collapse;
-    width: 95%;
-
-}
-
 th {
-    background-color: lightcyan;
-
+    background-color:rgba(51, 206, 255,0.1);
+    border-top: none;
 }
 
-h1, h2 {
-    color: lightcyan;
+td:first-child, th:first-child {
+    border-left: none;
 }
 
 .accordion {
-    background-color: lightcyan;
+    background-color: rgba(51, 206, 255,0.1);
+    border-radius:10px;
     color: #444;
     cursor: pointer;
     padding: 18px;
-    width: 95%;
+    width: 1600px;
     text-align: left;
-    border: none;
+    border:double #B03A2E 2px;
     outline: none;
     transition: 0.4s;
 }
 
 /* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
-.active, .accordion:hover {
-    background-color: lightgreen;
+ .accordion:hover {
+    background-color: rgba(51, 206, 255,0.5);
 }
 
 /* Style the accordion panel. Note: hidden by default */
 .panel {
-    padding: 0 18px;
-    background-color: black;
+    padding: 5px 0;
+    background-color: white;
     display: none;
     overflow: hidden;
 }

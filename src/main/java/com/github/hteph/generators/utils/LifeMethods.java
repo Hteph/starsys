@@ -25,17 +25,18 @@ public class LifeMethods {
         double lifeIndex = 0;
 
         if (baseTemperature < 100 || baseTemperature > 450) lifeIndex -= 5;
-        else if (baseTemperature < 250 || baseTemperature > 350) lifeIndex -= 3;
+        else if (baseTemperature < 270 || baseTemperature > 350) lifeIndex -= 4;
         else lifeIndex += 4;
         System.out.println("After temp life Index="+lifeIndex +" basetemp = "+baseTemperature);
 
-        if (atmoPressure < 0.1) lifeIndex -= 10;
+        if (atmoPressure < 0.2) lifeIndex -= 10;
         else if (atmoPressure > 5) lifeIndex -= 1;
+        else lifeIndex +=1;
         System.out.println("After atmo life Index="+lifeIndex + "pressure = "+ atmoPressure);
 
         if (hydrosphere < 1) lifeIndex -= 5;
-        else if (hydrosphere < 5) lifeIndex += 3;
-        else lifeIndex += 5;
+        else if (hydrosphere < 5) lifeIndex += 1;
+        else lifeIndex += 4;
 
         System.out.println("After hydro life Index="+lifeIndex +"Hydro = "+hydrosphere);
 

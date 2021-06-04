@@ -69,7 +69,7 @@ public final class TerrestrialPlanetFactory {
         Breathing lifeType;
         double tidelock;
 
-
+        System.out.println(name);
         var planetBuilder = Planet.builder()
                                   .archiveID(archiveID)
                                   .name(name)
@@ -247,7 +247,7 @@ public final class TerrestrialPlanetFactory {
         // The composition could be adjusted for the existence of life, so is set below
 
         //Bioshpere
-        System.out.println(name);
+
         hasGaia = LifeMethods.testLife(baseTemperature,
                                        atmoPressure.doubleValue(),
                                        hydrosphere,
@@ -274,6 +274,7 @@ public final class TerrestrialPlanetFactory {
         if (lifeType.equals(Breathing.OXYGEN) && baseTemperature < 250) greenhouseFactor *= 1.2;
 
         int surfaceTemp = getSurfaceTemp(baseTemperature, atmoPressure, albedo, greenhouseFactor, hasGaia);
+
         if (!atmoshericComposition.isEmpty()) MakeAtmosphere.checkAtmo(atmoshericComposition);
         planetBuilder.atmosphericComposition(atmoshericComposition);
 
@@ -377,9 +378,10 @@ public final class TerrestrialPlanetFactory {
         // My take on the effect of greenhouse and albedo on temperature max planerary temp is 1000 and the half
         // point is 400
         double surfaceTemp;
+        System.out.println("baseTemp before Greenhouse("+greenhouseFactor+" and albedo"+albedo+")= "+baseTemperature);
         if (hasGaia) {
-            surfaceTemp = 400d * (baseTemperature * albedo * greenhouseFactor)
-                    / (350d + baseTemperature * albedo * greenhouseFactor);
+            surfaceTemp = (baseTemperature * Math.pow((albedo), 1/4d) * sqrt(1+greenhouseFactor));;// 450d * (baseTemperature * albedo * greenhouseFactor)
+                    // (400d + baseTemperature * albedo * greenhouseFactor);
         } else if (atmoPressure.doubleValue() > 0) {
             surfaceTemp = 800d * (baseTemperature * albedo * greenhouseFactor)
                     / (400d + baseTemperature * albedo * greenhouseFactor);
@@ -387,6 +389,14 @@ public final class TerrestrialPlanetFactory {
             surfaceTemp = 1200d * (baseTemperature * albedo * greenhouseFactor)
                     / (800d + baseTemperature * albedo * greenhouseFactor);
         }
+
+        System.out.println("baseTemp after Greenhouse= "+surfaceTemp);
+        int altTemp = (int) (baseTemperature * Math.pow((albedo), 1/4d) * sqrt(1+greenhouseFactor));
+        System.out.println("Alternative calc= "+altTemp);
+
+        int altTemp2 = (int) (baseTemperature * albedo * greenhouseFactor);
+        System.out.println("Alternative2 calc= "+altTemp2);
+
         return (int) surfaceTemp;
     }
 

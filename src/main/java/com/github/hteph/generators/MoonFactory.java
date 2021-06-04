@@ -72,18 +72,17 @@ public final class MoonFactory {
 
         double moonsPlanetsRadii = 0;
 
-        boolean hasGaia;
         Breathing lifeType;
         double tidalForce = 0;
 
-
+        System.out.println(name);
         var moonBuilder = Planet.builder()
                                 .archiveID(archiveID)
                                 .name(name)
                                 .stellarObjectType(StellarObjectType.MOON)
                                 .description(description)
                                 .classificationName(classificationName)
-                .lunarOrbitDistance(BigDecimal.valueOf(lunarOrbitNumberInPlanetRadii).round(TWO));
+                .lunarOrbitDistance(BigDecimal.valueOf(lunarOrbitNumberInPlanetRadii).round(THREE));
 
         var orbitalFacts = OrbitalFacts.builder()
                                        .orbitsAround(orbitingAroundPlanet)
@@ -225,15 +224,15 @@ public final class MoonFactory {
             moonBuilder.hydrosphere(0);
         }
 
-        moonBuilder.atmoPressure(atmoPressure);
         // The composition could be adjusted for the existence of life, so is set below
         double systemAge = ((Star) (orbitingAroundPlanet.getOrbitalFacts().getOrbitsAround()))
                 .getAge()
                 .doubleValue();
 
         //Bioshpere
-        System.out.println(name);
-        hasGaia = LifeMethods.testLife(baseTemperature,
+
+        var hasGaia =false;
+        if(atmoPressure.doubleValue()>0) hasGaia = LifeMethods.testLife(baseTemperature,
                                        atmoPressure.doubleValue(),
                                        hydrosphere,
                                        atmoshericComposition,
@@ -283,8 +282,11 @@ public final class MoonFactory {
                            temperatureFacts.build().getRangeBandTempWinter(),
                            temperatureFacts.build().getRangeBandTempSummer());
 
+        if (!atmoshericComposition.isEmpty()) MakeAtmosphere.checkAtmo(atmoshericComposition);
+
         moonBuilder.orbitalFacts(orbitalFacts.build());
         moonBuilder.temperatureFacts(temperatureFacts.build());
+        moonBuilder.atmoPressure(atmoPressure.round(THREE));
         return moonBuilder.build();
     }
 
