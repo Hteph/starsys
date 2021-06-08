@@ -11,12 +11,12 @@ import static com.github.hteph.utils.NumberUtilities.sqrt;
 
 public class TempertureMethods {
 
-    public static TemperatureFacts.TemperatureFactsBuilder setAllKindOfLocalTemperature(double atmoPressure,
-                                                                                        int hydrosphere,
-                                                                                        double rotationalPeriod,
-                                                                                        double axialTilt,
-                                                                                        double surfaceTemp,
-                                                                                        double orbitalPeriod) {
+    public static TemperatureFacts.TemperatureFactsBuilder setSeasonalTemperature(double atmoPressure,
+                                                                                  int hydrosphere,
+                                                                                  double rotationalPeriod,
+                                                                                  double axialTilt,
+                                                                                  double surfaceTemp,
+                                                                                  double orbitalPeriod) {
 
         double[][] temperatureRangeBand = new double[][]{ // First is Low Moderation atmos, then Average etc
                 {1.10, 1.07, 1.05, 1.03, 1.00, 0.97, 0.93, 0.87, 0.78, 0.68},
@@ -30,19 +30,19 @@ public class TempertureMethods {
         double[] latitudeTemperature = new double[10];
         double[] baseTemperature = new double[10];
 
-        int testModeration = 0;
-        testModeration += (hydrosphere - 60) / 10;
-        testModeration += (atmoPressure < 0.1) ? -3 : 1;
-        testModeration += (int) atmoPressure;
-        testModeration += (rotationalPeriod < 10) ? -3 : 1;
-        testModeration += (int) (Math.sqrt(rotationalPeriod / 24)); //Shouldn't this be negative?
-        testModeration += (int) (10 / axialTilt);
+        int baseModeration = 0;
+        baseModeration += (hydrosphere - 60) / 10;
+        baseModeration += (atmoPressure < 0.1) ? -3 : 1;
+        baseModeration += (int) atmoPressure;
+        baseModeration += (rotationalPeriod < 10) ? -3 : 1;
+        baseModeration += (int) (Math.sqrt(rotationalPeriod / 24)); //Shouldn't this be negative?
+        baseModeration += (int) (10 / axialTilt);
 
         String atmoModeration;
         if (atmoPressure == 0) atmoModeration = "No";
         else if (atmoPressure > 10) atmoModeration = "Extreme";
-        else if (testModeration < -2) atmoModeration = "Low";
-        else if (testModeration > 2) atmoModeration = "High";
+        else if (baseModeration < -2) atmoModeration = "Low";
+        else if (baseModeration > 2) atmoModeration = "High";
         else atmoModeration = "Average";
 
         int atmoIndex;
@@ -89,6 +89,7 @@ public class TempertureMethods {
             summerTemperature[i] = (int) (latitudeTemperature[summer] - latitudeTemperature[i]) * seasonEffect;
             winterTemperature[i] = (int) (latitudeTemperature[winter] - latitudeTemperature[i]) * seasonEffect;
         }
+        System.out.println("Setting Seasonal temperatures, example = "+ summerTemperature[0]);
         return TemperatureFacts.builder()
                                .rangeBandTemperature(DoubleStream.of(baseTemperature)
                                                                  .mapToInt(t -> (int) Math.ceil(t))

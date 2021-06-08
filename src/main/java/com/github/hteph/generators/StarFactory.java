@@ -3,8 +3,10 @@ package com.github.hteph.generators;
 import com.github.hteph.repository.objects.OrbitalFacts;
 import com.github.hteph.repository.objects.Star;
 import com.github.hteph.tables.StarClassificationTable;
+import com.github.hteph.tables.TableMaker;
 import com.github.hteph.utils.Dice;
 import com.github.hteph.utils.NameGenerator;
+import com.github.hteph.utils.NumberUtilities;
 import com.github.hteph.utils.enums.StellarObjectType;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -43,7 +45,7 @@ public final class StarFactory {
         double lumosity = Math.pow(mass, 3.5); //Solar relative units
         String starClass = StarClassificationTable.findStarClass(temperature) + " V";
         double maxAge = 10 * Math.pow(1 / mass, 2.5);
-        double age = (0.4 + Math.random() * 0.55) * Math.min(maxAge, 13);// in billion of earth years
+        double age = (0.35 + Dice.d3()/10d+Math.random()/10d) * Math.min(maxAge, 13);// in billion of earth years
 
         if(age/maxAge>0.9) descriptors.add("Near end of lifetime");
 //TODO suspended this as it seems to be a bit overzealus in ingreasing the lumosity
@@ -52,7 +54,9 @@ public final class StarFactory {
 //        diameter *= Math.pow(halfAgeBalance, 1 / 3.0);
 
         //TODO abundance should be done nicer!
-        int abundance = generateAbundance(age);
+        int abundance = generateAbundance((int) age);
+
+        if(abundance > 4 ) descriptors.add("Resource Rich System");
 
         //TODO allow for multiple Starsystems, ie archiveID not hardcoded
 
@@ -89,13 +93,12 @@ public final class StarFactory {
                    .build();
     }
 
-    private static int generateAbundance(double age) {
-        int abundance;
+    private static int generateAbundance(int age) {
+
         int[] abundanceArray = new int[]{0, 10, 13, 19, 22};
-        int retVal = Arrays.binarySearch(abundanceArray, (int) (Dice._2d6() + age));
-        if (retVal < 0) abundance = 2 - retVal + 1;
-        else abundance = 2 - retVal;
-        return abundance;
+        List<Integer> resultList = List.of(0, 1, 2, 3, 4);
+
+        return TableMaker.makeRoll(Dice._2d6() + age, abundanceArray,resultList);
     }
 
     private static double generateMass() {
@@ -104,7 +107,15 @@ public final class StarFactory {
 //        int testDice =Dice._3d6()-3;
 //        double randN =testDice/(15.0+Math.random()/10); //turning the dice roll into a continous sligthly skewed randomnumber.
 //        mass = 0.045/(0.001+Math.pow(randN,5)); // <-----------------------------------------MOST IMPORTANT STARTING POINT
-        return 0.01 + ((Dice.aLotOfd3(6)-2) * Math.random() * Math.random() * Math.random()* Math.random());
+//        return 0.01 + ((Dice.aLotOfd3(6)-2) * Math.random() * Math.random() * Math.random()* Math.random());
+
+        double a = -5.0407;
+        double b = -69.232;
+        double t = -0.220214;
+
+        double baseMass =Math.random() + Dice._3d6()-3;
+
+        return ( a /(1+ b * Math.exp( t *(baseMass))));
     }
 
 }

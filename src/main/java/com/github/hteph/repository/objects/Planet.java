@@ -61,13 +61,13 @@ public class Planet extends StellarObject {
 
     public String getAtmosphericCompositionParsed() {
 
-        if(atmosphericComposition == null || atmosphericComposition.isEmpty()) return "";
+        if (atmosphericComposition == null || atmosphericComposition.isEmpty()) return "";
 
         ArrayList<AtmosphericGases> atmo = new ArrayList<>(atmosphericComposition);
 
         atmo.sort(Comparator.reverseOrder());
 
-        return "["+ atmo.stream().map(AtmosphericGases::toString).collect(Collectors.joining(", "))+"]";
+        return "[" + atmo.stream().map(AtmosphericGases::toString).collect(Collectors.joining(", ")) + "]";
     }
 
     @Override
@@ -84,9 +84,7 @@ public class Planet extends StellarObject {
                 ? ", Atmospheric Pressure = " + atmoPressure + " (" + getAtmosphericCompositionParsed() + ")"
                 : "";
 
-        var dayNightTemp = temperatureFacts.getDayTempMod() != null && temperatureFacts.getNightTempMod() != null
-                ? " D/N mod: " + temperatureFacts.getDayTempMod() + "/" + temperatureFacts.getNightTempMod()
-                : "";
+        var dayNightTemp = parseDayNightTemp();
 
         var almenack = ", Length of day = " + rotationalPeriod + " E-h, length of year = " + super.getOrbitalFacts()
                                                                                                   .getOrbitalPeriod() + " E-y";
@@ -105,13 +103,13 @@ public class Planet extends StellarObject {
         facts.put("mass", mass.toPlainString());
         facts.put("rotation period", rotationalPeriod.toPlainString());
         facts.put("radius", String.valueOf(radius));
-        facts.put("axial tilt", axialTilt.toPlainString()+"\u00B0");
+        facts.put("axial tilt", axialTilt.toPlainString() + "\u00B0");
         facts.put("orbital eccentricity", getOrbitalFacts().getOrbitalEccentricity().toPlainString());
         facts.put("magnetic field", magneticField.toPlainString());
         facts.put("orbital period", getOrbitalFacts().getOrbitalPeriod().toPlainString());
 
         facts.put("resonance", String.valueOf(resonanceOrbitalPeriod));
-        facts.put("inclination", getOrbitalFacts().getOrbitalInclination().toPlainString()+"\u00B0");
+        facts.put("inclination", getOrbitalFacts().getOrbitalInclination().toPlainString() + "\u00B0");
 
         if (getStellarObjectType() != StellarObjectType.JOVIAN) {
             facts.put("gravity", gravity.toPlainString());
@@ -124,19 +122,21 @@ public class Planet extends StellarObject {
             facts.put("hydrosphere", String.valueOf(hydrosphere));
             facts.put("atmospheric composition", getAtmosphericCompositionParsed());
             facts.put("atmospheric pressure", atmoPressure.toPlainString());
-            facts.put("Surface temperature", String.valueOf(temperatureFacts.getSurfaceTemp()-273)+"\u2103");
+            facts.put("Surface temperature", String.valueOf(temperatureFacts.getSurfaceTemp() - 273) + "\u2103");
 
-            facts.put("average rangeband temperature", getStringFromInts(temperatureFacts.getRangeBandTemperature()));
-            facts.put("summer rangeband temperature", getStringFromInts(temperatureFacts.getRangeBandTempSummer()));
-            facts.put("winter rangeband temperature", getStringFromInts(temperatureFacts.getRangeBandTempWinter()));
+            facts.put("dayNight", parseDayNightTemp());
 
-            facts.put("pressure",atmoPressure.toPlainString());
-            facts.put("composition",getAtmosphericCompositionParsed());
-            if(lifeType != null && lifeType != Breathing.NONE) facts.put("life type",lifeType.label);
+            facts.put("average rangeband temperature", getStringFromInts("Average", temperatureFacts.getRangeBandTemperature()));
+            facts.put("summer rangeband temperature", getStringFromInts("Summer diff", temperatureFacts.getRangeBandTempSummer()));
+            facts.put("winter rangeband temperature", getStringFromInts("Winter diff", temperatureFacts.getRangeBandTempWinter()));
+
+            facts.put("pressure", atmoPressure.toPlainString());
+            facts.put("composition", getAtmosphericCompositionParsed());
+            if (lifeType != null && lifeType != Breathing.NONE) facts.put("life type", lifeType.label);
         }
 
         if (getStellarObjectType() != StellarObjectType.MOON) {
-            if(moonList != null && !moonList.isEmpty()){
+            if (moonList != null && !moonList.isEmpty()) {
                 facts.put("number of moons", String.valueOf(moonList.size()));
             }
             facts.put("tide locked to star", String.valueOf(tideLockedStar));
@@ -146,13 +146,13 @@ public class Planet extends StellarObject {
                                                               .collect(Collectors.toList()));
             }
         } else {
-            facts.put("name",getName());
-            facts.put("description",getDescription());
+            facts.put("name", getName());
+            facts.put("description", getDescription());
 
             int calc = (int) lunarOrbitDistance.doubleValue()
-                    * ((Planet)(getOrbitalFacts().getOrbitsAround())).radius *2;
-            facts.put("orbitDistance",String.valueOf(calc));
-            if(planetLocked) facts.put("planetLocked", "Yes");
+                    * ((Planet) (getOrbitalFacts().getOrbitsAround())).radius * 2;
+            facts.put("orbitDistance", String.valueOf(calc));
+            if (planetLocked) facts.put("planetLocked", "Yes");
             facts.put("lunarOrbitalPeriod", lunarOrbitalPeriod.toPlainString());
             facts.put("rotation", rotationalPeriod.toPlainString());
 
@@ -162,11 +162,24 @@ public class Planet extends StellarObject {
                                   .build();
     }
 
-    private String getStringFromInts(int[] rangeBandTemperature) {
-//TODO fix this into a html table instead?
-        return IntStream.of(rangeBandTemperature)
-                        .mapToObj(String::valueOf)
-                        .collect(Collectors.joining("; ", "[", "]"));
+    private String parseDayNightTemp() {
+        return temperatureFacts.getDayTempMod() != null && temperatureFacts.getNightTempMod() != null
+                ? " +" + temperatureFacts.getDayTempMod().toPlainString()
+                + " / " + temperatureFacts.getNightTempMod().toPlainString()
+                : "";
     }
+
+    private String getStringFromInts(String label, int[] rangeBandTemperature) {
+
+        var rangeband = IntStream.of(rangeBandTemperature)
+                                 .mapToObj(String::valueOf)
+                                 .map(temp -> !label.equals("Average") && Integer.parseInt(temp) > 0 ? "+" + temp : temp)
+                                 .map(temp -> label.equals("Average") ? temp + "\u2103" : temp)
+                                 .collect(Collectors.joining("</td><td>", "<td>", "</td>"));
+
+        return "<td>" + label + "</td>" + rangeband;
+    }
+
+
 }
 

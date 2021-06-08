@@ -95,7 +95,7 @@ public class GenerateMoonSystem {
 
         if (index < 26) identifier = "" + (char) ('a' + index);
         else if (index < 26 * 2) identifier = "" + (char) ('a' + (index / 26)-1) + (char) ('a' + index % 26);
-        else identifier = "" +(char) ('m')+ (int) (Math.random() * 10000);
+        else identifier = "" +('m')+ (int) (Math.random() * 10000);
 
         String desc = size == 'm' ? "Minor Moon" : "Major Moon";
 

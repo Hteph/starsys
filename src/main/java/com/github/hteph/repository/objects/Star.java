@@ -36,7 +36,7 @@ public class Star extends StellarObject {
         facts.put("luminosity", luminosity.toString());
         facts.put("age", age.toString());
         facts.put("mass",mass.toString());
-
+        facts.put("abundance",String.valueOf(abundance));
 
         return Presentations.builder()
                             .facts(facts)

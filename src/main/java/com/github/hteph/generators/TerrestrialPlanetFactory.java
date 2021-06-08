@@ -10,8 +10,6 @@ import com.github.hteph.repository.objects.OrbitalFacts;
 import com.github.hteph.repository.objects.Planet;
 import com.github.hteph.repository.objects.Star;
 import com.github.hteph.tables.FindAtmoPressure;
-import com.github.hteph.tables.TableMaker;
-import com.github.hteph.tables.TectonicActivityTable;
 import com.github.hteph.utils.Dice;
 import com.github.hteph.utils.StreamUtilities;
 import com.github.hteph.utils.enums.BaseElementOfLife;
@@ -27,7 +25,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Supplier;
 
 import static com.github.hteph.generators.utils.MakeAtmosphere.checkHydrographics;
 import static com.github.hteph.generators.utils.MakeAtmosphere.findGreenhouseGases;
@@ -299,12 +296,12 @@ public final class TerrestrialPlanetFactory {
         //Climate -------------------------------------------------------
         // sets all the temperature stuff from axial tilt etc etc
 
-        var temperatureFacts = TempertureMethods.setAllKindOfLocalTemperature(atmoPressure.doubleValue(),
-                                                                           hydrosphere,
-                                                                           rotationalPeriod,
-                                                                           axialTilt,
-                                                                           surfaceTemp,
-                                                                           orbitalPeriod); // sets all the temperature stuff from axial tilt etc etc
+        var temperatureFacts = TempertureMethods.setSeasonalTemperature(atmoPressure.doubleValue(),
+                                                                        hydrosphere,
+                                                                        rotationalPeriod,
+                                                                        axialTilt,
+                                                                        surfaceTemp,
+                                                                        orbitalPeriod); // sets all the temperature stuff from axial tilt etc etc
         System.out.println("Stored surface temp (in C) = "+(surfaceTemp-274));
         temperatureFacts.surfaceTemp(surfaceTemp);
 

@@ -12,7 +12,6 @@ import com.github.hteph.repository.objects.Planet;
 import com.github.hteph.repository.objects.Star;
 import com.github.hteph.tables.FindAtmoPressure;
 import com.github.hteph.tables.TableMaker;
-import com.github.hteph.tables.TectonicActivityTable;
 import com.github.hteph.utils.Dice;
 import com.github.hteph.utils.enums.BaseElementOfLife;
 import com.github.hteph.utils.enums.Breathing;
@@ -267,6 +266,13 @@ public final class MoonFactory {
                                                            hasGaia,
                                                            lifeType);
 
+        var temperatureFacts = TempertureMethods.setSeasonalTemperature(atmoPressure.doubleValue(),
+                                                                        hydrosphere,
+                                                                        rotationalPeriod,
+                                                                        axialTilt,
+                                                                        surfaceTemp,
+                                                                        lunarOrbitalPeriod);
+
         if (!atmoshericComposition.isEmpty()) checkAtmo(atmoshericComposition, atmoPressure.doubleValue());
 
 
@@ -277,14 +283,7 @@ public final class MoonFactory {
         //Climate -------------------------------------------------------
         // sets all the temperature stuff from axial tilt etc etc TODO should take the special circumstances of moons too
 
-        var temperatureFacts = TempertureMethods.setAllKindOfLocalTemperature(atmoPressure.doubleValue(),
-                                                                              hydrosphere,
-                                                                              rotationalPeriod,
-                                                                              axialTilt,
-                                                                              surfaceTemp,
-                                                                              orbitingAroundPlanet.getOrbitalFacts()
-                                                                                               .getOrbitalPeriod()
-                                                                                               .doubleValue());
+
         temperatureFacts.surfaceTemp(surfaceTemp);
         //TODO Weather and day night temp cycle
         TempertureMethods.setDayNightTemp(temperatureFacts,
