@@ -17,15 +17,16 @@ public class LifeMethods {
                                    double atmoPressure,
                                    int hydrosphere,
                                    Set<AtmosphericGases> atmoshericComposition,
-                                   double age) {
+                                   double age, double magneticField) {
 
         //setting a limit on how fast life can develop
         if (age < 2) return false;
+        if (atmoPressure == 0) return false; //TODO Machine worlds and vacuum beings?
 
         double lifeIndex = 0;
 
-        if (baseTemperature < 100 || baseTemperature > 450) lifeIndex -= 5;
-        else if (baseTemperature < 270 || baseTemperature > 350) lifeIndex -= 4;
+        if (baseTemperature < 220 || baseTemperature > 400) lifeIndex -= 5;
+        else if (baseTemperature < 250 || baseTemperature > 350) lifeIndex -= 3;
         else lifeIndex += 4;
         System.out.println("After temp life Index="+lifeIndex +" basetemp = "+baseTemperature);
 
@@ -37,20 +38,24 @@ public class LifeMethods {
         if (hydrosphere < 1) lifeIndex -= 5;
         else if (hydrosphere < 5) lifeIndex += 1;
         else lifeIndex += 4;
-
         System.out.println("After hydro life Index="+lifeIndex +"Hydro = "+hydrosphere);
 
+        if(magneticField < 0.3) lifeIndex += - 3;
+        else if (magneticField > 5) lifeIndex += - 1;
+
+        System.out.println("After magnetic life Index="+lifeIndex +"magneto = "+magneticField);
+
         if (baseTemperature<270
-                && atmoshericComposition.stream().anyMatch(s -> s.getName().equals("NH3") && Dice.d6() < 4)){
+                && atmoshericComposition.stream().anyMatch(s -> s.getName().equals("NH3") && Dice.d6() < 6)){
             //TODO rework this to work  in the same way as Oxygen?
             lifeIndex += 4;
+            System.out.println("Ammonia life Index="+lifeIndex);
         }
 System.out.println("End life Index="+lifeIndex);
         return lifeIndex > 0; //Nod to Gaia-theory, if there is any chance of life it will aways be life present
     }
 
     public static Breathing findLifeType(Set<AtmosphericGases> atmoshericComposition, double age) {
-
 
         //TODO Allow for alternate gases such as Cl2
         return atmoshericComposition.stream()

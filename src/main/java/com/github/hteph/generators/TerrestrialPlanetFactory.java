@@ -2,6 +2,8 @@ package com.github.hteph.generators;
 
 import com.github.hteph.generators.utils.LifeMethods;
 import com.github.hteph.generators.utils.MakeAtmosphere;
+import com.github.hteph.generators.utils.PlanetaryUtils;
+import com.github.hteph.generators.utils.TempertureMethods;
 import com.github.hteph.repository.objects.AtmosphericGases;
 import com.github.hteph.repository.objects.Biosphere;
 import com.github.hteph.repository.objects.OrbitalFacts;
@@ -12,6 +14,7 @@ import com.github.hteph.tables.TableMaker;
 import com.github.hteph.tables.TectonicActivityTable;
 import com.github.hteph.utils.Dice;
 import com.github.hteph.utils.StreamUtilities;
+import com.github.hteph.utils.enums.BaseElementOfLife;
 import com.github.hteph.utils.enums.Breathing;
 import com.github.hteph.utils.enums.HydrosphereDescription;
 import com.github.hteph.utils.enums.StellarObjectType;
@@ -24,11 +27,14 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.function.Supplier;
 
 import static com.github.hteph.generators.utils.MakeAtmosphere.checkHydrographics;
 import static com.github.hteph.generators.utils.MakeAtmosphere.findGreenhouseGases;
+import static com.github.hteph.generators.utils.PlanetaryUtils.findAlbedo;
+import static com.github.hteph.generators.utils.PlanetaryUtils.findTectonicGroup;
+import static com.github.hteph.generators.utils.PlanetaryUtils.getDensity;
+import static com.github.hteph.generators.utils.PlanetaryUtils.getTectonicActivityGroup;
 import static com.github.hteph.utils.NumberUtilities.cubed;
 import static com.github.hteph.utils.NumberUtilities.sqrt;
 import static com.github.hteph.utils.NumberUtilities.squared;
@@ -60,7 +66,7 @@ public final class TerrestrialPlanetFactory {
         int baseTemperature;
         HydrosphereDescription hydrosphereDescription;
         int hydrosphere;
-        TreeSet<AtmosphericGases> atmoshericComposition;
+        Set<AtmosphericGases> atmoshericComposition;
         BigDecimal atmoPressure;
         double albedo;
         String tectonicActivityGroup;
@@ -187,15 +193,17 @@ public final class TerrestrialPlanetFactory {
         tectonicCore = findTectonicGroup(IS_INNER_ZONE, density);
         tectonicActivityGroup = getTectonicActivityGroup(star, tidalForce, mass);
 
+        var magneticField = PlanetaryUtils.getMagneticField(rotationalPeriod,
+                                                            tectonicCore,
+                                                            tectonicActivityGroup,
+                                                            star,
+                                                            density,
+                                                            mass
+        );
+
         planetBuilder.tectonicCore(tectonicCore)
                      .tectonicActivityGroup(tectonicActivityGroup)
-                     .magneticField(BigDecimal.valueOf(getMagneticField(rotationalPeriod,
-                                                                        tectonicCore,
-                                                                        tectonicActivityGroup,
-                                                                        star,
-                                                                        density,
-                                                                        mass
-                     )).round(TWO));
+                     .magneticField(BigDecimal.valueOf(magneticField).round(TWO));
 
         //Temperature
         baseTemperature = (int) (255 / sqrt((orbitDistance.doubleValue()
@@ -216,6 +224,7 @@ public final class TerrestrialPlanetFactory {
                                                                tectonicActivityGroup,
                                                                planetRadius,
                                                                gravity,
+                                                               magneticField,
                                                                planetBuilder);
         var tempPlanet = planetBuilder.build();
 
@@ -242,46 +251,47 @@ public final class TerrestrialPlanetFactory {
             }
 
         }
-
+        if (!atmoshericComposition.isEmpty()) MakeAtmosphere.checkAtmo(atmoshericComposition, atmoPressure.doubleValue());
         planetBuilder.atmoPressure(atmoPressure.round(THREE));
         // The composition could be adjusted for the existence of life, so is set below
 
+        albedo = findAlbedo(IS_INNER_ZONE, atmoPressure.doubleValue(), hydrosphereDescription, hydrosphere);
+        planetBuilder.albedo(BigDecimal.valueOf(albedo).round(TWO));
+        //adjusting base Temperature for albedo
+        baseTemperature = (int)( baseTemperature*albedo);
         //Bioshpere
 
         hasGaia = LifeMethods.testLife(baseTemperature,
                                        atmoPressure.doubleValue(),
                                        hydrosphere,
                                        atmoshericComposition,
-                                       star.getAge().doubleValue());
+                                       star.getAge().doubleValue(),
+                                       magneticField);
 
         if (hasGaia) lifeType = LifeMethods.findLifeType(atmoshericComposition, star.getAge().doubleValue());
         else lifeType = Breathing.NONE;
 
-        if (lifeType.equals(Breathing.OXYGEN))
+        if (lifeType.equals(Breathing.OXYGEN)) {
             MakeAtmosphere.adjustForOxygen(atmoPressure.doubleValue(), atmoshericComposition);
+        }
 
-        albedo = findAlbedo(IS_INNER_ZONE, atmoPressure.doubleValue(), hydrosphereDescription, hydrosphere);
-        planetBuilder.albedo(BigDecimal.valueOf(albedo).round(TWO));
         double greenhouseFactor = findGreenhouseGases(atmoshericComposition,
                                                       atmoPressure.doubleValue(),
                                                       baseTemperature,
                                                       hydrosphereDescription,
-                                                      hydrosphere);
+                                                      hydrosphere,
+                                                      hasGaia);
 
-        //TODO Here adding some Gaia moderation factor (needs tweaking probably) moving a bit more towards
-        // water/carbon ideal
-        if (lifeType.equals(Breathing.OXYGEN) && baseTemperature > 350) greenhouseFactor *= 0.8;
-        if (lifeType.equals(Breathing.OXYGEN) && baseTemperature < 250) greenhouseFactor *= 1.2;
+        int surfaceTemp = TempertureMethods.getSurfaceTemp(baseTemperature,
+                                                           atmoPressure,
+                                                           greenhouseFactor,
+                                                           hasGaia,
+                                                           lifeType);
 
-        int surfaceTemp = getSurfaceTemp(baseTemperature, atmoPressure, albedo, greenhouseFactor, hasGaia);
-
-        if (!atmoshericComposition.isEmpty()) MakeAtmosphere.checkAtmo(atmoshericComposition);
+        if (!atmoshericComposition.isEmpty()) MakeAtmosphere.checkAtmo(atmoshericComposition, atmoPressure.doubleValue());
         planetBuilder.atmosphericComposition(atmoshericComposition);
 
-        if (lifeType != Breathing.NONE) {
-            var biosphere = Biosphere.builder().respiration(lifeType);
-            planetBuilder.life(biosphere.build());
-        }
+
         //TODO Legacy to be removed
         planetBuilder.lifeType(lifeType);
 
@@ -289,15 +299,25 @@ public final class TerrestrialPlanetFactory {
         //Climate -------------------------------------------------------
         // sets all the temperature stuff from axial tilt etc etc
 
-        var temperatureFacts = MakeAtmosphere.setAllKindOfLocalTemperature(atmoPressure.doubleValue(),
+        var temperatureFacts = TempertureMethods.setAllKindOfLocalTemperature(atmoPressure.doubleValue(),
                                                                            hydrosphere,
                                                                            rotationalPeriod,
                                                                            axialTilt,
                                                                            surfaceTemp,
                                                                            orbitalPeriod); // sets all the temperature stuff from axial tilt etc etc
+        System.out.println("Stored surface temp (in C) = "+(surfaceTemp-274));
         temperatureFacts.surfaceTemp(surfaceTemp);
+
+        if (lifeType != Breathing.NONE) {
+            var biosphere = Biosphere.builder()
+                                     .homeworld(name)
+                                     .respiration(lifeType)
+                                     .baseElement(surfaceTemp<360 ? BaseElementOfLife.CARBON : BaseElementOfLife.SILICA);
+            planetBuilder.life(biosphere.build());
+        }
+
         //TODO Weather and day night temp cycle
-        MakeAtmosphere.setDayNightTemp(temperatureFacts,
+        TempertureMethods.setDayNightTemp(temperatureFacts,
                                        baseTemperature,
                                        star.getLuminosity().doubleValue(),
                                        orbitDistance.doubleValue(),
@@ -320,30 +340,7 @@ public final class TerrestrialPlanetFactory {
     }
 
 
-    private static double getMagneticField(double rotationalPeriod, String tectonicCore, String tectonicActivityGroup, Star orbitingAround, double density, double mass) {
-        double magneticField;
-        if (tectonicCore.contains("metal")) {
-            magneticField = 10 / (sqrt((rotationalPeriod / 24.0)))
-                    * squared(density)
-                    * sqrt(mass)
-                    / orbitingAround.getAge().doubleValue();
-            if (tectonicCore.contains("small")) magneticField *= 0.5;
-            if (tectonicCore.contains("medium")) magneticField *= 0.75;
-            if (tectonicActivityGroup.equals("Dead")) magneticField = Dice.d6() / 15.0;
-        } else {
-            magneticField = Dice.d6() / 20.0;
-        }
-        return magneticField;
-    }
 
-    private static String getTectonicActivityGroup(Star orbitingAround, double tidalForce, double mass) {
-        double tectonicActivity;
-        String tectonicActivityGroup;
-        tectonicActivity = (5 + Dice._2d6() - 2) * Math.pow(mass, 0.5) / orbitingAround.getAge().doubleValue();
-        tectonicActivity *= (1 + 0.5 * tidalForce);
-        tectonicActivityGroup = TectonicActivityTable.findTectonicActivityGroup(tectonicActivity);
-        return tectonicActivityGroup;
-    }
 
     private static int getEccentryMod(char orbitalObjectClass) {
         int eccentryMod = 1;
@@ -351,180 +348,10 @@ public final class TerrestrialPlanetFactory {
         return eccentryMod;
     }
 
-    private static double getDensity(BigDecimal orbitDistance, Star orbitingAround, double snowLine) {
-        double density;
-        if (orbitDistance.doubleValue() < snowLine) {
-            density = 0.3 + (Dice._2d6() - 2) * 0.127 / Math.pow(
-                    0.4 + (orbitDistance.doubleValue() / sqrt(orbitingAround.getLuminosity().doubleValue())), 0.67);
-        } else {
-            density = 0.3 + (Dice._2d6() - 2) * 0.05;
-        }
-        return density;
-    }
-
     private static int getBaseSize(char orbitalObjectClass) {
 
         int baseSize = 900 + Dice.d10() * 10; //Default for planets
         if (orbitalObjectClass == 't' || orbitalObjectClass == 'c') baseSize = 90 + Dice.d10();
         return baseSize;
-    }
-
-    private static int getSurfaceTemp(int baseTemperature,
-                                      BigDecimal atmoPressure,
-                                      double albedo,
-                                      double greenhouseFactor,
-                                      boolean hasGaia) {
-
-        // My take on the effect of greenhouse and albedo on temperature max planerary temp is 1000 and the half
-        // point is 400
-        double surfaceTemp;
-        System.out.println("baseTemp before Greenhouse("+greenhouseFactor+" and albedo"+albedo+")= "+baseTemperature);
-        if (hasGaia) {
-            surfaceTemp = (baseTemperature * Math.pow((albedo), 1/4d) * sqrt(1+greenhouseFactor));;// 450d * (baseTemperature * albedo * greenhouseFactor)
-                    // (400d + baseTemperature * albedo * greenhouseFactor);
-        } else if (atmoPressure.doubleValue() > 0) {
-            surfaceTemp = 800d * (baseTemperature * albedo * greenhouseFactor)
-                    / (400d + baseTemperature * albedo * greenhouseFactor);
-        } else {
-            surfaceTemp = 1200d * (baseTemperature * albedo * greenhouseFactor)
-                    / (800d + baseTemperature * albedo * greenhouseFactor);
-        }
-
-        System.out.println("baseTemp after Greenhouse= "+surfaceTemp);
-        int altTemp = (int) (baseTemperature * Math.pow((albedo), 1/4d) * sqrt(1+greenhouseFactor));
-        System.out.println("Alternative calc= "+altTemp);
-
-        int altTemp2 = (int) (baseTemperature * albedo * greenhouseFactor);
-        System.out.println("Alternative2 calc= "+altTemp2);
-
-        return (int) surfaceTemp;
-    }
-
-    /*TODO
-     * This should be reworked (in conjuction with atmo) to remove CL and F from naturally occuring and instead
-     * treat them similar to Oxygen. Also the Ammonia is dependent on free water as written right now
-     */
-
-
-    private static double findAlbedo(boolean InnerZone,
-                                     double atmoPressure,
-                                     HydrosphereDescription hydrosphereDescription,
-                                     int hydrosphere) {
-
-        int mod = 0;
-        int[] randAlbedoArray;
-        Double[] albedoBase = new Double[]{0.75, 0.85, 0.95, 1.05, 1.15};
-
-        if (InnerZone) {
-            randAlbedoArray = new int[]{0, 2, 4, 7, 10};
-
-            if (atmoPressure < 0.05) mod = 2;
-            if (atmoPressure > 50) {
-                mod = -4;
-            } else if (atmoPressure > 5) {
-                mod = -2;
-            }
-            if (hydrosphere > 50
-                    && hydrosphereDescription.equals(HydrosphereDescription.ICE_SHEET)
-                    && mod > -2)
-                mod = -2;
-            if (hydrosphere > 90
-                    && hydrosphereDescription.equals(HydrosphereDescription.ICE_SHEET)
-                    && mod > -4)
-                mod = -4;
-
-        } else {
-            randAlbedoArray = new int[]{0, 4, 6, 8, 10};
-            if (atmoPressure > 1) mod = 1;
-        }
-        return TableMaker.makeRoll(Dice._2d6() + mod, randAlbedoArray, albedoBase) + (Dice.d10() - 1) * 0.01;
-    }
-
-    private static int findTheHydrosphere(HydrosphereDescription hydrosphereDescription, int radius) {
-
-        //         zeroHydro = () -> 0;
-        //         superficialHydro = () -> Dice.d10()/2;
-        //         vLowHydro = Dice::d10;
-        //         lowHydro = () -> Dice.d10() + 10;
-        //         mediumHydro = () -> Dice.d20() + 20;
-        //         highHydro = () -> Dice.d20()+ Dice.d20()+ Dice.d20() +37;
-        //         vHighHydro = () -> 100;
-
-        List<Supplier<Integer>> hydroList = Arrays.asList(() -> Dice.d10() / 2,
-                                                          () -> Dice.d10() / 2 + 5,
-                                                          () -> Dice.d10() + 10,
-                                                          () -> Dice.d20() + 20,
-                                                          () -> Dice.d20() + Dice.d20() + Dice.d20() + 37,
-                                                          () -> 100);
-        int[] wetSmallPlanetHydro = {2, 5, 9, 10, 12, 13};
-        int[] wetMediumPlanetHydro = {2, 4, 7, 9, 11, 12};
-        int[] wetLargePlanetHydro = {0, 2, 3, 4, 7, 12};
-
-        Integer tempHydro = 0;
-
-        if (hydrosphereDescription.equals(HydrosphereDescription.LIQUID)
-                || hydrosphereDescription.equals(HydrosphereDescription.ICE_SHEET)) {
-            if (radius < 2000) {
-                tempHydro = TableMaker.makeRoll(Dice._2d6(), wetSmallPlanetHydro, hydroList).get();
-            } else if (radius < 4000) {
-                tempHydro = TableMaker.makeRoll(Dice._2d6(), wetMediumPlanetHydro, hydroList).get();
-            } else if (radius < 7000) {
-                tempHydro = TableMaker.makeRoll(Dice._2d6(), wetLargePlanetHydro, hydroList).get();
-            }
-        } else if (hydrosphereDescription.equals(HydrosphereDescription.CRUSTAL)) tempHydro = 100;
-        else if (hydrosphereDescription.equals(HydrosphereDescription.REMNANTS)) tempHydro = Dice.d6() / 2;
-
-        tempHydro = Math.min(100, tempHydro);
-
-        return tempHydro;
-    }
-
-    private static HydrosphereDescription findHydrosphereDescription(boolean InnerZone, int baseTemperature) {
-
-
-        HydrosphereDescription tempHydroD;
-        if (!InnerZone) {
-            tempHydroD = HydrosphereDescription.CRUSTAL;
-        } else if (baseTemperature > 500) {
-            tempHydroD = HydrosphereDescription.NONE;
-        } else if (baseTemperature > 370) {
-            tempHydroD = HydrosphereDescription.VAPOR;
-        } else if (baseTemperature > 245) {
-            tempHydroD = HydrosphereDescription.LIQUID;
-        } else {
-            tempHydroD = HydrosphereDescription.ICE_SHEET;
-        }
-        return tempHydroD;
-    }
-
-    private static String findTectonicGroup(boolean InnerZone, double density) {
-
-        String tempTectonics;
-        if (InnerZone) {
-            if (density < 0.7) {
-                if (Dice.d6() < 4) {
-                    tempTectonics = "Silicates core";
-                } else {
-                    tempTectonics = "Silicates, small metal core";
-                }
-            } else if (density < 1) {
-                tempTectonics = "Iron-nickel, medium metal core";
-            } else {
-                tempTectonics = "Iron-nickel, large metal core";
-            }
-        } else {
-            if (density < 0.3) {
-                tempTectonics = "Ice core";
-            } else if (density < 1) {
-                tempTectonics = "Silicate core";
-            } else {
-                if (Dice.d6() < 4) {
-                    tempTectonics = "Silicates core";
-                } else {
-                    tempTectonics = "Silicates, small metal core";
-                }
-            }
-        }
-        return tempTectonics;
     }
 }

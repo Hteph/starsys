@@ -7,14 +7,17 @@ import com.github.hteph.repository.objects.TemperatureFacts;
 import com.github.hteph.tables.TableMaker;
 import com.github.hteph.utils.Dice;
 import com.github.hteph.utils.NumberUtilities;
+import com.github.hteph.utils.StreamUtilities;
 import com.github.hteph.utils.enums.HydrosphereDescription;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Supplier;
@@ -22,16 +25,47 @@ import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 
 import static com.github.hteph.utils.NumberUtilities.sqrt;
+import static com.github.hteph.utils.NumberUtilities.squared;
 
 public class MakeAtmosphere {
 
-    private static final String SUBSCRIPT_TWO = "\u2082";
 
-    public static void checkAtmo(TreeSet<AtmosphericGases> atmoSet) {
-        atmoSet.forEach(gas -> System.out.println("Start Gas: "+gas.getName()+" "+gas.getPercentageInAtmo()+" %"));
+    public static void checkAtmo(Set<AtmosphericGases> atmoSet, double atmoPressure) {
+        atmoSet.forEach(gas -> System.out.println("Start Gas: " + gas.getName() + " " + gas.getPercentageInAtmo() + " %"));
+
+        if(atmoSet.size()==1) {
+
+            var oxygen = atmoSet.stream().filter(gas -> gas.getName().equals("O2")).findFirst();
+
+            oxygen.ifPresent(o2 -> {
+                int percentage = (int) Math.min(30/atmoPressure +Dice.d3(), 45+Dice.d10());
+                o2.setPercentageInAtmo(percentage);
+                atmoSet.add(AtmosphericGases.builder()
+                                            .name("N2")
+                                            .percentageInAtmo(100-percentage)
+                                            .build());
+            });
+
+        }
+
         var sumOfGasPercentage = atmoSet.stream()
                                         .map(AtmosphericGases::getPercentageInAtmo)
                                         .reduce(0, Integer::sum);
+        if(sumOfGasPercentage > 100){
+
+            do{
+                atmoSet.forEach(gas -> {
+                    int current = gas.getPercentageInAtmo();
+                    gas.setPercentageInAtmo(current-1);
+                });
+
+            }while(atmoSet.stream()
+                          .map(AtmosphericGases::getPercentageInAtmo)
+                          .reduce(0, Integer::sum)>100);
+
+
+        }
+
         if (sumOfGasPercentage < 100) {
 
             var currentN2 = atmoSet.stream()
@@ -44,17 +78,26 @@ public class MakeAtmosphere {
                                         .percentageInAtmo(currentN2 + 99 - sumOfGasPercentage);
             atmoSet.add(newN2.build());
             atmoSet.add(AtmosphericGases.builder().name("Other").percentageInAtmo(1).build());
-            atmoSet.forEach(gas -> System.out.println("End Gas: "+gas.getName()+" "+gas.getPercentageInAtmo()+" %"));
+            atmoSet.forEach(gas -> System.out.println("End Gas: " + gas.getName() + " " + gas.getPercentageInAtmo() + " %"));
         }
+
+
     }
 
     public static void checkHydrographics(HydrosphereDescription hydrosphereDescription,
-                                           int hydrosphere,
-                                           BigDecimal atmoPressure,
-                                           Planet.PlanetBuilder<?, ? extends Planet.PlanetBuilder<?, ?>> planetBuilder,
-                                           int surfaceTemp,
-                                           int[] latitudeWinterTemp,
-                                           int[] latitudeSummerTemp) {
+                                          int hydrosphere,
+                                          BigDecimal atmoPressure,
+                                          Planet.PlanetBuilder<?, ? extends Planet.PlanetBuilder<?, ?>> planetBuilder,
+                                          int surfaceTemp,
+                                          int[] latitudeWinterTemp,
+                                          int[] latitudeSummerTemp) {
+
+        if (hydrosphere > 0 && hydrosphereDescription == HydrosphereDescription.ICE_SHEET
+                && surfaceTemp + latitudeWinterTemp[4] > 274) {
+            System.out.println("Ice to Liquid, latitude40 winter temp: " + latitudeWinterTemp[4]);
+            planetBuilder.hydrosphereDescription(HydrosphereDescription.LIQUID);
+        }
+
         if (hydrosphere > 0
                 && surfaceTemp > 274
                 && atmoPressure.doubleValue() > 0
@@ -73,15 +116,15 @@ public class MakeAtmosphere {
                     planetBuilder.description("Storm World");
                 }
             }
-        } else if (hydrosphere > 0 && hydrosphereDescription == HydrosphereDescription.ICE_SHEET
-                && surfaceTemp + latitudeWinterTemp[4] > 274) {
-            System.out.println("Ice to Liquid, latitude40 winter temp: " + latitudeWinterTemp[4]);
-            planetBuilder.hydrosphereDescription(HydrosphereDescription.LIQUID);
-        } else if (hydrosphere == 0
+        }
+
+
+        if (hydrosphere == 0
                 && (hydrosphereDescription == HydrosphereDescription.LIQUID
                 || hydrosphereDescription == HydrosphereDescription.ICE_SHEET)) {
             planetBuilder.hydrosphereDescription(HydrosphereDescription.REMNANTS);
         }
+
         if (atmoPressure.doubleValue() == 0 && hydrosphere > 0) {
             planetBuilder.hydrosphereDescription(HydrosphereDescription.REMNANTS)
                          .hydrosphere(0);
@@ -108,13 +151,13 @@ public class MakeAtmosphere {
         return polarSeaLimit;
     }
 
-    public static void adjustForOxygen(double atmoPressure, TreeSet<AtmosphericGases> atmosphericComposition) {
+    public static void adjustForOxygen(double atmoPressure, Set<AtmosphericGases> atmosphericComposition) {
 
         Map<String, AtmosphericGases> atmoMap = atmosphericComposition
                 .stream()
                 .collect(Collectors.toMap(AtmosphericGases::getName, x -> x));
 
-        int oxygenMax = Math.max(18+Dice.d10(), (int) (Dice._3d6() * 2 / atmoPressure)); //This could be a bit more involved and interesting
+        int oxygenMax = Math.max(18 + Dice.d10(), (int) (Dice._3d6() * 2 / atmoPressure)); //This could be a bit more involved and interesting
 
         if (atmoMap.containsKey("CO2")) {
             if (atmoMap.get("CO2").getPercentageInAtmo() > oxygenMax) {
@@ -131,26 +174,28 @@ public class MakeAtmosphere {
                 AtmosphericGases co2 = atmoMap.get("CO2");
                 atmoMap.remove("CO2");
                 atmoMap.put("O2", AtmosphericGases.builder()
-                                                  .name("O"+SUBSCRIPT_TWO)
+                                                  .name("O2")
                                                   .percentageInAtmo(co2.getPercentageInAtmo())
                                                   .build());
             }
         } else { //if no CO2 we just find the largest and take from that
-            AtmosphericGases gas = atmosphericComposition.pollFirst();
-            if (gas != null) {
-                if (gas.getPercentageInAtmo() < oxygenMax) {
+
+            var maxGas = StreamUtilities.findMaxInMap(atmoMap);
+
+            if (maxGas != null) {
+                if (maxGas.getPercentageInAtmo() < oxygenMax) {
                     atmoMap.put("O2", AtmosphericGases.builder()
                                                       .name("O2")
-                                                      .percentageInAtmo(gas.getPercentageInAtmo())
+                                                      .percentageInAtmo(maxGas.getPercentageInAtmo())
                                                       .build());
                 } else {
                     atmoMap.put("O2", AtmosphericGases.builder()
                                                       .name("O2")
                                                       .percentageInAtmo(oxygenMax)
                                                       .build());
-                    atmoMap.put(gas.getName(), AtmosphericGases.builder()
+                    atmoMap.put(maxGas.getName(), AtmosphericGases.builder()
                                                                .name("O2")
-                                                               .percentageInAtmo(gas.getPercentageInAtmo() -
+                                                               .percentageInAtmo(maxGas.getPercentageInAtmo() -
                                                                                          oxygenMax)
                                                                .build());
                 }
@@ -218,11 +263,11 @@ public class MakeAtmosphere {
         return tempHydroD;
     }
 
-    public static int getWaterVaporFactor(int baseTemperature, HydrosphereDescription hydrosphereDescription, int hydrosphere) {
-        int waterVaporFactor;
+    public static double getWaterVaporFactor(int baseTemperature, HydrosphereDescription hydrosphereDescription, int hydrosphere) {
+        double waterVaporFactor;
         if (hydrosphereDescription.equals(HydrosphereDescription.LIQUID)
                 || hydrosphereDescription.equals(HydrosphereDescription.ICE_SHEET)) {
-            waterVaporFactor = (int) Math.max(0, (baseTemperature - 240) / 100.0 * hydrosphere * (Dice._2d6() - 1));
+            waterVaporFactor = (int) Math.max(0, (baseTemperature - 240) / 100.0 * hydrosphere * (Dice.aLotOfd3(2) - 1));
         } else {
             waterVaporFactor = 0;
         }
@@ -232,8 +277,13 @@ public class MakeAtmosphere {
     public static void removeCombustibles(Map<String, AtmosphericGases> atmoMap) {
         int removedpercentages = 0;
         if (atmoMap.containsKey("CH4")) {
-            removedpercentages += atmoMap.get("CH4").getPercentageInAtmo();
+            int burned = atmoMap.get("CH4").getPercentageInAtmo();
             atmoMap.remove("CH4");
+            atmoMap.put("CO2", AtmosphericGases.builder()
+                                              .name("CO2")
+                                              .percentageInAtmo((int)(burned/2.0))
+                                              .build());
+            removedpercentages += (int)(burned/2.0);
         }
         if (atmoMap.containsKey("H2")) {
             removedpercentages += atmoMap.get("H2").getPercentageInAtmo();
@@ -257,30 +307,37 @@ public class MakeAtmosphere {
         }
     }
 
-    public static double findGreenhouseGases(Set<AtmosphericGases> atmoshericComposition,
+    public static double findGreenhouseGases(Set<AtmosphericGases> atmosphericComposition,
                                              double atmoPressure,
                                              int baseTemperature,
                                              HydrosphereDescription hydrosphereDescription,
-                                             int hydrosphere) {
+                                             int hydrosphere,
+                                             boolean hasGaia) {
         double tempGreenhouseGasEffect = 0;
 
-        for (AtmosphericGases gas : atmoshericComposition) {
+        if(hasGaia && baseTemperature < 274) addSomeGreenhouseGas(atmosphericComposition);
+
+        for (AtmosphericGases gas : atmosphericComposition) {
 
             switch (gas.getName()) {
                 case "CO2":
                     tempGreenhouseGasEffect += gas.getPercentageInAtmo() * atmoPressure;
+                    System.out.println("Greehousegas 1s ?="+gas.getPercentageInAtmo() * atmoPressure);
                     break;
                 case "CH4":
                     tempGreenhouseGasEffect += gas.getPercentageInAtmo() * atmoPressure * 4;
+                    System.out.println("Greehousegas 4rs ?="+gas.getPercentageInAtmo() * atmoPressure);
                     break;
                 case "SO2":
                 case "NH3":
                 case "NO2":
                 case "H2S":
                     tempGreenhouseGasEffect += gas.getPercentageInAtmo() * atmoPressure * 8;
+                    System.out.println("Greehousegas 8ts ?="+gas.getPercentageInAtmo() * atmoPressure);
                     break;
                 case "H2SO4":
                     tempGreenhouseGasEffect += gas.getPercentageInAtmo() * atmoPressure * 16;
+                    System.out.println("Greehousegas 16s ?="+gas.getPercentageInAtmo() * atmoPressure);
                     break;
                 default:
                     tempGreenhouseGasEffect += gas.getPercentageInAtmo() * atmoPressure * 0;
@@ -290,155 +347,65 @@ public class MakeAtmosphere {
 
         var waterVaporFactor = MakeAtmosphere.getWaterVaporFactor(baseTemperature, hydrosphereDescription, hydrosphere);
 
-        return 1 + sqrt(atmoPressure) * 0.01 * (Dice._2d6() - 1)
-                + sqrt(tempGreenhouseGasEffect) * 0.1
-                + waterVaporFactor * 0.1;
+        var random = Dice.aLotOfd3(2) - 1;
+
+        System.out.println("greenhouseGas = "+tempGreenhouseGasEffect+", waterVaporEffect= " + waterVaporFactor +"random = "+random);
+
+        return sqrt(1 + atmoPressure * 0.01 * random
+                + tempGreenhouseGasEffect * 0.1
+                + waterVaporFactor * 0.1);
     }
 
-    public static TemperatureFacts.TemperatureFactsBuilder setAllKindOfLocalTemperature(double atmoPressure,
-                                                                                        int hydrosphere,
-                                                                                        double rotationalPeriod,
-                                                                                        double axialTilt,
-                                                                                        double surfaceTemp,
-                                                                                        double orbitalPeriod) {
+    private static void addSomeGreenhouseGas(Set<AtmosphericGases> atmosphericComposition) {
 
-        double[][] temperatureRangeBand = new double[][]{ // First is Low Moderation atmos, then Average etc
-                {1.10, 1.07, 1.05, 1.03, 1.00, 0.97, 0.93, 0.87, 0.78, 0.68},
-                {1.05, 1.04, 1.03, 1.02, 1.00, 0.98, 0.95, 0.90, 0.82, 0.75},
-                {1.02, 1.02, 1.02, 1.01, 1.00, 0.99, 0.98, 0.95, 0.91, 0.87},
-                {1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00}
-        };
+        var o2 = atmosphericComposition.stream()
+                                                              .filter(gas -> gas.getName().equals("O2"))
+                                                              .findFirst();
 
-        double[] summerTemperature = new double[10];
-        double[] winterTemperature = new double[10];
-        double[] latitudeTemperature = new double[10];
-        double[] baseTemperature = new double[10];
-
-        int testModeration = 0;
-        testModeration += (hydrosphere - 60) / 10;
-        testModeration += (atmoPressure < 0.1) ? -3 : 1;
-        testModeration += (int) atmoPressure;
-        testModeration += (rotationalPeriod < 10) ? -3 : 1;
-        testModeration += (int) (Math.sqrt(rotationalPeriod / 24)); //Shouldn't this be negative?
-        testModeration += (int) (10 / axialTilt);
-
-        String atmoModeration;
-        if (atmoPressure == 0) atmoModeration = "No";
-        else if (atmoPressure > 10) atmoModeration = "Extreme";
-        else if (testModeration < -2) atmoModeration = "Low";
-        else if (testModeration > 2) atmoModeration = "High";
-        else atmoModeration = "Average";
-
-        int atmoIndex;
-        switch (atmoModeration) {
-            case "High":
-                atmoIndex = 2;
-                break;
-            case "Average":
-                atmoIndex = 1;
-                break;
-            case "Extreme":
-                atmoIndex = 3;
-                break;
-            default:
-                atmoIndex = 0;
-                break;
-        }
-
-        for (int i = 0; i < 10; i++) {
-            latitudeTemperature[i] = temperatureRangeBand[atmoIndex][i] * surfaceTemp;
-        }
-
-        for (int i = 0; i < 10; i++) {
-            baseTemperature[i] = latitudeTemperature[i] - 274;
-        }
-
-        for (int i = 0; i < 10; i++) {
-
-            double seasonEffect = 1;
-            // This part is supposed to shift the rangebands for summer /winter effects, it makes an
-            // (to me unproven) assumption that winter temperatures at the poles is not changed by seasonal effects
-            // this feels odd but I have to delve further into the science before I dismiss it.
-            // the effect occurs from the intersection of axial tilt effects and rangeband effects in a way that
-            //makes me suspect it is unintentional.
-            int axialTiltEffect = (int) (axialTilt / 10);
-            int summer = Math.max(0, i - axialTiltEffect);
-            int winter = Math.min(9, i + axialTiltEffect);
-
-            if (i < 3 && axialTiltEffect < 4) seasonEffect *= 0.75;
-            if (i > 8 && axialTiltEffect > 3) seasonEffect *= 2;
-            if (orbitalPeriod < 0.25 && !atmoModeration.equals("Low")) seasonEffect *= 0.75;
-            if (orbitalPeriod > 3 && !atmoModeration.equals("High") && axialTilt > 40) seasonEffect *= 1.5;
-
-            summerTemperature[i] = (int) (latitudeTemperature[summer] - latitudeTemperature[i]) * seasonEffect;
-            winterTemperature[i] = (int) (latitudeTemperature[winter] - latitudeTemperature[i]) * seasonEffect;
-        }
-        return TemperatureFacts.builder()
-                               .rangeBandTemperature(DoubleStream.of(baseTemperature)
-                                                                 .mapToInt(t -> (int) Math.ceil(t))
-                                                                 .toArray())
-                               .rangeBandTempSummer(DoubleStream.of(summerTemperature)
-                                                                .mapToInt(t -> (int) Math.ceil(t))
-                                                                .toArray())
-                               .rangeBandTempWinter(DoubleStream.of(winterTemperature)
-                                                                .mapToInt(t -> (int) Math.ceil(t))
-                                                                .toArray());
-    }
-
-    public static void setDayNightTemp(TemperatureFacts.TemperatureFactsBuilder tempTempFacts, int baseTemperature, double luminosity, double orbitDistance, double atmoPressure, double rotationPeriod) {
-
-        //Assymerical sigmoidal:  5-parameter logistic (5PL)
-        var increasePerHourFactor = -1.554015 + (0.9854966 - -1.554015)/Math.pow(1 + Math.pow(atmoPressure/19056230d,0.5134927),1094.463);
-        var maxDayIncreaseMultiple = 7.711577 + (0.2199364 - 7.711577)/Math.pow(1 + Math.pow(atmoPressure/2017503d,1.004679),757641.3);
-        var incomingRadiation = luminosity/sqrt(orbitDistance);
-
-        var daytimeMax = Math.min(incomingRadiation*increasePerHourFactor*rotationPeriod/2d,baseTemperature*incomingRadiation*maxDayIncreaseMultiple);
-
-        var decresePerHour =  -0.5906138 + (19.28838 - -0.5906138)/Math.pow(1 + Math.pow(atmoPressure/291099200d,0.5804294),172207.2);
-        var maxNigthDecreaseMultiple = 0.03501408 + (0.7690167 - 0.03501408)/Math.pow(1 + Math.pow(atmoPressure/6815738d,0.7782145),322006.2);
-
-        var nighttimeMin =- Math.min(decresePerHour*rotationPeriod/2d,maxNigthDecreaseMultiple*baseTemperature);
-
-        System.out.println("+"+daytimeMax+"/"+nighttimeMin);
-        System.out.println("[+"+increasePerHourFactor+"/"+decresePerHour+"]");
-        tempTempFacts.nightTempMod(BigDecimal.valueOf(nighttimeMin).round(NumberUtilities.TWO));
-        tempTempFacts.dayTempMod(BigDecimal.valueOf(daytimeMax).round(NumberUtilities.TWO));
+        o2.ifPresent(gas -> {
+            var percentage = o2.map(AtmosphericGases::getPercentageInAtmo).orElse(0);
+            gas.setPercentageInAtmo(percentage/2);
+            atmosphericComposition.add(AtmosphericGases.builder()
+                                                       .name("CO2")
+                                                       .percentageInAtmo(percentage/2)
+                                                       .build());
+        });
 
     }
 
 
-    public static boolean isAboveBoilingpoint(int temperature, double pressure){
+    public static boolean isAboveBoilingpoint(int temperature, double pressure) {
 
-        if(temperature<274) return false;
+        if (temperature < 274) return false;
 
-        if(temperature>640) return true;
+        if (temperature > 640) return true;
 
         double A;
         double B;
         double C;
 
-        if(temperature<374){
-            A=8.07131;
-            B=1730.63;
-            C=233.426;
+        if (temperature < 374) {
+            A = 8.07131;
+            B = 1730.63;
+            C = 233.426;
         } else {
-            A=8.14019;
-            B=1810.94;
-            C=244.485;
+            A = 8.14019;
+            B = 1810.94;
+            C = 244.485;
         }
 
-        return pressure>Math.pow(10,A-(B/(C+(temperature-274))));
+        return pressure > Math.pow(10, A - (B / (C + (temperature - 274))));
     }
 
     @SuppressWarnings("rawtypes")
-    static public TreeSet<AtmosphericGases> createPlanetary(Star star,
-                                                 int baseTemperature,
-                                                 String tectonicActivityGroup,
-                                                 double radius,
-                                                 double gravity,
-                                                 Planet.PlanetBuilder planet) {
-        Set<String> makeAtmoshpere = new TreeSet<>();
-        TreeSet<AtmosphericGases> atmoArray = new TreeSet<>(new AtmosphericGases.atmoCompositionComparator());
+    static public Set<AtmosphericGases> createPlanetary(Star star,
+                                                            int baseTemperature,
+                                                            String tectonicActivityGroup,
+                                                            double radius,
+                                                            double gravity,
+                                                            double magneticField,
+                                                        Planet.PlanetBuilder planet) {
+        Set<String> makeAtmoshpere = new HashSet<>();
 
         startAtmosphereFromTemperature(baseTemperature, tectonicActivityGroup, makeAtmoshpere);
 
@@ -452,16 +419,18 @@ public class MakeAtmosphere {
 
         planet.boilingAtmo(boilingAtmo);
 
-        howDoTheStarlightAffectTheAtmosphere(star, baseTemperature, makeAtmoshpere);
+        howDoTheStarlightAffectTheAtmosphere(star, baseTemperature, makeAtmoshpere, magneticField);
+
+        Set<AtmosphericGases> atmosphere = new HashSet<>();
 
         if (!makeAtmoshpere.isEmpty()) {
 
-            setAtmosphericGasesConcentrations(makeAtmoshpere, atmoArray);
+           atmosphere =  setAtmosphericGasesConcentrations(makeAtmoshpere);
         }
-        return atmoArray;
+        return atmosphere;
     }
 
-    private static void setAtmosphericGasesConcentrations(Set<String> makeAtmoshpere, TreeSet<AtmosphericGases> atmoArray) {
+    private static Set<AtmosphericGases> setAtmosphericGasesConcentrations(Set<String> makeAtmoshpere) {
 
         //This should really be done with a bit more thought and just not random.
 
@@ -475,45 +444,62 @@ public class MakeAtmosphere {
         }
 
         part[0] += percentage; //whats left is added to primary gas
-        ArrayList<String> randGas = new ArrayList<>(makeAtmoshpere);
-        Collections.shuffle(randGas);
 
-        for (int i = 0; i < part.length; i++) {
-            atmoArray.add(AtmosphericGases.builder()
-                                          .name(randGas.get(i))
-                                          .percentageInAtmo(part[i])
-                                          .build());
+
+        ArrayList<String> randGas = new ArrayList<>();
+        if(makeAtmoshpere.contains("N2")){
+            makeAtmoshpere.remove("N2");
+
+            randGas.addAll(makeAtmoshpere);
+            Collections.shuffle(randGas);
+            randGas.add(0,"N2");
+
+        } else {
+            randGas.addAll(makeAtmoshpere);
+
         }
+
+        Set<AtmosphericGases> atmo = new HashSet<>();
+        for (int i = 0; i < part.length; i++) {
+            atmo.add(AtmosphericGases.builder()
+                                     .name(randGas.get(i))
+                                     .percentageInAtmo(part[i])
+                                     .build());
+        }
+
+        return  atmo;
     }
 
-    private static void howDoTheStarlightAffectTheAtmosphere(Star star, int baseTemperature, Set<String> makeAtmoshpere) {
+    private static void howDoTheStarlightAffectTheAtmosphere(Star star, int baseTemperature, Set<String> makeAtmoshpere, double magneticField) {
+        var magneticFieldFactor = 1+squared(magneticField)/100;
+
         if ((star.getClassification().contains("A")
                 || star.getClassification().contains("B"))
-                && baseTemperature > 150) {
+                && baseTemperature > 150 * magneticFieldFactor) {
             makeAtmoshpere.remove("H2O");
             makeAtmoshpere.remove("NH3");
             makeAtmoshpere.remove("CH4");
             makeAtmoshpere.remove("H2S");
         }
-        if (star.getClassification().contains("F") && baseTemperature > 180) {
+        if (star.getClassification().contains("F") && baseTemperature > 180 * magneticFieldFactor ) {
             makeAtmoshpere.remove("H2O");
             makeAtmoshpere.remove("NH3");
             makeAtmoshpere.remove("CH4");
             makeAtmoshpere.remove("H2S");
         }
-        if (star.getClassification().contains("G") && baseTemperature > 230) {
+        if (star.getClassification().contains("G") && baseTemperature > 230 * magneticFieldFactor) {
             makeAtmoshpere.remove("H2O");
             makeAtmoshpere.remove("NH3");
             makeAtmoshpere.remove("CH4");
             makeAtmoshpere.remove("H2S");
         }
-        if (star.getClassification().contains("K") && baseTemperature > 250) {
+        if (star.getClassification().contains("K") && baseTemperature > 250 * magneticFieldFactor) {
             makeAtmoshpere.remove("H2O");
             makeAtmoshpere.remove("NH3");
             makeAtmoshpere.remove("CH4");
             makeAtmoshpere.remove("H2S");
         }
-        if ((star.getClassification().contains("M")) && baseTemperature > 270) {
+        if ((star.getClassification().contains("M")) && baseTemperature > 270 * magneticFieldFactor) {
             makeAtmoshpere.remove("H2O");
             makeAtmoshpere.remove("NH3");
             makeAtmoshpere.remove("CH4");
@@ -522,9 +508,9 @@ public class MakeAtmosphere {
     }
 
     private static boolean whatGasesStaysInTheAtmosphere(int baseTemperature, double radius, double gravity, Set<String> makeAtmoshpere) {
-        double retainedGases = 0.02783 * baseTemperature / Math.pow(Math.pow((19600 * gravity * radius), 0.5) / 11200, 2);
+        double retainedGases = 0.02783 * baseTemperature / squared(sqrt((19600 * gravity * radius)) / 11200);
         boolean boilingAtmo = false;
-
+//Rewrite this by assigning gasses as Enums with molecular weight and so on
         if (retainedGases > 2) boilingAtmo = makeAtmoshpere.remove("H2");
         if (retainedGases > 4) boilingAtmo = makeAtmoshpere.remove("He");
         if (retainedGases > 16) boilingAtmo = makeAtmoshpere.remove("CH4");
@@ -573,19 +559,25 @@ public class MakeAtmosphere {
                 if (Dice.d6() < 2) makeAtmoshpere.add("NH3");
 
                 break;
-            case 3:case 4: case 5:
+            case 3:
+            case 4:
+            case 5:
                 makeAtmoshpere.add("N2");
                 makeAtmoshpere.add("Ne");
                 break;
-            case 6:case 7: case 8:
+            case 6:
+            case 7:
+            case 8:
                 makeAtmoshpere.add("He");
                 makeAtmoshpere.add("H2");
                 break;
-            case 9: case 10:
+            case 9:
+            case 10:
                 makeAtmoshpere.add("N2");
                 makeAtmoshpere.add("H2");
                 break;
-            case 11:case 12:
+            case 11:
+            case 12:
                 makeAtmoshpere.add("He");
                 break;
             default:
@@ -608,20 +600,26 @@ public class MakeAtmosphere {
                 if (Dice.d6() < 2) makeAtmoshpere.add("CO");
                 if (Dice.d6() < 2) makeAtmoshpere.add("NH3");
                 break;
-            case 3:case 4: case 5:
+            case 3:
+            case 4:
+            case 5:
                 makeAtmoshpere.add("H2");
                 makeAtmoshpere.add("He");
                 break;
-            case 6:case 7: case 8:
+            case 6:
+            case 7:
+            case 8:
                 makeAtmoshpere.add("H2");
                 makeAtmoshpere.add("He");
                 makeAtmoshpere.add("N2");
                 break;
-            case 9: case 10:
+            case 9:
+            case 10:
                 makeAtmoshpere.add("N2");
                 makeAtmoshpere.add("CH4");
                 break;
-            case 11:case 12:
+            case 11:
+            case 12:
                 makeAtmoshpere.add("N2");
                 makeAtmoshpere.add("CO");
                 break;
@@ -647,15 +645,21 @@ public class MakeAtmosphere {
             case 3:
                 makeAtmoshpere.add("CO2");
                 break;
-            case 4:case 5:case 6:case 7: case 8:
+            case 4:
+            case 5:
+            case 6:
+            case 7:
+            case 8:
                 makeAtmoshpere.add("N2");
                 makeAtmoshpere.add("CO2");
                 break;
-            case 9: case 10:
+            case 9:
+            case 10:
                 makeAtmoshpere.add("N2");
                 makeAtmoshpere.add("CH4");
                 break;
-            case 11:case 12:
+            case 11:
+            case 12:
                 makeAtmoshpere.add("H2");
                 makeAtmoshpere.add("He");
                 break;
@@ -683,17 +687,22 @@ public class MakeAtmosphere {
             case 3:
                 makeAtmoshpere.add("CO2");
                 break;
-            case 4:case 5:
+            case 4:
+            case 5:
                 makeAtmoshpere.add("H2O");//Obs just adding water to below
-            case 6: case 7:case 8:
+            case 6:
+            case 7:
+            case 8:
                 makeAtmoshpere.add("N2");
                 makeAtmoshpere.add("CO2");
                 break;
-            case 9: case 10:
+            case 9:
+            case 10:
                 makeAtmoshpere.add("NO2");
                 makeAtmoshpere.add("SO2");
                 break;
-            case 11: case 12:
+            case 11:
+            case 12:
                 makeAtmoshpere.add("SO2");
                 break;
             default:
@@ -717,17 +726,22 @@ public class MakeAtmosphere {
             case 3:
                 makeAtmoshpere.add("CO2");
                 break;
-            case 4: case 5:
+            case 4:
+            case 5:
                 makeAtmoshpere.add("H2O");//Obs just adding water to below
-            case 6:case 7:case 8:
+            case 6:
+            case 7:
+            case 8:
                 makeAtmoshpere.add("N2");
                 makeAtmoshpere.add("CO2");
                 break;
-            case 9:case 10:
+            case 9:
+            case 10:
                 makeAtmoshpere.add("N2");
                 makeAtmoshpere.add("CH4");
                 break;
-            case 11:case 12:
+            case 11:
+            case 12:
                 makeAtmoshpere.add("CO2");
                 makeAtmoshpere.add("CH4");
                 makeAtmoshpere.add("NH3");

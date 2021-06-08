@@ -11,7 +11,7 @@ public class StarClassificationTable {
 
     static {
         map.put(60000, "X"); //This should be implemented as some special case, a black hole etc
-        map.put(30000, "O");
+        map.put(30000, "O"); //Problematic so these are cut out from the equation for now
         map.put(10000, "B");
         map.put(7500, "A");
         map.put(6000, "F");
@@ -27,12 +27,15 @@ public class StarClassificationTable {
 
         Integer topTemp = 0;
         Integer baseTemp = 0;
+        int deciNumber;
+
         try {
             baseTemp = map.floorKey(temperature);
             topTemp = map.ceilingKey(temperature);
-            
-            int deciNumber = (int)(10 - (10 * (temperature - baseTemp) /(1.0*(topTemp - baseTemp))));
-            return map.get(baseTemp) + deciNumber;
+
+            deciNumber = (int)(10 - (10 * (temperature - baseTemp) /(1.0*(topTemp - baseTemp))));
+
+
         } catch (Exception e) {
             log.warn("\n++++++++++\nTemperature error!" +
                                        "\n temperature = " + temperature + " " +
@@ -42,5 +45,10 @@ public class StarClassificationTable {
 
             return "unknown";
         }
+
+        var starClass = map.get(baseTemp) ;
+
+
+        return starClass + deciNumber;
     }
 }

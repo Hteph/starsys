@@ -3,7 +3,7 @@ package com.github.hteph.utils.enums;
 public enum BaseElementOfLife {
 
     CARBON ("Carbon based"),
-    Silica ("Silica based");
+    SILICA ("Silica based");
 
     public final String label;
 

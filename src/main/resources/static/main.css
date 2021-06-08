@@ -11,7 +11,7 @@ table {
     border:double rgba(148, 49, 38 ,1) 10px;
     border-radius:10px;
     -moz-border-radius:10px;
-    width:1600px;
+    width:95%;
 }
 
 td, th {
@@ -35,7 +35,7 @@ td:first-child, th:first-child {
     color: #444;
     cursor: pointer;
     padding: 18px;
-    width: 1600px;
+    width: 95%;
     text-align: left;
     border:double #B03A2E 2px;
     outline: none;

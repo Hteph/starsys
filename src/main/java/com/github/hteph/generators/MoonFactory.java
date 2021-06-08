@@ -3,15 +3,18 @@ package com.github.hteph.generators;
 
 import com.github.hteph.generators.utils.LifeMethods;
 import com.github.hteph.generators.utils.MakeAtmosphere;
+import com.github.hteph.generators.utils.PlanetaryUtils;
+import com.github.hteph.generators.utils.TempertureMethods;
 import com.github.hteph.repository.objects.AtmosphericGases;
+import com.github.hteph.repository.objects.Biosphere;
 import com.github.hteph.repository.objects.OrbitalFacts;
 import com.github.hteph.repository.objects.Planet;
 import com.github.hteph.repository.objects.Star;
-import com.github.hteph.repository.objects.TemperatureFacts;
 import com.github.hteph.tables.FindAtmoPressure;
 import com.github.hteph.tables.TableMaker;
 import com.github.hteph.tables.TectonicActivityTable;
 import com.github.hteph.utils.Dice;
+import com.github.hteph.utils.enums.BaseElementOfLife;
 import com.github.hteph.utils.enums.Breathing;
 import com.github.hteph.utils.enums.HydrosphereDescription;
 import com.github.hteph.utils.enums.StellarObjectType;
@@ -22,18 +25,17 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.DoubleStream;
 
+import static com.github.hteph.generators.utils.MakeAtmosphere.adjustForOxygen;
 import static com.github.hteph.generators.utils.MakeAtmosphere.checkAtmo;
 import static com.github.hteph.generators.utils.MakeAtmosphere.checkHydrographics;
 import static com.github.hteph.generators.utils.MakeAtmosphere.findHydrosphereDescription;
 import static com.github.hteph.generators.utils.MakeAtmosphere.findTheHydrosphere;
-import static com.github.hteph.generators.utils.MakeAtmosphere.getWaterVaporFactor;
+import static com.github.hteph.generators.utils.PlanetaryUtils.findAlbedo;
+import static com.github.hteph.generators.utils.PlanetaryUtils.findTectonicGroup;
+import static com.github.hteph.generators.utils.PlanetaryUtils.getDensity;
+import static com.github.hteph.generators.utils.PlanetaryUtils.getTectonicActivityGroup;
 import static com.github.hteph.utils.NumberUtilities.cubed;
 import static com.github.hteph.utils.NumberUtilities.sqrt;
 import static com.github.hteph.utils.NumberUtilities.squared;
@@ -62,13 +64,13 @@ public final class MoonFactory {
         int baseTemperature;
         HydrosphereDescription hydrosphereDescription;
         int hydrosphere;
-        TreeSet<AtmosphericGases> atmoshericComposition;
+        Set<AtmosphericGases> atmoshericComposition;
         BigDecimal atmoPressure;
         double albedo;
         String tectonicActivityGroup;
 
         double moonsPlanetMass = 0;
-        Double lunarOrbitalPeriod;
+        double lunarOrbitalPeriod;
 
         double moonsPlanetsRadii = 0;
 
@@ -82,7 +84,7 @@ public final class MoonFactory {
                                 .stellarObjectType(StellarObjectType.MOON)
                                 .description(description)
                                 .classificationName(classificationName)
-                .lunarOrbitDistance(BigDecimal.valueOf(lunarOrbitNumberInPlanetRadii).round(THREE));
+                                .lunarOrbitDistance(BigDecimal.valueOf(lunarOrbitNumberInPlanetRadii).round(THREE));
 
         var orbitalFacts = OrbitalFacts.builder()
                                        .orbitsAround(orbitingAroundPlanet)
@@ -103,7 +105,7 @@ public final class MoonFactory {
 
         // size may not be all, but here it is set
         //TODO add greater varity for moon objects, depending on planet
-        final int moonRadius = Math.min(orbitingAroundPlanet.getRadius()/3,
+        final int moonRadius = Math.min(orbitingAroundPlanet.getRadius() / 3,
                                         Dice._2d6() * getBaseSize(orbitalObjectClass));
         moonBuilder.radius(moonRadius);
 
@@ -112,6 +114,7 @@ public final class MoonFactory {
         final double mass = cubed(moonRadius / 6380.0) * density;
         final double gravity = mass / squared((moonRadius / 6380.0));
 
+        //I assume this is in Earth days?
         lunarOrbitalPeriod = sqrt(cubed((lunarOrbitNumberInPlanetRadii * moonsPlanetsRadii) / 400000)
                                           * 793.64 / (moonsPlanetMass + mass));
 
@@ -133,10 +136,9 @@ public final class MoonFactory {
         if (moonTidal > 1) planetLocked = true;
         moonBuilder.planetLocked(planetLocked);
 
-
         //Rotation - day/night cycle
         if (planetLocked) {
-            rotationalPeriod = lunarOrbitalPeriod;
+            rotationalPeriod = lunarOrbitalPeriod * 24;
         } else {
             rotationalPeriod = (Dice.d6() + Dice.d6() + 8)
                     * (1 + 0.1 * (tidalForce * centralStar.getAge().doubleValue() - sqrt(mass)));
@@ -171,16 +173,19 @@ public final class MoonFactory {
         tectonicCore = findTectonicGroup(IS_INNER_ZONE, density);
         tectonicActivityGroup = getTectonicActivityGroup(centralStar, tidalForce, mass);
 
+        var magneticField = PlanetaryUtils.getMagneticField(rotationalPeriod,
+                                                            tectonicCore,
+                                                            tectonicActivityGroup,
+                                                            centralStar,
+                                                            density,
+                                                            mass);
+
         moonBuilder.tectonicCore(tectonicCore)
                    .tectonicActivityGroup(tectonicActivityGroup)
-                   .magneticField(BigDecimal.valueOf(getMagneticField(rotationalPeriod,
-                                                                      tectonicCore,
-                                                                      tectonicActivityGroup,
-                                                                      centralStar,
-                                                                      density,
-                                                                      mass
-                   )).round(TWO));
+                   .magneticField(BigDecimal.valueOf(magneticField).round(TWO));
 
+        //adding magnetic field from planet (where it exists i.e Jovians) for the forthcoming calculations
+        if(orbitingAroundPlanet.getMagneticField() != null ) magneticField +=orbitingAroundPlanet.getMagneticField().doubleValue();
         //Temperature
         baseTemperature = (int) (255 / sqrt((orbitDistance.doubleValue()
                 / sqrt(centralStar.getLuminosity().doubleValue()))));
@@ -194,12 +199,14 @@ public final class MoonFactory {
         moonBuilder.hydrosphereDescription(hydrosphereDescription);
         moonBuilder.hydrosphere(hydrosphere);
 
+
         //Atmoshperic details
         atmoshericComposition = MakeAtmosphere.createPlanetary(centralStar,
                                                                baseTemperature,
                                                                tectonicActivityGroup,
                                                                moonRadius,
                                                                gravity,
+                                                               magneticField,
                                                                moonBuilder);
         var tempMoon = moonBuilder.build();
 
@@ -210,6 +217,10 @@ public final class MoonFactory {
                                                   atmoshericComposition);
 
         // TODO Special considerations for c objects, this should be expanded upon when these gets more details
+        albedo = findAlbedo(IS_INNER_ZONE, atmoPressure.doubleValue(), hydrosphereDescription, hydrosphere);
+        moonBuilder.albedo(BigDecimal.valueOf(albedo).round(TWO));
+
+        baseTemperature = (int)( baseTemperature*albedo);
 
         if (orbitalObjectClass == 'c') { //These should never had a chance to get an "real" atmosphere in the first
             // place but may have some traces
@@ -231,48 +242,57 @@ public final class MoonFactory {
 
         //Bioshpere
 
-        var hasGaia =false;
-        if(atmoPressure.doubleValue()>0) hasGaia = LifeMethods.testLife(baseTemperature,
-                                       atmoPressure.doubleValue(),
-                                       hydrosphere,
-                                       atmoshericComposition,
-                                       systemAge);
+        var hasGaia = false;
+        if (atmoPressure.doubleValue() > 0) hasGaia = LifeMethods.testLife(baseTemperature,
+                                                                           atmoPressure.doubleValue(),
+                                                                           hydrosphere,
+                                                                           atmoshericComposition,
+                                                                           systemAge,
+                                                                           magneticField);
         if (hasGaia) lifeType = LifeMethods.findLifeType(atmoshericComposition, systemAge);
         else lifeType = Breathing.NONE;
 
         if (lifeType.equals(Breathing.OXYGEN)) adjustForOxygen(atmoPressure.doubleValue(), atmoshericComposition);
 
-        albedo = findAlbedo(IS_INNER_ZONE, atmoPressure.doubleValue(), hydrosphereDescription, hydrosphere);
-        moonBuilder.albedo(BigDecimal.valueOf(albedo).round(TWO));
         double greenhouseFactor = MakeAtmosphere.findGreenhouseGases(atmoshericComposition,
-                                                                        atmoPressure.doubleValue(),
-                                                                        baseTemperature,
-                                                                        hydrosphereDescription,
-                                                                        hydrosphere);
+                                                                     atmoPressure.doubleValue(),
+                                                                     baseTemperature,
+                                                                     hydrosphereDescription,
+                                                                     hydrosphere,
+                                                                     hasGaia);
 
-        //TODO Here adding some Gaia moderation factor (needs tweaking probably) moving a bit more towards
-        // water/carbon ideal
-        if (lifeType.equals(Breathing.OXYGEN) && baseTemperature > 350) greenhouseFactor *= 0.8;
-        if (lifeType.equals(Breathing.OXYGEN) && baseTemperature < 250) greenhouseFactor *= 1.2;
+        int surfaceTemp = TempertureMethods.getSurfaceTemp(baseTemperature,
+                                                           atmoPressure,
+                                                           greenhouseFactor,
+                                                           hasGaia,
+                                                           lifeType);
 
-        int surfaceTemp = getSurfaceTemp(baseTemperature, atmoPressure, albedo, greenhouseFactor, hasGaia);
-        if(!atmoshericComposition.isEmpty()) checkAtmo(atmoshericComposition);
+        if (!atmoshericComposition.isEmpty()) checkAtmo(atmoshericComposition, atmoPressure.doubleValue());
+
+
+
         moonBuilder.atmosphericComposition(atmoshericComposition);
         moonBuilder.lifeType(lifeType);
 
         //Climate -------------------------------------------------------
         // sets all the temperature stuff from axial tilt etc etc TODO should take the special circumstances of moons too
 
-        var temperatureFacts = MakeAtmosphere.setAllKindOfLocalTemperature(atmoPressure.doubleValue(),
-                                                            hydrosphere,
-                                                            rotationalPeriod,
-                                                            axialTilt,
-                                                            surfaceTemp,
-                                                            orbitingAroundPlanet.getOrbitalFacts()
-                                                                                .getOrbitalPeriod()
-                                                                                .doubleValue());
+        var temperatureFacts = TempertureMethods.setAllKindOfLocalTemperature(atmoPressure.doubleValue(),
+                                                                              hydrosphere,
+                                                                              rotationalPeriod,
+                                                                              axialTilt,
+                                                                              surfaceTemp,
+                                                                              orbitingAroundPlanet.getOrbitalFacts()
+                                                                                               .getOrbitalPeriod()
+                                                                                               .doubleValue());
         temperatureFacts.surfaceTemp(surfaceTemp);
         //TODO Weather and day night temp cycle
+        TempertureMethods.setDayNightTemp(temperatureFacts,
+                                          baseTemperature,
+                                          centralStar.getLuminosity().doubleValue(),
+                                          orbitDistance.doubleValue(),
+                                          atmoPressure.doubleValue(),
+                                          rotationalPeriod);
 
         checkHydrographics(hydrosphereDescription,
                            hydrosphere,
@@ -282,37 +302,30 @@ public final class MoonFactory {
                            temperatureFacts.build().getRangeBandTempWinter(),
                            temperatureFacts.build().getRangeBandTempSummer());
 
-        if (!atmoshericComposition.isEmpty()) MakeAtmosphere.checkAtmo(atmoshericComposition);
+        checkHydrographics(hydrosphereDescription,
+                           hydrosphere,
+                           atmoPressure,
+                           moonBuilder,
+                           surfaceTemp,
+                           temperatureFacts.build().getRangeBandTempWinter(),
+                           temperatureFacts.build().getRangeBandTempSummer());
+
+        if (!atmoshericComposition.isEmpty()) MakeAtmosphere.checkAtmo(atmoshericComposition, atmoPressure.doubleValue());
+
+        if (lifeType != Breathing.NONE) {
+            var biosphere = Biosphere.builder()
+                                     .homeworld(name)
+                                     .respiration(lifeType)
+                                     .baseElement(surfaceTemp<360 ? BaseElementOfLife.CARBON : BaseElementOfLife.SILICA);
+            moonBuilder.life(biosphere.build());
+        }
 
         moonBuilder.orbitalFacts(orbitalFacts.build());
         moonBuilder.temperatureFacts(temperatureFacts.build());
         moonBuilder.atmoPressure(atmoPressure.round(THREE));
+
+
         return moonBuilder.build();
-    }
-
-    private static double getMagneticField(double rotationalPeriod, String tectonicCore, String tectonicActivityGroup, Star orbitingAround, double density, double mass) {
-        double magneticField;
-        if (tectonicCore.contains("metal")) {
-            magneticField = 10 / (sqrt((rotationalPeriod / 24.0)))
-                    * squared(density)
-                    * sqrt(mass)
-                    / orbitingAround.getAge().doubleValue();
-            if (tectonicCore.contains("small")) magneticField *= 0.5;
-            if (tectonicCore.contains("medium")) magneticField *= 0.75;
-            if (tectonicActivityGroup.equals("Dead")) magneticField = Dice.d6() / 15.0;
-        } else {
-            magneticField = Dice.d6() / 20.0;
-        }
-        return magneticField;
-    }
-
-    private static String getTectonicActivityGroup(Star orbitingAround, double tidalForce, double mass) {
-        double tectonicActivity;
-        String tectonicActivityGroup;
-        tectonicActivity = (5 + Dice._2d6() - 2) * Math.pow(mass, 0.5) / orbitingAround.getAge().doubleValue();
-        tectonicActivity *= (1 + 0.5 * tidalForce);
-        tectonicActivityGroup = TectonicActivityTable.findTectonicActivityGroup(tectonicActivity);
-        return tectonicActivityGroup;
     }
 
     private static int getEccentryMod(char orbitalObjectClass) {
@@ -321,173 +334,21 @@ public final class MoonFactory {
         return eccentryMod;
     }
 
-    private static double getDensity(BigDecimal orbitDistance, Star orbitingAround, double snowLine) {
-        double density;
-        if (orbitDistance.doubleValue() < snowLine) {
-            density = 0.3 + (Dice._2d6() - 2) * 0.127 / Math.pow(
-                    0.4 + (orbitDistance.doubleValue() / sqrt(orbitingAround.getLuminosity().doubleValue())), 0.67);
-        } else {
-            density = 0.3 + (Dice._2d6() - 2) * 0.05;
-        }
-        return density;
-    }
-
     private static int getBaseSize(char orbitalObjectClass) {
 
         //TODO add greater varity for moon objects, depending on planet
-        int baseSize=10;
+        int baseSize = 10;
         if (orbitalObjectClass == 'M') {
-            List<Integer> baseSizeList = Arrays.asList(150, 200, 300, 400, 500, 600, 700, 800, 850, 900);
-            baseSize= TableMaker.makeRoll(Dice.d10(), baseSizeList);
+            List<Integer> baseSizeList = Arrays.asList(150, 200, 300, 400, 500, 600, 700, 800, 900, 1000);
+            baseSize = TableMaker.makeRoll(Dice.d10(), baseSizeList);
 
         } else if (orbitalObjectClass == 'm') {
             List<Integer> baseSizeList = Arrays.asList(5, 10, 15, 20, 25, 30, 40, 50, 60, 75);
-            baseSize= TableMaker.makeRoll(Dice.d10(), baseSizeList);
+            baseSize = TableMaker.makeRoll(Dice.d10(), baseSizeList);
 
         } else if (orbitalObjectClass == 'c') baseSize = 90;
         return baseSize;
     }
 
-    private static int getSurfaceTemp(int baseTemperature,
-                                      BigDecimal atmoPressure,
-                                      double albedo,
-                                      double greenhouseFactor,
-                                      boolean hasGaia) {
 
-        // My take on the effect of greenhouse and albedo on temperature max planerary temp is 1000 and the half
-        // point is 400
-        double surfaceTemp;
-        if (hasGaia) {
-            surfaceTemp = 400 * (baseTemperature * albedo * greenhouseFactor)
-                    / (350d + baseTemperature * albedo * greenhouseFactor);
-        } else if (atmoPressure.doubleValue() > 0) {
-            surfaceTemp = 800 * (baseTemperature * albedo * greenhouseFactor)
-                    / (400d + baseTemperature * albedo * greenhouseFactor);
-        } else {
-            surfaceTemp = 1200 * (baseTemperature * albedo * greenhouseFactor)
-                    / (800d + baseTemperature * albedo * greenhouseFactor);
-        }
-        return (int) surfaceTemp;
-    }
-
-    private static void adjustForOxygen(double atmoPressure, TreeSet<AtmosphericGases> atmosphericComposition) {
-
-        Map<String, AtmosphericGases> atmoMap = atmosphericComposition
-                .stream()
-                .collect(Collectors.toMap(AtmosphericGases::getName, x -> x));
-
-        int oxygenMax = Math.max(50, (int) (Dice._3d6() * 2 / atmoPressure)); //This could be a bit more involved and interesting
-
-        if (atmoMap.containsKey("CO2")) {
-            if (atmoMap.get("CO2").getPercentageInAtmo() > oxygenMax) {
-                AtmosphericGases co2 = atmoMap.get("CO2");
-                atmoMap.remove("CO2");
-                atmoMap.put("O2", AtmosphericGases.builder().name("O2").percentageInAtmo(oxygenMax).build());
-                //perhaps the remnant CO should be put in as N2 instead?
-                atmoMap.put("CO2", AtmosphericGases.builder()
-                                                   .name("CO2")
-                                                   .percentageInAtmo(co2.getPercentageInAtmo() - oxygenMax)
-                                                   .build());
-
-            } else {
-                AtmosphericGases co2 = atmoMap.get("CO2");
-                atmoMap.remove("CO2");
-                atmoMap.put("O2", AtmosphericGases.builder()
-                                                  .name("O2")
-                                                  .percentageInAtmo(co2.getPercentageInAtmo())
-                                                  .build());
-            }
-        } else { //if no CO2 we just find the largest and take from that
-            AtmosphericGases gas = atmosphericComposition.pollFirst();
-            if (gas != null) {
-                if (gas.getPercentageInAtmo() < oxygenMax) {
-                    atmoMap.put("O2", AtmosphericGases.builder()
-                                                      .name("O2")
-                                                      .percentageInAtmo(gas.getPercentageInAtmo())
-                                                      .build());
-                } else {
-                    atmoMap.put("O2", AtmosphericGases.builder()
-                                                      .name("O2")
-                                                      .percentageInAtmo(oxygenMax)
-                                                      .build());
-                    atmoMap.put(gas.getName(), AtmosphericGases.builder()
-                                                               .name("O2")
-                                                               .percentageInAtmo(gas.getPercentageInAtmo() -
-                                                                                         oxygenMax)
-                                                               .build());
-                }
-            }
-        }
-
-        MakeAtmosphere.removeCombustibles(atmoMap);
-        atmosphericComposition.clear();
-        atmosphericComposition.addAll(atmoMap.values());
-    }
-
-    private static double findAlbedo(boolean InnerZone,
-                                     double atmoPressure,
-                                     HydrosphereDescription hydrosphereDescription,
-                                     int hydrosphere) {
-
-        int mod = 0;
-        int[] randAlbedoArray;
-        Double[] albedoBase = new Double[]{0.75, 0.85, 0.95, 1.05, 1.15};
-
-        if (InnerZone) {
-            randAlbedoArray = new int[]{0, 2, 4, 7, 10};
-
-            if (atmoPressure < 0.05) mod = 2;
-            if (atmoPressure > 50) {
-                mod = -4;
-            } else if (atmoPressure > 5) {
-                mod = -2;
-            }
-            if (hydrosphere > 50
-                    && hydrosphereDescription.equals(HydrosphereDescription.ICE_SHEET)
-                    && mod > -2)
-                mod = -2;
-            if (hydrosphere > 90
-                    && hydrosphereDescription.equals(HydrosphereDescription.ICE_SHEET)
-                    && mod > -4)
-                mod = -4;
-
-        } else {
-            randAlbedoArray = new int[]{0, 4, 6, 8, 10};
-            if (atmoPressure > 1) mod = 1;
-        }
-        return TableMaker.makeRoll(Dice._2d6() + mod, randAlbedoArray, albedoBase) + (Dice.d10() - 1) * 0.01;
-    }
-
-
-
-    private static String findTectonicGroup(boolean InnerZone, double density) {
-
-        String tempTectonics;
-        if (InnerZone) {
-            if (density < 0.7) {
-                if (Dice.d6() < 4) {
-                    tempTectonics = "Silicates core";
-                } else {
-                    tempTectonics = "Silicates, small metal core";
-                }
-            } else if (density < 1) {
-                tempTectonics = "Iron-nickel, medium metal core";
-            } else {
-                tempTectonics = "Iron-nickel, large metal core";
-            }
-        } else {
-            if (density < 0.3) {
-                tempTectonics = "Ice core";
-            } else if (density < 1) {
-                tempTectonics = "Silicate core";
-            } else {
-                if (Dice.d6() < 4) {
-                    tempTectonics = "Silicates core";
-                } else {
-                    tempTectonics = "Silicates, small metal core";
-                }
-            }
-        }
-        return tempTectonics;
-    }
 }

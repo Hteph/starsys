@@ -10,6 +10,9 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.SuperBuilder;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -58,9 +61,13 @@ public class Planet extends StellarObject {
 
     public String getAtmosphericCompositionParsed() {
 
-        return atmosphericComposition == null || atmosphericComposition.isEmpty()
-                ? ""
-                :"["+ atmosphericComposition.stream().map(AtmosphericGases::toString).collect(Collectors.joining(", "))+"]";
+        if(atmosphericComposition == null || atmosphericComposition.isEmpty()) return "";
+
+        ArrayList<AtmosphericGases> atmo = new ArrayList<>(atmosphericComposition);
+
+        atmo.sort(Comparator.reverseOrder());
+
+        return "["+ atmo.stream().map(AtmosphericGases::toString).collect(Collectors.joining(", "))+"]";
     }
 
     @Override
@@ -98,13 +105,13 @@ public class Planet extends StellarObject {
         facts.put("mass", mass.toPlainString());
         facts.put("rotation period", rotationalPeriod.toPlainString());
         facts.put("radius", String.valueOf(radius));
-        facts.put("axial tilt", axialTilt.toPlainString());
+        facts.put("axial tilt", axialTilt.toPlainString()+"\u00B0");
         facts.put("orbital eccentricity", getOrbitalFacts().getOrbitalEccentricity().toPlainString());
         facts.put("magnetic field", magneticField.toPlainString());
         facts.put("orbital period", getOrbitalFacts().getOrbitalPeriod().toPlainString());
 
         facts.put("resonance", String.valueOf(resonanceOrbitalPeriod));
-        facts.put("inclination", getOrbitalFacts().getOrbitalInclination().toPlainString());
+        facts.put("inclination", getOrbitalFacts().getOrbitalInclination().toPlainString()+"\u00B0");
 
         if (getStellarObjectType() != StellarObjectType.JOVIAN) {
             facts.put("gravity", gravity.toPlainString());
@@ -117,7 +124,7 @@ public class Planet extends StellarObject {
             facts.put("hydrosphere", String.valueOf(hydrosphere));
             facts.put("atmospheric composition", getAtmosphericCompositionParsed());
             facts.put("atmospheric pressure", atmoPressure.toPlainString());
-            facts.put("Surface temperature", String.valueOf(temperatureFacts.getSurfaceTemp()-273));
+            facts.put("Surface temperature", String.valueOf(temperatureFacts.getSurfaceTemp()-273)+"\u2103");
 
             facts.put("average rangeband temperature", getStringFromInts(temperatureFacts.getRangeBandTemperature()));
             facts.put("summer rangeband temperature", getStringFromInts(temperatureFacts.getRangeBandTempSummer()));

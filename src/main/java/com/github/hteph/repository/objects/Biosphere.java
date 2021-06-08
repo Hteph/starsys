@@ -9,6 +9,7 @@ import lombok.Data;
 @Builder
 public class Biosphere {
 
+    private String homeworld;
     private Breathing respiration;
     private BaseElementOfLife baseElement;
 

@@ -12,7 +12,9 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -25,21 +27,25 @@ public final class StarFactory {
 
     public static Star get(String systemName, char systemPosition, Star star) {
 
+        List<String> descriptors = new ArrayList<>();
         var randomNameGenerator = new NameGenerator();
 
-        double mass = generateMass();
+        double mass;
+        int temperature;
         //TODO This is for type V stars, should be expanded to handle other types, if the mass is too low to generate a decent temperture,
-        // make a unique stellar object instead, a white dwarf or something
-        int temperature = 100 * (int) (((500 + 4800 * Math.pow(mass, 0.5)) * (0.8 + Math.random() * 0.4)) / 100);
-        if (temperature < 100 || temperature > 55000) {
-            //generate something unique instead
-        }
+        // make a unique stellar object instead, a white dwarf or something, if to high make a giant star
+        do {
+            mass = generateMass();
+            temperature = 100 * (int) (((500 + 4800 * Math.pow(mass, 0.5)) * (0.8 + Math.random() * 0.4)) / 100);
+        }while (temperature<100 || temperature>28000);
+
         double diameter = Math.pow(mass, 2 / 3.0);//Solar relative units
         double lumosity = Math.pow(mass, 3.5); //Solar relative units
         String starClass = StarClassificationTable.findStarClass(temperature) + " V";
         double maxAge = 10 * Math.pow(1 / mass, 2.5);
-        double age = (0.3 + Math.random() * 0.6) * Math.min(maxAge, 13);// in billion of earth years
+        double age = (0.4 + Math.random() * 0.55) * Math.min(maxAge, 13);// in billion of earth years
 
+        if(age/maxAge>0.9) descriptors.add("Near end of lifetime");
 //TODO suspended this as it seems to be a bit overzealus in ingreasing the lumosity
 //        double halfAgeBalance = 2 * age / maxAge;
 //        lumosity *= Math.pow(halfAgeBalance, 0.5);
@@ -47,8 +53,6 @@ public final class StarFactory {
 
         //TODO abundance should be done nicer!
         int abundance = generateAbundance(age);
-
-        String description =  starClass ;
 
         //TODO allow for multiple Starsystems, ie archiveID not hardcoded
 
@@ -68,16 +72,18 @@ public final class StarFactory {
                                        .orbitalDistance(BigDecimal.ZERO)
                                        .orbitalPeriod(BigDecimal.ZERO);
 
+        String description = starClass + ": " + String.join(", ", descriptors);
+
         return Star.builder()
                    .archiveID(systemName + " " + systemPosition)
                    .stellarObjectType(StellarObjectType.STAR)
                    .name(starName)
                    .age(BigDecimal.valueOf(age).round(TWO))
-                   .description(description)
+                   .description(starClass)
                    .luminosity(BigDecimal.valueOf(lumosity).round(THREE))
                    .mass(BigDecimal.valueOf(mass).round(THREE))
                    .diameter(BigDecimal.valueOf(diameter).round(THREE))
-                   .classification(starClass)
+                   .classification(description)
                    .abundance(abundance)
                    .orbitalFacts(orbitalFacts.build())
                    .build();
@@ -98,7 +104,7 @@ public final class StarFactory {
 //        int testDice =Dice._3d6()-3;
 //        double randN =testDice/(15.0+Math.random()/10); //turning the dice roll into a continous sligthly skewed randomnumber.
 //        mass = 0.045/(0.001+Math.pow(randN,5)); // <-----------------------------------------MOST IMPORTANT STARTING POINT
-        return 0.01 + ((Dice.aLotOfd3(6)-3) * Math.random() * Math.random() * Math.random());
+        return 0.01 + ((Dice.aLotOfd3(6)-2) * Math.random() * Math.random() * Math.random()* Math.random());
     }
 
 }
