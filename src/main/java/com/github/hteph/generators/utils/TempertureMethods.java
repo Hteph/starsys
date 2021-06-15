@@ -1,6 +1,7 @@
 package com.github.hteph.generators.utils;
 
 import com.github.hteph.repository.objects.TemperatureFacts;
+import com.github.hteph.utils.Dice;
 import com.github.hteph.utils.NumberUtilities;
 import com.github.hteph.utils.enums.Breathing;
 
@@ -10,6 +11,11 @@ import java.util.stream.DoubleStream;
 import static com.github.hteph.utils.NumberUtilities.sqrt;
 
 public class TempertureMethods {
+
+    public static int findBaseTemp(double orbitalDistance, double luminosity) {
+
+        return (int) (255 / sqrt((orbitalDistance / sqrt(luminosity))));
+    }
 
     public static TemperatureFacts.TemperatureFactsBuilder setSeasonalTemperature(double atmoPressure,
                                                                                   int hydrosphere,
@@ -89,7 +95,7 @@ public class TempertureMethods {
             summerTemperature[i] = (int) (latitudeTemperature[summer] - latitudeTemperature[i]) * seasonEffect;
             winterTemperature[i] = (int) (latitudeTemperature[winter] - latitudeTemperature[i]) * seasonEffect;
         }
-        System.out.println("Setting Seasonal temperatures, example = "+ summerTemperature[0]);
+
         return TemperatureFacts.builder()
                                .rangeBandTemperature(DoubleStream.of(baseTemperature)
                                                                  .mapToInt(t -> (int) Math.ceil(t))
@@ -104,7 +110,7 @@ public class TempertureMethods {
 
 
     public static int getSurfaceTemp(int baseTemperature,
-                                     BigDecimal atmoPressure,
+                                     double atmoPressure,
                                      double greenhouseFactor,
                                      boolean hasGaia,
                                      Breathing lifeType) {
@@ -117,37 +123,21 @@ public class TempertureMethods {
         // My take on the effect of greenhouse and albedo on temperature max planerary temp is 1000 and the half
         // point is 400
         double surfaceTemp;
-        System.out.println("baseTemp before Greenhouse(" + greenhouseFactor + ")= " + baseTemperature);
         if (hasGaia) {
             double a = 3.94935;
             double b = 304.305;
             double t = -2.88013;
 
-            int modTemp =(int)(baseTemperature * NumberUtilities.sqrt(1 + greenhouseFactor));
-            surfaceTemp =100* (int)( a /(1+ b * Math.exp( t *(modTemp/100d))));
+            int modTemp = (int) (baseTemperature * NumberUtilities.sqrt(1 + greenhouseFactor));
+            surfaceTemp = 100 * (int) (a / (1 + b * Math.exp(t * (modTemp / 100d))));
             //surfaceTemp = 400d * (baseTemperature  * greenhouseFactor) / (350d + baseTemperature * greenhouseFactor);
-        } else if (atmoPressure.doubleValue() > 0) {
-            surfaceTemp = 800d * (baseTemperature  * greenhouseFactor)
-                    / (400d + baseTemperature  * greenhouseFactor);
+        } else if (atmoPressure > 0) {
+            surfaceTemp = 800d * (baseTemperature * greenhouseFactor)
+                    / (400d + baseTemperature * greenhouseFactor);
         } else {
-            surfaceTemp = 1200d * (baseTemperature  * greenhouseFactor)
-                    / (800d + baseTemperature  * greenhouseFactor);
+            surfaceTemp = 1200d * (baseTemperature * greenhouseFactor)
+                    / (800d + baseTemperature * greenhouseFactor);
         }
-
-        System.out.println("baseTemp after Greenhouse= " + surfaceTemp);
-        int altTemp = (int) (baseTemperature  * NumberUtilities.sqrt(1 + greenhouseFactor));
-        System.out.println("Alternative calc= " + altTemp);
-
-        int altTemp2 = (int) (baseTemperature  * greenhouseFactor);
-        System.out.println("Alternative2 calc= " + altTemp2);
-
-        double a = 3.94935;
-        double b = 304.305;
-        double t = -2.88013;
-
-        int altTemp3 =100* (int)( a /(1+ b * Math.exp( t *baseTemperature/100)));
-
-        System.out.println("Alternative 3 calc= " + altTemp3);
 
         return (int) surfaceTemp;
     }
@@ -155,22 +145,45 @@ public class TempertureMethods {
     public static void setDayNightTemp(TemperatureFacts.TemperatureFactsBuilder tempTempFacts, int baseTemperature, double luminosity, double orbitDistance, double atmoPressure, double rotationPeriod) {
 
         //Assymerical sigmoidal:  5-parameter logistic (5PL)
+
+
+
         var increasePerHourFactor = -1.554015 + (0.9854966 - -1.554015) / Math.pow(1 + Math.pow(atmoPressure / 19056230d, 0.5134927), 1094.463);
+        increasePerHourFactor = Math.max(0.01,increasePerHourFactor);
         var maxDayIncreaseMultiple = 7.711577 + (0.2199364 - 7.711577) / Math.pow(1 + Math.pow(atmoPressure / 2017503d, 1.004679), 757641.3);
         var incomingRadiation = luminosity / sqrt(orbitDistance);
+        System.out.println("increasePerHourFactor =" + increasePerHourFactor + ", maxDayIncreaseMultiple=" + maxDayIncreaseMultiple + ", incomingRadiation=" + incomingRadiation);
+        var daytimeMax = Math.min(incomingRadiation * increasePerHourFactor * rotationPeriod / 2d,
+                                  Math.min(1000+ Dice._2d6()*25, baseTemperature * incomingRadiation * maxDayIncreaseMultiple));
+        System.out.println("DayTemperatue by day=" + incomingRadiation * increasePerHourFactor * rotationPeriod / 2d + " but max=" + baseTemperature * incomingRadiation * maxDayIncreaseMultiple);
 
-        var daytimeMax = Math.min(incomingRadiation * increasePerHourFactor * rotationPeriod / 2d, baseTemperature * incomingRadiation * maxDayIncreaseMultiple);
+
 
         var decresePerHour = -0.5906138 + (19.28838 - -0.5906138) / Math.pow(1 + Math.pow(atmoPressure / 291099200d, 0.5804294), 172207.2);
+        decresePerHour = Math.min(decresePerHour,0.1);
         var maxNigthDecreaseMultiple = 0.03501408 + (0.7690167 - 0.03501408) / Math.pow(1 + Math.pow(atmoPressure / 6815738d, 0.7782145), 322006.2);
 
-        var nighttimeMin = -Math.min(decresePerHour * rotationPeriod / 2d, maxNigthDecreaseMultiple * baseTemperature);
+        var nighttimeMin = -Math.min(decresePerHour * rotationPeriod / 2d,
+                                     maxNigthDecreaseMultiple * baseTemperature);
 
-        System.out.println("+" + daytimeMax + "/" + nighttimeMin);
-        System.out.println("[+" + increasePerHourFactor + "/" + decresePerHour + "]");
-        tempTempFacts.nightTempMod(BigDecimal.valueOf(nighttimeMin).round(NumberUtilities.TWO));
-        tempTempFacts.dayTempMod(BigDecimal.valueOf(daytimeMax).round(NumberUtilities.TWO));
+        System.out.println("Temperatue by night=" + decresePerHour * rotationPeriod / 2d + " but max=" + maxNigthDecreaseMultiple * baseTemperature);
 
+        tempTempFacts.dayNightVariation(TemperatureFacts.Variation.builder()
+                                                                  .max((int) daytimeMax)
+                                                                  .min((int) nighttimeMin)
+                                                                  .build());
     }
 
+    public static TemperatureFacts.Variation setExcentricityVariation(double eccentricity,
+                                                                      double orbitDistance,
+                                                                      double luminosity) {
+
+        var base = findBaseTemp(orbitDistance, luminosity);
+        var variation = TemperatureFacts.Variation.builder();
+
+        variation.max(findBaseTemp(orbitDistance * (1 - eccentricity), luminosity) - base);
+        variation.min(findBaseTemp(orbitDistance * (1 + eccentricity), luminosity) - base);
+
+        return variation.build();
+    }
 }

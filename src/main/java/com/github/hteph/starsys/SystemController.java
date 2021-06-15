@@ -23,13 +23,19 @@ public class SystemController {
     @GetMapping("/system")
     public String greeting(@RequestParam(name = "name", required = false, defaultValue = "random") String name, Model model) {
 
-        var star = StarFactory.get(name, 'A', null);
-        ArrayList<StellarObject> systemList = StarSystemGenerator.Generator(star);
+        boolean findLife = false;
+        List<Biosphere> lifeList;
+        if(name.equals("life")) findLife = true;
+        ArrayList<StellarObject> systemList;
+
+        do {
+            var star = StarFactory.get(name, 'A', null);
+            systemList = StarSystemGenerator.Generator(star);
+            lifeList = getLife(systemList);
+
+        }while(findLife && lifeList.isEmpty());
 
         boolean hasMoons = hasMoons(systemList);
-        var lifeList = getLife(systemList);
-
-        System.out.println("++++++++++++++++++++Has Life = "+ lifeList.size());
 
         model.addAttribute("objects", systemList);
         model.addAttribute("hasMoons", hasMoons);

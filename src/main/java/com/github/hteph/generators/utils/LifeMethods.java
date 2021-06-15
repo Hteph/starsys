@@ -28,30 +28,23 @@ public class LifeMethods {
         if (baseTemperature < 220 || baseTemperature > 400) lifeIndex -= 5;
         else if (baseTemperature < 250 || baseTemperature > 350) lifeIndex -= 3;
         else lifeIndex += 4;
-        System.out.println("After temp life Index="+lifeIndex +" basetemp = "+baseTemperature);
 
         if (atmoPressure < 0.2) lifeIndex -= 10;
         else if (atmoPressure > 5) lifeIndex -= 1;
         else lifeIndex +=1;
-        System.out.println("After atmo life Index="+lifeIndex + "pressure = "+ atmoPressure);
 
         if (hydrosphere < 1) lifeIndex -= 5;
         else if (hydrosphere < 5) lifeIndex += 1;
         else lifeIndex += 4;
-        System.out.println("After hydro life Index="+lifeIndex +"Hydro = "+hydrosphere);
 
         if(magneticField < 0.3) lifeIndex += - 3;
         else if (magneticField > 5) lifeIndex += - 1;
 
-        System.out.println("After magnetic life Index="+lifeIndex +"magneto = "+magneticField);
 
-        if (baseTemperature<270
-                && atmoshericComposition.stream().anyMatch(s -> s.getName().equals("NH3") && Dice.d6() < 6)){
+        if (atmoshericComposition.stream().anyMatch(s -> s.getName().equals("NH3"))){
             //TODO rework this to work  in the same way as Oxygen?
             lifeIndex += 4;
-            System.out.println("Ammonia life Index="+lifeIndex);
         }
-System.out.println("End life Index="+lifeIndex);
         return lifeIndex > 0; //Nod to Gaia-theory, if there is any chance of life it will aways be life present
     }
 

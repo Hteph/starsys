@@ -64,7 +64,7 @@ public final class TerrestrialPlanetFactory {
         HydrosphereDescription hydrosphereDescription;
         int hydrosphere;
         Set<AtmosphericGases> atmoshericComposition;
-        BigDecimal atmoPressure;
+
         double albedo;
         String tectonicActivityGroup;
 
@@ -106,53 +106,50 @@ public final class TerrestrialPlanetFactory {
 
         //Eccentricity and Inclination
 
-        final double axialTilt = (int) (10 * Dice._3d6() / 2.0 * Math.random());
         final int eccentryMod = getEccentryMod(orbitalObjectClass);
         double eccentricity = eccentryMod * (Dice._2d6() - 2) / (100.0 * Dice.d6());
 
-        planetBuilder.axialTilt(BigDecimal.valueOf(axialTilt).round(THREE));
         orbitalFacts.orbitalInclination(BigDecimal.valueOf(eccentryMod * (Dice._2d6()) / (1.0 + mass / 10.0))
                                                   .round(THREE));
 
-        // TODO tidelocked or not should take into consideration moons too!
         var tempMoonPlanet = planetBuilder.orbitalFacts(orbitalFacts.build()).build();
 
         List<Planet> moonList = GenerateMoonSystem.terrestialMoons(tempMoonPlanet, orbitDistance, IS_INNER_ZONE);
         planetBuilder.moonList(moonList);
 
-
+        //Tidal forces
         final double sumOfLunarTidal = StreamUtilities.getStreamEmptyIfNull(moonList)
                                                       .map(m -> m.getLunarTidal().doubleValue())
                                                       .reduce(0d, Double::sum);
 
         boolean tidelocked = false;
 
+
         double tidalForce = (star.getMass().doubleValue() * 26640000 / cubed(orbitDistance.doubleValue() * 400.0))
-                / (1.0 + sumOfLunarTidal);
+                / (1.0 + sumOfLunarTidal/10);
         tidelock = (0.83 + (Dice._2d6() - 2) * 0.03) * tidalForce * star.getAge().doubleValue() / 6.6;
         if (tidelock > 1) {
             tidelocked = true;
             //TODO Tidelocked planets generally can't have moon, but caught objects should be allowed?
             planetBuilder.moonList(Collections.emptyList());
         }
-
         planetBuilder.tideLockedStar(tidelocked);
+
+        //Axuíal tilt
+        double tiltDivisor = tidelocked ? 10d : 2d;
+        final double axialTilt = (int) (10 * Dice._3d6() / tiltDivisor * Math.random());
+        planetBuilder.axialTilt(BigDecimal.valueOf(axialTilt).round(TWO));
 
         //Rotation - day/night cycle
         if (tidelocked) {
             rotationalPeriod = orbitalPeriod * 365 * 24;
         } else {
-            double tidalEffects = (1 + 0.1 * Math.max(0, (tidalForce * star.getAge().doubleValue() - sqrt(mass))));
+            double tidalEffects = (1 + 0.2 * Math.max(0, (tidalForce * star.getAge().doubleValue() - sqrt(mass))));
             rotationalPeriod = (Dice._3d6() + 12 + Dice.d10() / 10d) * tidalEffects;
-            System.out.println("start rotation: " + rotationalPeriod);
-            System.out.println("tidal effects: " + tidalEffects);
 
 
             if (Dice.d10() < 2) {
-                System.out.println("deviant rotation: " + rotationalPeriod);
                 rotationalPeriod = Math.pow(rotationalPeriod, Dice.d3() + Dice.d10() / 10.0);
-                System.out.println("Becomes: " + rotationalPeriod);
-
             }
 
             final double ORBITAL_PERIOD_HOURS = orbitalPeriod * 365 * 24;
@@ -160,13 +157,11 @@ public final class TerrestrialPlanetFactory {
             if (rotationalPeriod > (ORBITAL_PERIOD_HOURS) / 2.0) {
                 planetBuilder.resonanceOrbitalPeriod(true);
                 //TODO update this to TableMaker
-                System.out.println("start rotation: " + rotationalPeriod);
                 double[] resonanceArray = {0.5, 2 / 3.0, 1, 1.5, 2, 2.5, 3, 3.5};
                 double[] eccentricityEffect = {0.1, 0.15, 0.21, 0.39, 0.57, 0.72, 0.87, 0.87};
 
                 int resultResonance = Arrays.binarySearch(resonanceArray, rotationalPeriod / ORBITAL_PERIOD_HOURS);
 
-                System.out.println("resonance: " + resultResonance);
                 if (resultResonance < 0) {
                     eccentricity = eccentricityEffect[-resultResonance - 2];
                     rotationalPeriod = resonanceArray[-resultResonance - 2] * ORBITAL_PERIOD_HOURS;
@@ -177,7 +172,6 @@ public final class TerrestrialPlanetFactory {
                     rotationalPeriod = resonanceArray[-resultResonance] * ORBITAL_PERIOD_HOURS;
                 }
 
-                System.out.println("reulting rotation: " + rotationalPeriod);
             }
         }
 
@@ -203,8 +197,8 @@ public final class TerrestrialPlanetFactory {
                      .magneticField(BigDecimal.valueOf(magneticField).round(TWO));
 
         //Temperature
-        baseTemperature = (int) (255 / sqrt((orbitDistance.doubleValue()
-                / sqrt(star.getLuminosity().doubleValue()))));
+        baseTemperature = TempertureMethods.findBaseTemp(orbitDistance.doubleValue(), star.getLuminosity()
+                                                                                          .doubleValue());
 
         //base temp is an value of little use beyond this generator and is not propagated to the planet object
 
@@ -225,41 +219,41 @@ public final class TerrestrialPlanetFactory {
                                                                planetBuilder);
         var tempPlanet = planetBuilder.build();
 
-        atmoPressure = FindAtmoPressure.calculate(tectonicActivityGroup,
-                                                  hydrosphere,
-                                                  tempPlanet.isBoilingAtmo(),
-                                                  mass,
-                                                  atmoshericComposition);
+        double atmoPressure = FindAtmoPressure.calculate(tectonicActivityGroup,
+                                                         hydrosphere,
+                                                         tempPlanet.isBoilingAtmo(),
+                                                         mass,
+                                                         atmoshericComposition);
 
         // TODO Special considerations for c objects, this should be expanded upon when these gets more details
 
         if (orbitalObjectClass == 'c') { //These should never had a chance to get an "real" atmosphere in the first
             // place but may have some traces
-            if (Dice.d6(6)) atmoPressure = BigDecimal.valueOf(0);
-            else atmoPressure = BigDecimal.valueOf(0.001);
+            if (Dice.d6(6)) atmoPressure = 0;
+            else atmoPressure = 0.001;
         }
 
-        if (atmoPressure.doubleValue() == 0) atmoshericComposition.clear();
+        if (atmoPressure == 0) atmoshericComposition.clear();
         if (atmoshericComposition.isEmpty()) { //There are edge cases where all of atmo has boiled away
-            atmoPressure = BigDecimal.valueOf(0);
+            atmoPressure = 0;
             if (hydrosphereDescription == HydrosphereDescription.LIQUID && hydrosphere > 0) {
                 planetBuilder.hydrosphereDescription(HydrosphereDescription.REMNANTS);
                 planetBuilder.hydrosphere(0);
             }
 
         }
-        if (!atmoshericComposition.isEmpty()) MakeAtmosphere.checkAtmo(atmoshericComposition, atmoPressure.doubleValue());
-        planetBuilder.atmoPressure(atmoPressure.round(THREE));
+        if (!atmoshericComposition.isEmpty())
+            MakeAtmosphere.checkAtmo(atmoshericComposition, atmoPressure);
         // The composition could be adjusted for the existence of life, so is set below
 
-        albedo = findAlbedo(IS_INNER_ZONE, atmoPressure.doubleValue(), hydrosphereDescription, hydrosphere);
+        albedo = findAlbedo(IS_INNER_ZONE, atmoPressure, hydrosphereDescription, hydrosphere);
         planetBuilder.albedo(BigDecimal.valueOf(albedo).round(TWO));
         //adjusting base Temperature for albedo
-        baseTemperature = (int)( baseTemperature*albedo);
+        baseTemperature = (int) (baseTemperature * albedo);
         //Bioshpere
 
         hasGaia = LifeMethods.testLife(baseTemperature,
-                                       atmoPressure.doubleValue(),
+                                       atmoPressure,
                                        hydrosphere,
                                        atmoshericComposition,
                                        star.getAge().doubleValue(),
@@ -269,11 +263,12 @@ public final class TerrestrialPlanetFactory {
         else lifeType = Breathing.NONE;
 
         if (lifeType.equals(Breathing.OXYGEN)) {
-            MakeAtmosphere.adjustForOxygen(atmoPressure.doubleValue(), atmoshericComposition);
+            int oxygen = MakeAtmosphere.adjustForOxygen(atmoPressure, atmoshericComposition);
+            atmoPressure += oxygen;
         }
 
         double greenhouseFactor = findGreenhouseGases(atmoshericComposition,
-                                                      atmoPressure.doubleValue(),
+                                                      atmoPressure,
                                                       baseTemperature,
                                                       hydrosphereDescription,
                                                       hydrosphere,
@@ -285,7 +280,8 @@ public final class TerrestrialPlanetFactory {
                                                            hasGaia,
                                                            lifeType);
 
-        if (!atmoshericComposition.isEmpty()) MakeAtmosphere.checkAtmo(atmoshericComposition, atmoPressure.doubleValue());
+        if (!atmoshericComposition.isEmpty())
+            MakeAtmosphere.checkAtmo(atmoshericComposition, atmoPressure);
         planetBuilder.atmosphericComposition(atmoshericComposition);
 
 
@@ -296,30 +292,34 @@ public final class TerrestrialPlanetFactory {
         //Climate -------------------------------------------------------
         // sets all the temperature stuff from axial tilt etc etc
 
-        var temperatureFacts = TempertureMethods.setSeasonalTemperature(atmoPressure.doubleValue(),
+        var temperatureFacts = TempertureMethods.setSeasonalTemperature(atmoPressure,
                                                                         hydrosphere,
                                                                         rotationalPeriod,
                                                                         axialTilt,
                                                                         surfaceTemp,
                                                                         orbitalPeriod); // sets all the temperature stuff from axial tilt etc etc
-        System.out.println("Stored surface temp (in C) = "+(surfaceTemp-274));
+
         temperatureFacts.surfaceTemp(surfaceTemp);
+        temperatureFacts.eccentricityVariation(TempertureMethods.setExcentricityVariation(eccentricity,
+                                                                                          orbitDistance.doubleValue(),
+                                                                                          star.getLuminosity()
+                                                                                              .doubleValue()));
 
         if (lifeType != Breathing.NONE) {
             var biosphere = Biosphere.builder()
                                      .homeworld(name)
                                      .respiration(lifeType)
-                                     .baseElement(surfaceTemp<360 ? BaseElementOfLife.CARBON : BaseElementOfLife.SILICA);
+                                     .baseElement(surfaceTemp < 370 ? BaseElementOfLife.CARBON : BaseElementOfLife.SILICA);
             planetBuilder.life(biosphere.build());
         }
 
         //TODO Weather and day night temp cycle
         TempertureMethods.setDayNightTemp(temperatureFacts,
-                                       baseTemperature,
-                                       star.getLuminosity().doubleValue(),
-                                       orbitDistance.doubleValue(),
-                                       atmoPressure.doubleValue(),
-                                       rotationalPeriod);
+                                          baseTemperature,
+                                          star.getLuminosity().doubleValue(),
+                                          orbitDistance.doubleValue(),
+                                          atmoPressure,
+                                          rotationalPeriod);
 
 
 //Sanity check of water
@@ -335,8 +335,6 @@ public final class TerrestrialPlanetFactory {
         planetBuilder.temperatureFacts(temperatureFacts.build());
         return planetBuilder.build();
     }
-
-
 
 
     private static int getEccentryMod(char orbitalObjectClass) {

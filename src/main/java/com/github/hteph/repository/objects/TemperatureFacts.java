@@ -3,8 +3,6 @@ package com.github.hteph.repository.objects;
 import lombok.Builder;
 import lombok.Data;
 
-import java.math.BigDecimal;
-
 @Data
 @Builder
 public class TemperatureFacts {
@@ -13,6 +11,13 @@ public class TemperatureFacts {
     private int[] rangeBandTemperature;
     private int[] rangeBandTempSummer;
     private int[] rangeBandTempWinter;
-    private BigDecimal nightTempMod;
-    private BigDecimal dayTempMod;
+    private Variation dayNightVariation;
+    private Variation eccentricityVariation;
+
+    @Data
+    @Builder
+    static public class Variation {
+        int max;
+        int min;
+    }
 }

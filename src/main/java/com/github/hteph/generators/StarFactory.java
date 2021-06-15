@@ -61,7 +61,7 @@ public final class StarFactory {
         //TODO allow for multiple Starsystems, ie archiveID not hardcoded
 
         String starName;
-        if(systemName.equals("random")) {
+        if(systemName.equals("random") || systemName.equals("life")) {
             try {
                 starName = randomNameGenerator.compose((3 + Dice.d6()));
             } catch (Exception e) {
@@ -77,6 +77,8 @@ public final class StarFactory {
                                        .orbitalPeriod(BigDecimal.ZERO);
 
         String description = starClass + ": " + String.join(", ", descriptors);
+
+        //TODO fix systemName ArchiveID isn't used but multiple starSystems probably will
 
         return Star.builder()
                    .archiveID(systemName + " " + systemPosition)

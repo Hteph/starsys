@@ -64,7 +64,6 @@ public final class StarSystemGenerator {
             if(s.getOrbitObject()== 'J') s.setOrbitObject('j');
         } );
 
-        System.out.println("Jovians = "+tempOrbitalObjects.stream().filter(s -> s.getOrbitObject() =='j' || s.getOrbitObject() =='J').count());
 
         //Detailed bodies
         //TODO This should be moved to a method

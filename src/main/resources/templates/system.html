@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html" lang="">
 <head>
-    <title>Getting Started: Serving Web Content</title>
+    <title>Star system facts</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link th:href="@{/main.css}" rel="stylesheet"/>
@@ -9,16 +9,15 @@
 </head>
 <body>
 
-<button class="tablink" onclick="openPage('System Facts', this, '#a0daa9')" id="defaultOpen">Home</button>
-<button class="tablink" onclick="openPage('News', this, '#a0daa9')" >News</button>
-<button class="tablink" onclick="openPage('Contact', this, '#a0daa9')">Contact</button>
-<button class="tablink" onclick="openPage('About', this, '#a0daa9')">About</button>
+<button class="tablink" onclick="openPage('System Facts', this, '#a0daa9')" id="defaultOpen">System Facts</button>
+<button class="tablink" onclick="openPage('News', this, '#a0daa9')">Biosphere</button>
+<button class="tablink" onclick="openPage('Contact', this, '#a0daa9')">Sophonts</button>
+<button class="tablink" onclick="openPage('About', this, '#a0daa9')">Notes</button>
 
 <div id="System Facts" class="tabcontent">
-    <h1>System Facts</h1>
     <p>This lists the major, organised objects in the system. in addition to these there are thousands of small objects
-        in
-        irregular orbits. If you need one just take a look at the outermost objects of a gas giant.
+        in irregular orbits. If you need one of those just take a look at the outermost objects of a gas giant for now.
+        There will be a list of examples later on, as well as inclusion of trojan points content etc
     </p>
     <table>
         <tr>
@@ -140,48 +139,51 @@
                     <br/>
                     <span><b>Average Surface Temperature: : </b></span>
                     <span th:text="${object.getPresentations().getFacts().get('Surface temperature')}">-</span>
-
-                    <button class="parentCell"><small>Details</small>
+                    <!--                    <div th:unless="${object.getPresentations().getFacts().get('tide locked to star') == 'true'}">-->
+                    <button class="parentCell"
+                            th:unless="${object.getPresentations().getFacts().get('tide locked to star') == 'true'}">
+                        <small>Details</small>
                         <span class="tooltip">
-<h2>Temperature Details</h2>
-                        <span><b>Max Day Increase/Night decrease : </b></span>
-                <span th:text="${object.getPresentations().getFacts().get('dayNight')}">-</span>
-                            </br>
+                            <h2>Temperature Details</h2>
+                                <p>
+                            <span><b>Max Day Increase/Night decrease : </b></span>
+                            <span th:text="${object.getPresentations.getFacts.get('dayNight')}">-</span>
+                                                                        <span><b>Variations due to eccentricity: </b>
+                <span th:text="${object.getPresentations().getFacts().get('eccentricityVariation')}">-</span></span>
+                                </p>
+                            <br/>
                             <table class="center">
-                    <tr>
-                        <th>Label</th>
-                        <th>Equator</th>
-                        <th>10°</th>
-                        <th>20°</th>
-                        <th>30°</th>
-                        <th>40°</th>
-                        <th>50°</th>
-                        <th>60°</th>
-                        <th>70°</th>
-                        <th>80°</th>
-                        <th>Pole</th>
-                    </tr>
-                    <tr>
+                                <tr>
+                                    <th>Label</th>
+                                    <th>Equator</th>
+                                    <th>10°</th>
+                                    <th>20°</th>
+                                    <th>30°</th>
+                                    <th>40°</th>
+                                    <th>50°</th>
+                                    <th>60°</th>
+                                    <th>70°</th>
+                                    <th>80°</th>
+                                    <th>Pole</th>
+                                </tr>
+                                <tr>
                         <span style="text-align:center"
                               th:utext="${object.getPresentations().getFacts().get('average rangeband temperature')}">missing</span>
-                    </tr>
-                         <tr>
+                                </tr>
+                                <tr>
                         <span style="text-align:center"
                               th:utext="${object.getPresentations().getFacts().get('summer rangeband temperature')}">missing</span>
-                    </tr>
-                         <tr>
+                                </tr>
+                                <tr>
                         <span style="text-align:center"
                               th:utext="${object.getPresentations().getFacts().get('winter rangeband temperature')}">missing</span>
-                    </tr>
+                                </tr>
 
-                </table>
+                            </table>
 
-
-
-
-                </span>
+                        </span>
                     </button>
-
+                    <!--                    </div>-->
 
                 </div>
                 <div th:case="'J'">
@@ -307,9 +309,10 @@
                                     <span class="tooltip">
 
                                     <h2>Temperature Details</h2>
-                        <span><b>Max Day Increase/Night decrease : </b>
-
+                        <span><b>Max Day Increase/Night decrease: </b>
                 <span th:text="${moon.getFacts.get('dayNight')}">-</span></span>
+                                        <span><b>Variations due to eccentricity: </b>
+                <span th:text="${moon.getFacts.get('eccentricityVariation')}">-</span></span>
                                     <br/>
                 <table class="center">
                     <tr>
@@ -371,7 +374,7 @@
 
 <div id="News" class="tabcontent">
 
-    Life stuff
+    <p th:unless="${hasLife}">No native biosphere was found in this system</p>
     <div th:if="${hasLife}">
         <button class="accordion">Biosphere Facts</button>
 
@@ -401,13 +404,12 @@
 </div>
 
 <div id="Contact" class="tabcontent">
-    <h3>Contact</h3>
-    <p>Get in touch, or swing by for a cup of coffee.</p>
+
+    <p>Here there will be information about the civilization building sophonts in this system, native or colonizers</p>
 </div>
 
 <div id="About" class="tabcontent">
-    <h3>About</h3>
-    <p>Who we are and what we do.</p>
+    <p>Here there will be facts about enigmas or points of interest that are present in the system</p>
 </div>
 
 <script>

@@ -3,17 +3,15 @@ package com.github.hteph.tables;
 import com.github.hteph.repository.objects.AtmosphericGases;
 import com.github.hteph.utils.Dice;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.Set;
 
 public class FindAtmoPressure {
 
-    public static BigDecimal calculate(String tectonicActivityGroup,
-                                       int hydrosphere,
-                                       boolean boilingAtmo,
-                                       double mass,
-                                       Set<AtmosphericGases> atmoshericComposition) {
+    public static double calculate(String tectonicActivityGroup,
+                                   int hydrosphere,
+                                   boolean boilingAtmo,
+                                   double mass,
+                                   Set<AtmosphericGases> atmoshericComposition) {
 
         // TODO redo this with a better algorithm, binary search and so on so on
         double pressure;
@@ -61,6 +59,6 @@ public class FindAtmoPressure {
         }
         if (atmoshericComposition.isEmpty()) pressure = 0;
         pressure *= mass;
-        return BigDecimal.valueOf(pressure).setScale(4, RoundingMode.HALF_UP);
+        return pressure;
     }
 }

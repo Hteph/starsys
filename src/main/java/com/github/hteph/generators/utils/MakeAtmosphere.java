@@ -31,7 +31,6 @@ public class MakeAtmosphere {
 
 
     public static void checkAtmo(Set<AtmosphericGases> atmoSet, double atmoPressure) {
-        atmoSet.forEach(gas -> System.out.println("Start Gas: " + gas.getName() + " " + gas.getPercentageInAtmo() + " %"));
 
         if(atmoSet.size()==1) {
 
@@ -78,7 +77,6 @@ public class MakeAtmosphere {
                                         .percentageInAtmo(currentN2 + 99 - sumOfGasPercentage);
             atmoSet.add(newN2.build());
             atmoSet.add(AtmosphericGases.builder().name("Other").percentageInAtmo(1).build());
-            atmoSet.forEach(gas -> System.out.println("End Gas: " + gas.getName() + " " + gas.getPercentageInAtmo() + " %"));
         }
 
 
@@ -86,7 +84,7 @@ public class MakeAtmosphere {
 
     public static void checkHydrographics(HydrosphereDescription hydrosphereDescription,
                                           int hydrosphere,
-                                          BigDecimal atmoPressure,
+                                          double atmoPressure,
                                           Planet.PlanetBuilder<?, ? extends Planet.PlanetBuilder<?, ?>> planetBuilder,
                                           int surfaceTemp,
                                           int[] latitudeWinterTemp,
@@ -94,20 +92,20 @@ public class MakeAtmosphere {
 
         if (hydrosphere > 0 && hydrosphereDescription == HydrosphereDescription.ICE_SHEET
                 && surfaceTemp + latitudeWinterTemp[4] > 274) {
-            System.out.println("Ice to Liquid, latitude40 winter temp: " + latitudeWinterTemp[4]);
+            //TODO this should be done in a better way
             planetBuilder.hydrosphereDescription(HydrosphereDescription.LIQUID);
         }
 
         if (hydrosphere > 0
                 && surfaceTemp > 274
-                && atmoPressure.doubleValue() > 0
+                && atmoPressure > 0
                 && hydrosphereDescription == HydrosphereDescription.LIQUID) {
-            if (MakeAtmosphere.isAboveBoilingpoint(surfaceTemp + latitudeWinterTemp[9], atmoPressure.doubleValue())) {
+            if (MakeAtmosphere.isAboveBoilingpoint(surfaceTemp + latitudeWinterTemp[9], atmoPressure)) {
 
                 planetBuilder.hydrosphereDescription(HydrosphereDescription.VAPOR)
                              .hydrosphere(1);
-            } else if (MakeAtmosphere.isAboveBoilingpoint(surfaceTemp, atmoPressure.doubleValue())) {
-                int[] latitudeForLiquid = findThresholdForLiquid(surfaceTemp, atmoPressure.doubleValue(), latitudeWinterTemp, latitudeSummerTemp);
+            } else if (MakeAtmosphere.isAboveBoilingpoint(surfaceTemp, atmoPressure)) {
+                int[] latitudeForLiquid = findThresholdForLiquid(surfaceTemp, atmoPressure, latitudeWinterTemp, latitudeSummerTemp);
                 if (50 * (1 - Math.sin(10 * latitudeForLiquid[0])) < hydrosphere) {
                     planetBuilder.hydrosphere((int) (50 * (1 - Math.sin(10 * latitudeForLiquid[0]))));
                 }
@@ -125,7 +123,7 @@ public class MakeAtmosphere {
             planetBuilder.hydrosphereDescription(HydrosphereDescription.REMNANTS);
         }
 
-        if (atmoPressure.doubleValue() == 0 && hydrosphere > 0) {
+        if (atmoPressure == 0 && hydrosphere > 0) {
             planetBuilder.hydrosphereDescription(HydrosphereDescription.REMNANTS)
                          .hydrosphere(0);
         }
@@ -151,7 +149,7 @@ public class MakeAtmosphere {
         return polarSeaLimit;
     }
 
-    public static void adjustForOxygen(double atmoPressure, Set<AtmosphericGases> atmosphericComposition) {
+    public static int adjustForOxygen(double atmoPressure, Set<AtmosphericGases> atmosphericComposition) {
 
         Map<String, AtmosphericGases> atmoMap = atmosphericComposition
                 .stream()
@@ -159,11 +157,16 @@ public class MakeAtmosphere {
 
         int oxygenMax = Math.max(18 + Dice.d10(), (int) (Dice._3d6() * 2 / atmoPressure)); //This could be a bit more involved and interesting
 
+        int oxygenPercentage =0;
+
         if (atmoMap.containsKey("CO2")) {
             if (atmoMap.get("CO2").getPercentageInAtmo() > oxygenMax) {
+                oxygenPercentage = oxygenMax;
                 AtmosphericGases co2 = atmoMap.get("CO2");
                 atmoMap.remove("CO2");
-                atmoMap.put("O2", AtmosphericGases.builder().name("O2").percentageInAtmo(oxygenMax).build());
+                atmoMap.put("O2", AtmosphericGases.builder().name("O2")
+                                                  .percentageInAtmo(oxygenMax)
+                                                  .build());
                 //perhaps the remnant CO should be put in as N2 instead?
                 atmoMap.put("CO2", AtmosphericGases.builder()
                                                    .name("CO2")
@@ -172,11 +175,13 @@ public class MakeAtmosphere {
 
             } else {
                 AtmosphericGases co2 = atmoMap.get("CO2");
+                oxygenPercentage = co2.getPercentageInAtmo();
                 atmoMap.remove("CO2");
                 atmoMap.put("O2", AtmosphericGases.builder()
                                                   .name("O2")
-                                                  .percentageInAtmo(co2.getPercentageInAtmo())
+                                                  .percentageInAtmo(oxygenPercentage)
                                                   .build());
+
             }
         } else { //if no CO2 we just find the largest and take from that
 
@@ -184,11 +189,14 @@ public class MakeAtmosphere {
 
             if (maxGas != null) {
                 if (maxGas.getPercentageInAtmo() < oxygenMax) {
+                    oxygenPercentage = maxGas.getPercentageInAtmo();
                     atmoMap.put("O2", AtmosphericGases.builder()
                                                       .name("O2")
-                                                      .percentageInAtmo(maxGas.getPercentageInAtmo())
+                                                      .percentageInAtmo(oxygenPercentage)
                                                       .build());
+
                 } else {
+                    oxygenPercentage =oxygenMax;
                     atmoMap.put("O2", AtmosphericGases.builder()
                                                       .name("O2")
                                                       .percentageInAtmo(oxygenMax)
@@ -206,6 +214,7 @@ public class MakeAtmosphere {
         atmosphericComposition.clear();
 
         atmosphericComposition.addAll(atmoMap.values());
+        return oxygenPercentage;
     }
 
     public static int findTheHydrosphere(HydrosphereDescription hydrosphereDescription, int radius) {
@@ -322,22 +331,18 @@ public class MakeAtmosphere {
             switch (gas.getName()) {
                 case "CO2":
                     tempGreenhouseGasEffect += gas.getPercentageInAtmo() * atmoPressure;
-                    System.out.println("Greehousegas 1s ?="+gas.getPercentageInAtmo() * atmoPressure);
                     break;
                 case "CH4":
                     tempGreenhouseGasEffect += gas.getPercentageInAtmo() * atmoPressure * 4;
-                    System.out.println("Greehousegas 4rs ?="+gas.getPercentageInAtmo() * atmoPressure);
                     break;
                 case "SO2":
                 case "NH3":
                 case "NO2":
                 case "H2S":
                     tempGreenhouseGasEffect += gas.getPercentageInAtmo() * atmoPressure * 8;
-                    System.out.println("Greehousegas 8ts ?="+gas.getPercentageInAtmo() * atmoPressure);
                     break;
                 case "H2SO4":
                     tempGreenhouseGasEffect += gas.getPercentageInAtmo() * atmoPressure * 16;
-                    System.out.println("Greehousegas 16s ?="+gas.getPercentageInAtmo() * atmoPressure);
                     break;
                 default:
                     tempGreenhouseGasEffect += gas.getPercentageInAtmo() * atmoPressure * 0;
@@ -349,7 +354,6 @@ public class MakeAtmosphere {
 
         var random = Dice.aLotOfd3(2) - 1;
 
-        System.out.println("greenhouseGas = "+tempGreenhouseGasEffect+", waterVaporEffect= " + waterVaporFactor +"random = "+random);
 
         return sqrt(1 + atmoPressure * 0.01 * random
                 + tempGreenhouseGasEffect * 0.1
@@ -363,7 +367,7 @@ public class MakeAtmosphere {
                                                               .findFirst();
 
         o2.ifPresent(gas -> {
-            var percentage = o2.map(AtmosphericGases::getPercentageInAtmo).orElse(0);
+            int percentage = o2.map(AtmosphericGases::getPercentageInAtmo).orElse(0);
             gas.setPercentageInAtmo(percentage/2);
             atmosphericComposition.add(AtmosphericGases.builder()
                                                        .name("CO2")

@@ -125,6 +125,7 @@ public class Planet extends StellarObject {
             facts.put("Surface temperature", String.valueOf(temperatureFacts.getSurfaceTemp() - 273) + "\u2103");
 
             facts.put("dayNight", parseDayNightTemp());
+            facts.put("eccentricityVariation", parseEccentricityVariation());
 
             facts.put("average rangeband temperature", getStringFromInts("Average", temperatureFacts.getRangeBandTemperature()));
             facts.put("summer rangeband temperature", getStringFromInts("Summer diff", temperatureFacts.getRangeBandTempSummer()));
@@ -163,9 +164,16 @@ public class Planet extends StellarObject {
     }
 
     private String parseDayNightTemp() {
-        return temperatureFacts.getDayTempMod() != null && temperatureFacts.getNightTempMod() != null
-                ? " +" + temperatureFacts.getDayTempMod().toPlainString()
-                + " / " + temperatureFacts.getNightTempMod().toPlainString()
+        return temperatureFacts.getDayNightVariation() != null
+                ? " +" + temperatureFacts.getDayNightVariation().getMax()
+                + " / " + temperatureFacts.getDayNightVariation().getMin()
+                : "";
+    }
+
+    private String parseEccentricityVariation() {
+        return temperatureFacts.getDayNightVariation() != null
+                ? " +" + temperatureFacts.getEccentricityVariation().getMax()
+                + " / " + temperatureFacts.getEccentricityVariation().getMin()
                 : "";
     }
 
