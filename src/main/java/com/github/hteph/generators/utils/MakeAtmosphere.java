@@ -155,7 +155,7 @@ public class MakeAtmosphere {
                 .stream()
                 .collect(Collectors.toMap(AtmosphericGases::getName, x -> x));
 
-        int oxygenMax = Math.max(18 + Dice.d10(), (int) (Dice._3d6() * 2 / atmoPressure)); //This could be a bit more involved and interesting
+        int oxygenMax = Math.min(18 + Dice.d10(), (int) ((Dice._3d6() * 2) / atmoPressure)); //This could be a bit more involved and interesting
 
         int oxygenPercentage =0;
 
@@ -320,11 +320,8 @@ public class MakeAtmosphere {
                                              double atmoPressure,
                                              int baseTemperature,
                                              HydrosphereDescription hydrosphereDescription,
-                                             int hydrosphere,
-                                             boolean hasGaia) {
+                                             int hydrosphere) {
         double tempGreenhouseGasEffect = 0;
-
-        if(hasGaia && baseTemperature < 274) addSomeGreenhouseGas(atmosphericComposition);
 
         for (AtmosphericGases gas : atmosphericComposition) {
 
@@ -360,26 +357,10 @@ public class MakeAtmosphere {
                 + waterVaporFactor * 0.1);
     }
 
-    private static void addSomeGreenhouseGas(Set<AtmosphericGases> atmosphericComposition) {
-
-        var o2 = atmosphericComposition.stream()
-                                                              .filter(gas -> gas.getName().equals("O2"))
-                                                              .findFirst();
-
-        o2.ifPresent(gas -> {
-            int percentage = o2.map(AtmosphericGases::getPercentageInAtmo).orElse(0);
-            gas.setPercentageInAtmo(percentage/2);
-            atmosphericComposition.add(AtmosphericGases.builder()
-                                                       .name("CO2")
-                                                       .percentageInAtmo(percentage/2)
-                                                       .build());
-        });
-
-    }
 
 
     public static boolean isAboveBoilingpoint(int temperature, double pressure) {
-
+//https://www.ajdesigner.com/phpvaporpressure/water_vapor_pressure_equation.php
         if (temperature < 274) return false;
 
         if (temperature > 640) return true;
@@ -398,7 +379,8 @@ public class MakeAtmosphere {
             C = 244.485;
         }
 
-        return pressure > Math.pow(10, A - (B / (C + (temperature - 274))));
+        return temperature > (B/(A-Math.log10(pressure)))-C;
+
     }
 
     @SuppressWarnings("rawtypes")

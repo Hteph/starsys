@@ -182,7 +182,8 @@ public final class MoonFactory {
                    .magneticField(BigDecimal.valueOf(magneticField).round(TWO));
 
         //adding magnetic field from planet (where it exists i.e Jovians) for the forthcoming calculations
-        if(orbitingAroundPlanet.getMagneticField() != null ) magneticField +=orbitingAroundPlanet.getMagneticField().doubleValue();
+        if (orbitingAroundPlanet.getMagneticField() != null)
+            magneticField += orbitingAroundPlanet.getMagneticField().doubleValue();
         //Temperature
 
         //base temp is an value of little use beyond this generator and is not propagated to the planet object
@@ -198,25 +199,25 @@ public final class MoonFactory {
 
         //Atmospheric details
         var atmosphericComposition = MakeAtmosphere.createPlanetary(centralStar,
-                                                               baseTemperature,
-                                                               tectonicActivityGroup,
-                                                               moonRadius,
-                                                               gravity,
-                                                               magneticField,
-                                                               moonBuilder);
+                                                                    baseTemperature,
+                                                                    tectonicActivityGroup,
+                                                                    moonRadius,
+                                                                    gravity,
+                                                                    magneticField,
+                                                                    moonBuilder);
         var tempMoon = moonBuilder.build();
 
         double atmoPressure = FindAtmoPressure.calculate(tectonicActivityGroup,
-                                                  hydrosphere,
-                                                  tempMoon.isBoilingAtmo(),
-                                                  mass,
-                                                  atmosphericComposition);
+                                                         hydrosphere,
+                                                         tempMoon.isBoilingAtmo(),
+                                                         mass,
+                                                         atmosphericComposition);
 
         // TODO Special considerations for c objects, this should be expanded upon when these gets more details
         var albedo = findAlbedo(IS_INNER_ZONE, atmoPressure, hydrosphereDescription, hydrosphere);
         moonBuilder.albedo(BigDecimal.valueOf(albedo).round(TWO));
 
-        baseTemperature = (int)( baseTemperature*albedo);
+        baseTemperature = (int) (baseTemperature * albedo);
 
         if (orbitalObjectClass == 'c') { //These should never had a chance to get an "real" atmosphere in the first
             // place but may have some traces
@@ -236,35 +237,31 @@ public final class MoonFactory {
                 .getAge()
                 .doubleValue();
 
-        //Bioshpere
-
-        var hasGaia = false;
-        if (atmoPressure > 0) hasGaia = LifeMethods.testLife(baseTemperature,
-                                                                           atmoPressure,
-                                                                           hydrosphere,
-                                                                           atmosphericComposition,
-                                                                           systemAge,
-                                                                           magneticField);
-        if (hasGaia) lifeType = LifeMethods.findLifeType(atmosphericComposition, systemAge);
-        else lifeType = Breathing.NONE;
-
-        if (lifeType.equals(Breathing.OXYGEN)){
-            int oxygen = adjustForOxygen(atmoPressure, atmosphericComposition);
-            atmoPressure += oxygen;
-        }
-
         double greenhouseFactor = MakeAtmosphere.findGreenhouseGases(atmosphericComposition,
                                                                      atmoPressure,
                                                                      baseTemperature,
                                                                      hydrosphereDescription,
-                                                                     hydrosphere,
-                                                                     hasGaia);
+                                                                     hydrosphere);
 
-        int surfaceTemp = TempertureMethods.getSurfaceTemp(baseTemperature,
-                                                           atmoPressure,
-                                                           greenhouseFactor,
-                                                           hasGaia,
-                                                           lifeType);
+        int surfaceTemp = TempertureMethods.getSurfaceTemp(baseTemperature,  atmoPressure,  greenhouseFactor);
+        //Bioshpere
+
+        var hasGaia = false;
+        if (atmoPressure > 0) hasGaia = LifeMethods.testLife(surfaceTemp,
+                                                             atmoPressure,
+                                                             hydrosphere,
+                                                             atmosphericComposition,
+                                                             systemAge,
+                                                             magneticField,
+                                                             tectonicActivityGroup);
+        if (hasGaia) lifeType = LifeMethods.findLifeType(atmosphericComposition, systemAge);
+        else lifeType = Breathing.NONE;
+
+        if (lifeType.equals(Breathing.OXYGEN)) {
+            int oxygen = adjustForOxygen(atmoPressure, atmosphericComposition);
+            atmoPressure *= 1 + oxygen / 100d;
+        }
+
 
         var temperatureFacts = TempertureMethods.setSeasonalTemperature(atmoPressure,
                                                                         hydrosphere,
@@ -274,7 +271,8 @@ public final class MoonFactory {
                                                                         lunarOrbitalPeriod);
         temperatureFacts.eccentricityVariation(TempertureMethods.setExcentricityVariation(eccentricity,
                                                                                           orbitDistance.doubleValue(),
-                                                                                          centralStar.getLuminosity().doubleValue()));
+                                                                                          centralStar.getLuminosity()
+                                                                                                     .doubleValue()));
 
         if (!atmosphericComposition.isEmpty()) checkAtmo(atmosphericComposition, atmoPressure);
 
@@ -316,7 +314,7 @@ public final class MoonFactory {
             var biosphere = Biosphere.builder()
                                      .homeworld(name)
                                      .respiration(lifeType)
-                                     .baseElement(surfaceTemp<360 ? BaseElementOfLife.CARBON : BaseElementOfLife.SILICA);
+                                     .baseElement(surfaceTemp < 360 ? BaseElementOfLife.CARBON : BaseElementOfLife.SILICA);
             moonBuilder.life(biosphere.build());
         }
 

@@ -111,26 +111,15 @@ public class TempertureMethods {
 
     public static int getSurfaceTemp(int baseTemperature,
                                      double atmoPressure,
-                                     double greenhouseFactor,
-                                     boolean hasGaia,
-                                     Breathing lifeType) {
+                                     double greenhouseFactor) {
 
-        //TODO Here adding some Gaia moderation factor (needs tweaking probably) moving a bit more towards
-        // water/carbon ideal
-        if (lifeType.equals(Breathing.OXYGEN) && baseTemperature > 350) greenhouseFactor *= 0.8;
-        if (lifeType.equals(Breathing.OXYGEN) && baseTemperature < 250) greenhouseFactor *= 1.2;
 
-        // My take on the effect of greenhouse and albedo on temperature max planerary temp is 1000 and the half
-        // point is 400
+
         double surfaceTemp;
-        if (hasGaia) {
-            double a = 3.94935;
-            double b = 304.305;
-            double t = -2.88013;
+        if (baseTemperature > 220 && baseTemperature < 400) {
 
-            int modTemp = (int) (baseTemperature * NumberUtilities.sqrt(1 + greenhouseFactor));
-            surfaceTemp = 100 * (int) (a / (1 + b * Math.exp(t * (modTemp / 100d))));
-            //surfaceTemp = 400d * (baseTemperature  * greenhouseFactor) / (350d + baseTemperature * greenhouseFactor);
+            surfaceTemp = (int) (baseTemperature * NumberUtilities.sqrt(1 + greenhouseFactor));
+
         } else if (atmoPressure > 0) {
             surfaceTemp = 800d * (baseTemperature * greenhouseFactor)
                     / (400d + baseTemperature * greenhouseFactor);
@@ -138,7 +127,6 @@ public class TempertureMethods {
             surfaceTemp = 1200d * (baseTemperature * greenhouseFactor)
                     / (800d + baseTemperature * greenhouseFactor);
         }
-
         return (int) surfaceTemp;
     }
 
@@ -146,27 +134,21 @@ public class TempertureMethods {
 
         //Assymerical sigmoidal:  5-parameter logistic (5PL)
 
-
-
         var increasePerHourFactor = -1.554015 + (0.9854966 - -1.554015) / Math.pow(1 + Math.pow(atmoPressure / 19056230d, 0.5134927), 1094.463);
         increasePerHourFactor = Math.max(0.01,increasePerHourFactor);
         var maxDayIncreaseMultiple = 7.711577 + (0.2199364 - 7.711577) / Math.pow(1 + Math.pow(atmoPressure / 2017503d, 1.004679), 757641.3);
         var incomingRadiation = luminosity / sqrt(orbitDistance);
-        System.out.println("increasePerHourFactor =" + increasePerHourFactor + ", maxDayIncreaseMultiple=" + maxDayIncreaseMultiple + ", incomingRadiation=" + incomingRadiation);
         var daytimeMax = Math.min(incomingRadiation * increasePerHourFactor * rotationPeriod / 2d,
                                   Math.min(1000+ Dice._2d6()*25, baseTemperature * incomingRadiation * maxDayIncreaseMultiple));
-        System.out.println("DayTemperatue by day=" + incomingRadiation * increasePerHourFactor * rotationPeriod / 2d + " but max=" + baseTemperature * incomingRadiation * maxDayIncreaseMultiple);
 
 
 
         var decresePerHour = -0.5906138 + (19.28838 - -0.5906138) / Math.pow(1 + Math.pow(atmoPressure / 291099200d, 0.5804294), 172207.2);
-        decresePerHour = Math.min(decresePerHour,0.1);
+        decresePerHour = Math.max(decresePerHour,0.1);
         var maxNigthDecreaseMultiple = 0.03501408 + (0.7690167 - 0.03501408) / Math.pow(1 + Math.pow(atmoPressure / 6815738d, 0.7782145), 322006.2);
 
         var nighttimeMin = -Math.min(decresePerHour * rotationPeriod / 2d,
                                      maxNigthDecreaseMultiple * baseTemperature);
-
-        System.out.println("Temperatue by night=" + decresePerHour * rotationPeriod / 2d + " but max=" + maxNigthDecreaseMultiple * baseTemperature);
 
         tempTempFacts.dayNightVariation(TemperatureFacts.Variation.builder()
                                                                   .max((int) daytimeMax)

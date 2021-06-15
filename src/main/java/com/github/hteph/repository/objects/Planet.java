@@ -45,6 +45,7 @@ public class Planet extends StellarObject {
     private Set<AtmosphericGases> atmosphericComposition;
     private BigDecimal atmoPressure;
     private boolean boilingAtmo;
+
     private TemperatureFacts temperatureFacts;
 
     private List<Planet> moonList;

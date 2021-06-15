@@ -251,38 +251,37 @@ public final class TerrestrialPlanetFactory {
         //adjusting base Temperature for albedo
         baseTemperature = (int) (baseTemperature * albedo);
         //Bioshpere
+        double greenhouseFactor = findGreenhouseGases(atmoshericComposition,
+                                                      atmoPressure,
+                                                      baseTemperature,
+                                                      hydrosphereDescription,
+                                                      hydrosphere);
 
-        hasGaia = LifeMethods.testLife(baseTemperature,
+        int surfaceTemp = TempertureMethods.getSurfaceTemp(baseTemperature,
+                                                           atmoPressure,
+                                                           greenhouseFactor);
+
+        hasGaia = LifeMethods.testLife(surfaceTemp,
                                        atmoPressure,
                                        hydrosphere,
                                        atmoshericComposition,
                                        star.getAge().doubleValue(),
-                                       magneticField);
+                                       magneticField, tectonicActivityGroup);
 
         if (hasGaia) lifeType = LifeMethods.findLifeType(atmoshericComposition, star.getAge().doubleValue());
         else lifeType = Breathing.NONE;
 
         if (lifeType.equals(Breathing.OXYGEN)) {
             int oxygen = MakeAtmosphere.adjustForOxygen(atmoPressure, atmoshericComposition);
-            atmoPressure += oxygen;
+            atmoPressure *= 1+ oxygen/100d; //completly invented buff for atmopressure of oxygen breathers
         }
 
-        double greenhouseFactor = findGreenhouseGases(atmoshericComposition,
-                                                      atmoPressure,
-                                                      baseTemperature,
-                                                      hydrosphereDescription,
-                                                      hydrosphere,
-                                                      hasGaia);
 
-        int surfaceTemp = TempertureMethods.getSurfaceTemp(baseTemperature,
-                                                           atmoPressure,
-                                                           greenhouseFactor,
-                                                           hasGaia,
-                                                           lifeType);
 
-        if (!atmoshericComposition.isEmpty())
-            MakeAtmosphere.checkAtmo(atmoshericComposition, atmoPressure);
+        if (!atmoshericComposition.isEmpty()) MakeAtmosphere.checkAtmo(atmoshericComposition, atmoPressure);
+
         planetBuilder.atmosphericComposition(atmoshericComposition);
+        planetBuilder.atmoPressure(BigDecimal.valueOf(atmoPressure).round(THREE));
 
 
         //TODO Legacy to be removed

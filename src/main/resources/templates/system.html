@@ -42,6 +42,7 @@
             <td th:text="${object.getName()}">N/A</td>
             <!--Celestial facts-->
             <td th:switch="${object.stellarObjectType.getLabel()}">
+
                 <div th:case="'T'">
                     <span><b>Mass: </b></span>
                     <span th:text="${object.getPresentations().getFacts().get('mass')}">-</span>
@@ -183,9 +184,10 @@
 
                         </span>
                     </button>
-                    <!--                    </div>-->
+
 
                 </div>
+
                 <div th:case="'J'">
 
                     <span><b>Magnetic field: </b></span>
@@ -194,6 +196,9 @@
                     <br/>
                     <span><b>Axial Tilt: </b></span>
                     <span th:text="${object.getPresentations().getFacts().get('axial tilt')}">-</span>
+                    <span><b>Magnetic field: </b></span>
+                    <span th:text="${object.getPresentations().getFacts().get('magnetic field')}">-</span>
+                    <span> Earth Normal </span>
 
                 </div>
                 <div th:case="'A'">

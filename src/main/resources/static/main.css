@@ -97,7 +97,7 @@ body, html {
 .tablink {
     border:double #B03A2E 3px;
     border-radius: 25px;
-    background-color: grey;
+    background-color: rgba(102, 102, 153,0.1);
     color: black;
     float: left;
     outline: none;
