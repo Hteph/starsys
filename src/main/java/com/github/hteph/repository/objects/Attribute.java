@@ -2,19 +2,21 @@ package com.github.hteph.repository.objects;
 
 
 
-import com.github.hteph.utils.enums.Attributes;
+import com.github.hteph.utils.enums.AttributeEnum;
 import com.github.hteph.utils.enums.baseEnum;
+import lombok.Data;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@Data
 public class Attribute {
 	
 	private String name;
 	private String description;
 	private int level;
 	private HashMap<String, Attribute> conditions;
-	private Attributes enumCode;
+	private AttributeEnum enumCode;
 
     public Attribute(String name, String description) {
 		
@@ -22,22 +24,6 @@ public class Attribute {
 		this.description = description;
 		this.level=1;
 		conditions = new HashMap<>();
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public int getLevel() {
-		return level;
-	}
-
-	public void setLevel(int level) {
-		this.level = level;
 	}
 	
 	public Attribute increaseLevel() {
@@ -93,13 +79,13 @@ public class Attribute {
 							+ "-------------";
     }
 
-    public Attributes getEnumCode() {
+    public AttributeEnum getEnumCode() {
         return enumCode;
     }
 
     public Attribute setEnumCode(baseEnum enumCode) {
 
-        if(enumCode instanceof Attributes) this.enumCode = (Attributes)enumCode;
+        if(enumCode instanceof AttributeEnum) this.enumCode = (AttributeEnum)enumCode;
 
         return this;
     }

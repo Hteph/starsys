@@ -1,10 +1,10 @@
 package com.github.hteph.tables;
 
 import com.github.hteph.repository.objects.Planet;
-import com.github.hteph.repository.objects.Sophont;
+import com.github.hteph.repository.objects.Creature;
 import com.github.hteph.repository.objects.StellarObject;
 import com.github.hteph.utils.Dice;
-import com.github.hteph.utils.enums.Attributes;
+import com.github.hteph.utils.enums.AttributeEnum;
 import com.github.hteph.utils.enums.ClimatePref;
 import com.github.hteph.utils.enums.EnvironmentalEnum;
 import com.github.hteph.utils.enums.HydrosphereDescription;
@@ -13,7 +13,7 @@ import com.github.hteph.utils.enums.LocomotionModes;
 import static com.github.hteph.utils.enums.LocomotionModes.*;
 
 public class EnvironmentalAttributesTable {
-    public static void environmentalAttributes(Sophont lifeform, EnvironmentalEnum[] environ) {
+    public static void environmentalAttributes(Creature lifeform, EnvironmentalEnum[] environ) {
         HydrosphereDescription liquidStatus;
         LocomotionModes[] walkModes;
         LocomotionModes locomotion;
@@ -114,6 +114,7 @@ public class EnvironmentalAttributesTable {
                 DietTable.findTrophicLevel(lifeform, environ[0]);
                 break;
             case GRASSLANDS:
+                lifeform.addToDescription("Evolved on a bountiful plain. ");
                 if (Dice.d6(3))lifeform.setClimate(ClimatePref.HOT);
                 walkModes = new LocomotionModes[]{BURROWER,JUMPER, WALKER, FLIER};
                 locomotion = TableMaker.makeRoll(
@@ -125,6 +126,7 @@ public class EnvironmentalAttributesTable {
                 DietTable.findTrophicLevel(lifeform, environ[0]);
                 break;
             case HEATHLANDS:
+                lifeform.addToDescription("Evolved on ha harsh plain. ");
                 if (Dice.d6(2))lifeform.setClimate(ClimatePref.COLD);
                 walkModes = new LocomotionModes[]{BURROWER,JUMPER, WALKER, FLIER};
                 locomotion = TableMaker.makeRoll(
@@ -136,6 +138,7 @@ public class EnvironmentalAttributesTable {
                 DietTable.findTrophicLevel(lifeform, environ[0]);
                 break;
             case SHRUBLANDS:
+                lifeform.addToDescription("Evolved on a plain with low sturdy vegetation. ");
                 if (Dice.d6(2))lifeform.setClimate(ClimatePref.HOT);
                 walkModes = new LocomotionModes[]{BURROWER,JUMPER, WALKER, FLIER};
                 locomotion = TableMaker.makeRoll(
@@ -158,7 +161,7 @@ public class EnvironmentalAttributesTable {
                 if(Dice.d6(3)) lifeform.addAttribute("Plains dweller", "This species body evolved for living in open areas. ");
                 if(Dice.d6(3)) {
                     lifeform.addAttribute("Nictating Membrane", "The lifeform have a transparent lens over the eyes that you can open and close like an eyelid. This protects the eyes from irritants. ");
-                    lifeform.addAttribute(Attributes.VISION);
+                    lifeform.addAttribute(AttributeEnum.VISION);
                 }
                 DietTable.findTrophicLevel(lifeform, environ[0]);
                 break;
@@ -176,6 +179,7 @@ public class EnvironmentalAttributesTable {
                 DietTable.findTrophicLevel(lifeform, environ[0]);
                 break;
             case TROPICAL_SAVANNAS:
+                lifeform.addToDescription("Evolved on a hot and rich plain. ");
                 lifeform.setClimate(ClimatePref.HOT);
                 walkModes = new LocomotionModes[]{BURROWER,JUMPER, WALKER, FLIER};
                 locomotion = TableMaker.makeRoll(
@@ -211,6 +215,7 @@ public class EnvironmentalAttributesTable {
                 DietTable.findTrophicLevel(lifeform, environ[0]);
                 break;
             case MANAGED_GRASSLANDS:
+                lifeform.addToDescription("Evolved in a managed system. ");
                 lifeform.addAttribute("Artifical Ecosystem", "The lifeform evolved in a biome created by another lifeform, either on purpose, accident or invasive. ");
                 if (Dice._2d6(6))lifeform.setClimate(ClimatePref.WARM);
                 else lifeform.setClimate(ClimatePref.HOT);
@@ -224,6 +229,7 @@ public class EnvironmentalAttributesTable {
                 DietTable.findTrophicLevel(lifeform, environ[0]);
                 break;
             case FIELD_CROP:
+                lifeform.addToDescription("Evolved in a managed system. ");
                 lifeform.addAttribute("Artifical Ecosystem", "The lifeform evolved in a biome created by another lifeform, either on purpose, accident or invasive. ");
                 if (Dice._2d6(10))lifeform.setClimate(ClimatePref.WARM);
                 else lifeform.setClimate(ClimatePref.HOT);
@@ -237,6 +243,7 @@ public class EnvironmentalAttributesTable {
                 DietTable.findTrophicLevel(lifeform, environ[0]);
                 break;
             case TREE_CROP:
+                lifeform.addToDescription("Evolved in a managed system. ");
                 lifeform.addAttribute("Artifical Ecosystem", "The lifeform evolved in a biome created by another lifeform, either on purpose, accident or invasive. ");
                 lifeform.addToDescription("Evolved in a cultivated forest. ");
                 lifeform.setClimate(TableMaker.makeRoll(
@@ -254,6 +261,7 @@ public class EnvironmentalAttributesTable {
                 DietTable.findTrophicLevel(lifeform, environ[0]);
                 break;
             case GREENHOUSE:
+                lifeform.addToDescription("Evolved inside an artifical bio system ");
                 lifeform.addAttribute("Artifical Ecosystem", "The lifeform evolved in a biome created by another lifeform, either on purpose, accident or invasive. ");
                 if (Dice._2d6(4))lifeform.setClimate(ClimatePref.WARM);
                 else lifeform.setClimate(ClimatePref.HOT);
@@ -267,6 +275,7 @@ public class EnvironmentalAttributesTable {
                 DietTable.findTrophicLevel(lifeform, environ[0]);
                 break;
             case BIOINDUSTRIAL:
+                lifeform.addToDescription("Evolved inside an artifical bio system ");
                 lifeform.addAttribute("Artifical Ecosystem", "The lifeform evolved in a biome created by another lifeform, either on purpose, accident or invasive. ");
                 lifeform.setClimate(TableMaker.makeRoll(
                         Dice.d6(),
@@ -330,7 +339,7 @@ public class EnvironmentalAttributesTable {
                 }
                 break;
             case INTERTIDAL_AND_LITTORAL:
-                lifeform.addToDescription("Evolved in streams or rivers");
+                lifeform.addToDescription("Evolved in a tidal or near coastal environment");
                 lifeform.setClimate(TableMaker.makeRoll(
                         Dice.d6(),
                         new int[]{1,2,6},
@@ -347,6 +356,7 @@ public class EnvironmentalAttributesTable {
                 DietTable.findTrophicLevel(lifeform, environ[0]);
                 break;
             case REEFS:
+                lifeform.addToDescription("Evolved at a bountiful reef. ");
                 lifeform.addAttribute("Aquatic", "Obligat living in water and can't survive on dry land. ");
                 DietTable.findTrophicLevel(lifeform, environ[0]);
                 break;
@@ -375,10 +385,12 @@ public class EnvironmentalAttributesTable {
 
                 break;
             case SHELVES:
+                lifeform.addToDescription("Evolved at the continal plates edge to the ocean. ");
                 lifeform.addAttribute("Aquatic", "Obligat living in water and can't survive on dry land. ");
                 DietTable.findTrophicLevel(lifeform, environ[0]);
                 break;
             case DEEP_OCEAN:
+                lifeform.addToDescription("Evolved as a denizen of the free ocean. ");
                 lifeform.addAttribute("Aquatic", "Obligat living in water and can't survive on dry land. ");
                 if (Dice.d6(3)) {
                     lifeform.addAttribute("Pressure Support", "The species can regulate its internal pressure and survive very high water pressures");
@@ -387,6 +399,7 @@ public class EnvironmentalAttributesTable {
                 DietTable.findTrophicLevel(lifeform, environ[0]);
                 break;
             case MANAGED_AQUATIC:
+                lifeform.addToDescription("Evolved in a managed system. ");
                 lifeform.addAttribute("Aquatic", "Obligat living in water and can't survive on dry land. ");
                 lifeform.addAttribute("Artifical Ecosystem", "The lifeform evolved in a biome created by another lifeform, either on purpose, accident or invasive. ");
                 DietTable.findTrophicLevel(lifeform, environ[0]);
@@ -420,7 +433,7 @@ public class EnvironmentalAttributesTable {
         }
 
         if (lifeform.hasAttribute(AMPHIBIOUS.getName())) {
-            lifeform.addAttribute(Attributes.DEPENDENCY).addCondition("Water","Lifeform needs immersion in water daily");
+            lifeform.addAttribute(AttributeEnum.DEPENDENCY).addCondition("Water", "Lifeform needs immersion in water daily");
             if (Dice.d6(4)) {
                 lifeform.addAttribute("Breath Holding",2, "By gathering air and store it internaly this species operates underwater for extended time");
             } else if (Dice._3d6(5)) {
@@ -432,17 +445,17 @@ public class EnvironmentalAttributesTable {
         }
 
         if (lifeform.hasAttribute(LocomotionModes.BRACHIATOR.getName())) {
-            lifeform.addAttribute(Attributes.STRENGTH,2)
+            lifeform.addAttribute(AttributeEnum.STRENGTH, 2)
                     .addCondition("Swinging Limbs","This lifeform has strong limbs specialised for swinging. ");
         }
 
         if (lifeform.hasAttribute(LocomotionModes.CLIMBER.getName()) ){
-            lifeform.addAttribute(Attributes.AGILITY,2);
+            lifeform.addAttribute(AttributeEnum.AGILITY, 2);
             if(Dice._3d6(8))lifeform.addAttribute("Perfect Balance", "The lifeforms kinestetics allows them to always keep their footing, no matter how narrow the walking surface. ");
         }
 
         if (lifeform.hasAttribute(SWIMMER.getName())) {
-            lifeform.addAttribute(Attributes.DEPENDENCY).addCondition("Water","Lifeform needs immersion in water daily");
+            lifeform.addAttribute(AttributeEnum.DEPENDENCY).addCondition("Water", "Lifeform needs immersion in water daily");
             if (Dice.d6(5)) {
                 lifeform.addAttribute("Breath Holding", "By gathering air and store it internaly this species operates underwater for extended time");
             } else if (Dice._3d6(5)) {
@@ -454,13 +467,13 @@ public class EnvironmentalAttributesTable {
         if (lifeform.hasAttribute(BURROWER.getName())) {
             lifeform.addAttribute("Claws", "The lifeforms limbs has devolped harden parts to cause damage. ");
             if(Dice._3d6(8)) lifeform.addAttribute("Nictating Membrane", "The lifeform have a transparent lens over the eyes that you can open and close like an eyelid. This protects the eyes from irritants. ");
-            if(Dice._3d6(8)) lifeform.addAttribute(Attributes.STRENGTH);
+            if(Dice._3d6(8)) lifeform.addAttribute(AttributeEnum.STRENGTH);
             lifeform.addAttribute("Tunnel Dweller","The lifeform evolved in selfbuilt tunnel systems. ");
             lifeform.addAttribute("Phobia","Agoraphobia, mild");
         }
 
         if(lifeform.hasAttribute(AQUATIC.getName())){
-            lifeform.addAttribute(Attributes.DEPENDENCY).addCondition("Water", "Lifeform needs immersion in water to survive. ");
+            lifeform.addAttribute(AttributeEnum.DEPENDENCY).addCondition("Water", "Lifeform needs immersion in water to survive. ");
             if (Dice.d6(2)) {
                 lifeform.addAttribute("Breath Holding",2, "By gathering air and store it internaly this species operates underwater for extended time");
             } else if (Dice._3d6(5)) {
@@ -474,13 +487,13 @@ public class EnvironmentalAttributesTable {
         }
 
         if(lifeform.hasAttribute(GLIDER.getName())){
-            if(Dice._3d6(8)) lifeform.addAttribute(Attributes.AGILITY);
+            if(Dice._3d6(8)) lifeform.addAttribute(AttributeEnum.AGILITY);
             lifeform.addAttribute("Flight","The lifeform can take to the air. ")
                     .addCondition("Gliding","Only gliding flight");
            if(Dice._3d6(8)) lifeform.addAttribute("Phobia", "Claustrophobia, mild");
             if(Dice._3d6(10)){
                 lifeform.addAttribute("Fragile","The lifeform has hollow bones or otherwise weight reducing bodybuild. ");
-            lifeform.addAttribute(Attributes.CONSTITUTION,-1);
+            lifeform.addAttribute(AttributeEnum.CONSTITUTION, -1);
             }
         }
 
@@ -495,11 +508,11 @@ public class EnvironmentalAttributesTable {
             if(Dice._3d6(9)){
                 lifeform.addAttribute("Absolute Direction", "The lifeform has developed an excellent sense of direction and navigation. ");
             }
-            if(Dice._3d6(8)) lifeform.addAttribute(Attributes.AGILITY);
+            if(Dice._3d6(8)) lifeform.addAttribute(AttributeEnum.AGILITY);
             if(Dice._3d6(10)) lifeform.addAttribute("Phobia", "claustrophobia, mild");
             if(Dice._3d6(10)){
                 lifeform.addAttribute("Fragile","The lifeform has hollow bones or other weight reducing bodybuild. ");
-                lifeform.addAttribute(Attributes.CONSTITUTION,-1);
+                lifeform.addAttribute(AttributeEnum.CONSTITUTION, -1);
             }
            if(Dice._3d6(12) && lifeform.getAttributes().get(FLIER.getName()).hasCondition("Balloon")){
                lifeform.addAttribute("Phobia", "Sharp objects, mild. ");

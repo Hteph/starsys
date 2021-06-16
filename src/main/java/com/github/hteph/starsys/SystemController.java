@@ -1,10 +1,12 @@
 package com.github.hteph.starsys;
 
+import com.github.hteph.generators.CreatureGenerator;
 import com.github.hteph.generators.StarFactory;
 import com.github.hteph.generators.StarSystemGenerator;
 import com.github.hteph.repository.objects.Biosphere;
 import com.github.hteph.repository.objects.Planet;
 import com.github.hteph.repository.objects.StellarObject;
+import com.github.hteph.utils.enums.Breathing;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,12 +30,17 @@ public class SystemController {
         if(name.equals("life")) findLife = true;
         ArrayList<StellarObject> systemList;
 
+        int safeCount=0;
         do {
+            safeCount++;
             var star = StarFactory.get(name, 'A', null);
             systemList = StarSystemGenerator.Generator(star);
             lifeList = getLife(systemList);
 
+            if(safeCount>20) throw new RuntimeException("No life found");
         }while(findLife && lifeList.isEmpty());
+
+        lifeList.forEach(biosphere -> biosphere.setCreature(CreatureGenerator.generator(biosphere.getHomeworld())));
 
         boolean hasMoons = hasMoons(systemList);
 

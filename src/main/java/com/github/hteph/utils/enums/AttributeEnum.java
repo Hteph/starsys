@@ -2,7 +2,7 @@ package com.github.hteph.utils.enums;
 
 /**
  */
-public enum Attributes implements baseEnum {
+public enum AttributeEnum implements baseEnum {
 
     AGILITY("Agility","The power of moving quickly and easily"),
     ALERTNESS("Alertness","How aware and attentive the lifeform is."),
@@ -35,7 +35,7 @@ public enum Attributes implements baseEnum {
     private final String name;
     private final String description;
 
-    Attributes(String name, String description) {
+    AttributeEnum(String name, String description) {
         this.name = name;
         this.description = description;
     }

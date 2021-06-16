@@ -390,16 +390,40 @@
                     <th>No</th>
                     <th>Homeworld</th>
                     <th>Basic Facts</th>
+                    <th>Example creature</th>
                 </tr>
 
                 <tr th:each="bio, bioStat : ${biospheres}">
                     <td style="text-align:center" th:text="${bioStat.count }">-</td>
-                    <td th:text="${bio.getHomeworld()}">N/A</td>
+                    <td th:text="${bio.getHomeworld().getName()}">N/A</td>
                     <td>
                         <span><b>Respiration:</b></span>
                         <span th:text="${bio.getRespiration().label}">-</span>
+                        <br/>
                         <span><b>Building Element:</b></span>
                         <span th:text="${bio.getBaseElement().label}">-</span>
+                        <br/>
+                        <span><b>Gravity:</b></span>
+                        <span th:text="${bio.getHomeworld().getPresentations().getFacts().get('gravity')}">-</span>
+                    </td>
+                    <td>
+                        <span th:text="${bio.getCreature().getName()}">-</span>
+                        <span th:text="${bio.getCreature().getDescription()}">-</span>
+                        <ul>
+                            <div th:each="attribute:${bio.getCreature().getAttributes()}">
+                                <li>
+                                    <span th:text="${attribute.getValue().getName()}"></span>
+                                    :
+                                    <span th:text="${attribute.getValue().getLevel()}"></span>
+[
+                                        <small>
+                                            <span th:text="${attribute.getValue().getDescription()}"></span>
+                                        </small>
+]
+
+                                </li>
+                            </div>
+                        </ul>
                     </td>
 
                 </tr>
@@ -456,6 +480,13 @@
 
     // Get the element with id="defaultOpen" and click on it
     document.getElementById("defaultOpen").click();
+
+
+        // When the user clicks on <div>, open the popup
+        function myFunction() {
+            var popup = document.getElementById("myPopup");
+            popup.classList.toggle("show");
+        }
 
 </script>
 

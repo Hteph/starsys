@@ -243,7 +243,7 @@ public final class MoonFactory {
                                                                      hydrosphereDescription,
                                                                      hydrosphere);
 
-        int surfaceTemp = TempertureMethods.getSurfaceTemp(baseTemperature,  atmoPressure,  greenhouseFactor);
+        int surfaceTemp = TempertureMethods.getSurfaceTemp(baseTemperature, atmoPressure, greenhouseFactor);
         //Bioshpere
 
         var hasGaia = false;
@@ -254,12 +254,16 @@ public final class MoonFactory {
                                                              systemAge,
                                                              magneticField,
                                                              tectonicActivityGroup);
-        if (hasGaia) lifeType = LifeMethods.findLifeType(atmosphericComposition, systemAge);
-        else lifeType = Breathing.NONE;
+        var biosphere = Biosphere.builder();
+        if (hasGaia) {
+            lifeType = LifeMethods.findLifeType(atmosphericComposition, centralStar.getAge().doubleValue());
+            if (lifeType.equals(Breathing.OXYGEN)) {
+                int oxygen = MakeAtmosphere.adjustForOxygen(atmoPressure, atmosphericComposition);
+                atmoPressure *= 1 + oxygen / 100d; //completly invented buff for atmopressure of oxygen breathers
+            }
 
-        if (lifeType.equals(Breathing.OXYGEN)) {
-            int oxygen = adjustForOxygen(atmoPressure, atmosphericComposition);
-            atmoPressure *= 1 + oxygen / 100d;
+            biosphere.respiration(lifeType)
+                     .baseElement(surfaceTemp < 360+Dice.d20() ? BaseElementOfLife.CARBON : BaseElementOfLife.SILICA);
         }
 
 
@@ -277,7 +281,7 @@ public final class MoonFactory {
         if (!atmosphericComposition.isEmpty()) checkAtmo(atmosphericComposition, atmoPressure);
 
         moonBuilder.atmosphericComposition(atmosphericComposition);
-        moonBuilder.lifeType(lifeType);
+
 
         //Climate -------------------------------------------------------
         // sets all the temperature stuff from axial tilt etc etc TODO should take the special circumstances of moons too
@@ -310,20 +314,16 @@ public final class MoonFactory {
 
         if (!atmosphericComposition.isEmpty()) MakeAtmosphere.checkAtmo(atmosphericComposition, atmoPressure);
 
-        if (lifeType != Breathing.NONE) {
-            var biosphere = Biosphere.builder()
-                                     .homeworld(name)
-                                     .respiration(lifeType)
-                                     .baseElement(surfaceTemp < 360 ? BaseElementOfLife.CARBON : BaseElementOfLife.SILICA);
-            moonBuilder.life(biosphere.build());
-        }
-
         moonBuilder.orbitalFacts(orbitalFacts.build());
         moonBuilder.temperatureFacts(temperatureFacts.build());
         moonBuilder.atmoPressure(BigDecimal.valueOf(atmoPressure).round(THREE));
 
+        var moon =moonBuilder.build();
+        biosphere.homeworld(moon);
+        //TODO create a wrapper with needed info instead of homeworld direct reference
+        if(hasGaia) moon.setLife(biosphere.build());
 
-        return moonBuilder.build();
+        return moon;
     }
 
     private static int getEccentryMod(char orbitalObjectClass) {

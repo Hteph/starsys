@@ -126,7 +126,7 @@ public final class TerrestrialPlanetFactory {
 
 
         double tidalForce = (star.getMass().doubleValue() * 26640000 / cubed(orbitDistance.doubleValue() * 400.0))
-                / (1.0 + sumOfLunarTidal/10);
+                / (1.0 + sumOfLunarTidal / 10);
         tidelock = (0.83 + (Dice._2d6() - 2) * 0.03) * tidalForce * star.getAge().doubleValue() / 6.6;
         if (tidelock > 1) {
             tidelocked = true;
@@ -268,25 +268,21 @@ public final class TerrestrialPlanetFactory {
                                        star.getAge().doubleValue(),
                                        magneticField, tectonicActivityGroup);
 
-        if (hasGaia) lifeType = LifeMethods.findLifeType(atmoshericComposition, star.getAge().doubleValue());
-        else lifeType = Breathing.NONE;
+        var biosphere = Biosphere.builder();
+        if (hasGaia) {
+            lifeType = LifeMethods.findLifeType(atmoshericComposition, star.getAge().doubleValue());
+            if (lifeType.equals(Breathing.OXYGEN)) {
+                int oxygen = MakeAtmosphere.adjustForOxygen(atmoPressure, atmoshericComposition);
+                atmoPressure *= 1 + oxygen / 100d; //completly invented buff for atmopressure of oxygen breathers
+            }
 
-        if (lifeType.equals(Breathing.OXYGEN)) {
-            int oxygen = MakeAtmosphere.adjustForOxygen(atmoPressure, atmoshericComposition);
-            atmoPressure *= 1+ oxygen/100d; //completly invented buff for atmopressure of oxygen breathers
+            biosphere.respiration(lifeType)
+                     .baseElement(surfaceTemp < 360+Dice.d20() ? BaseElementOfLife.CARBON : BaseElementOfLife.SILICA);
         }
-
-
-
         if (!atmoshericComposition.isEmpty()) MakeAtmosphere.checkAtmo(atmoshericComposition, atmoPressure);
 
         planetBuilder.atmosphericComposition(atmoshericComposition);
         planetBuilder.atmoPressure(BigDecimal.valueOf(atmoPressure).round(THREE));
-
-
-        //TODO Legacy to be removed
-        planetBuilder.lifeType(lifeType);
-
 
         //Climate -------------------------------------------------------
         // sets all the temperature stuff from axial tilt etc etc
@@ -304,13 +300,6 @@ public final class TerrestrialPlanetFactory {
                                                                                           star.getLuminosity()
                                                                                               .doubleValue()));
 
-        if (lifeType != Breathing.NONE) {
-            var biosphere = Biosphere.builder()
-                                     .homeworld(name)
-                                     .respiration(lifeType)
-                                     .baseElement(surfaceTemp < 370 ? BaseElementOfLife.CARBON : BaseElementOfLife.SILICA);
-            planetBuilder.life(biosphere.build());
-        }
 
         //TODO Weather and day night temp cycle
         TempertureMethods.setDayNightTemp(temperatureFacts,
@@ -332,9 +321,11 @@ public final class TerrestrialPlanetFactory {
 
         planetBuilder.orbitalFacts(orbitalFacts.build());
         planetBuilder.temperatureFacts(temperatureFacts.build());
-        return planetBuilder.build();
+        var planet = planetBuilder.build();
+        //TODO create a wrapper with needed info instead of homeworld direct reference
+        if(hasGaia) planet.setLife(biosphere.homeworld(planet).build());
+        return planet;
     }
-
 
     private static int getEccentryMod(char orbitalObjectClass) {
         int eccentryMod = 1;

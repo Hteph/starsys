@@ -11,7 +11,6 @@ import lombok.experimental.SuperBuilder;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -57,7 +56,6 @@ public class Planet extends StellarObject {
 
     private String classificationName;
 
-    private Breathing lifeType;
     private Biosphere life;
 
     public String getAtmosphericCompositionParsed() {
@@ -80,7 +78,9 @@ public class Planet extends StellarObject {
         String hydroPercentage = hydrosphereDescription != null && hydrosphereDescription != HydrosphereDescription.NONE
                 ? " ( " + hydrosphere + " %)"
                 : "";
-        var life = lifeType != null && lifeType != Breathing.NONE ? ", Life Type: " + lifeType.label : "";
+        var life = getLife() != null && getLife().getRespiration() != Breathing.NONE
+                ? ", Life Type: " + getLife().getRespiration().label
+                : "";
         var atmo = atmoPressure != null
                 ? ", Atmospheric Pressure = " + atmoPressure + " (" + getAtmosphericCompositionParsed() + ")"
                 : "";
@@ -134,7 +134,7 @@ public class Planet extends StellarObject {
 
             facts.put("pressure", atmoPressure.toPlainString());
             facts.put("composition", getAtmosphericCompositionParsed());
-            if (lifeType != null && lifeType != Breathing.NONE) facts.put("life type", lifeType.label);
+            if (life != null && life.getRespiration() != Breathing.NONE) facts.put("life type", life.getRespiration().label);
         }
 
         if (getStellarObjectType() != StellarObjectType.MOON) {

@@ -9,8 +9,12 @@ import lombok.Data;
 @Builder
 public class Biosphere {
 
-    private String homeworld;
+    //TODO chnage this to a wrapper object with just the information needed and not the whole world object
+    //circular references!!!
+    private StellarObject homeworld;
     private Breathing respiration;
     private BaseElementOfLife baseElement;
+
+    private Creature creature;
 
 }

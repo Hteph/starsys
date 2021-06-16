@@ -4,20 +4,20 @@ package com.github.hteph.repository.objects;
 
 import com.github.hteph.utils.Dice;
 import com.github.hteph.utils.NameGenerator;
-import com.github.hteph.utils.enums.Attributes;
+import com.github.hteph.utils.enums.AttributeEnum;
 import com.github.hteph.utils.enums.ClimatePref;
 import com.github.hteph.utils.enums.EnvironmentalEnum;
 import com.github.hteph.utils.enums.TrophicLevels;
 import com.github.hteph.utils.enums.baseEnum;
 import lombok.Data;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 @Data
-public class Sophont implements Serializable {
+public class Creature implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -32,7 +32,7 @@ public class Sophont implements Serializable {
 
 // Constructor -------------------------------------------
 	
-	public Sophont(StellarObject place) {
+	public Creature(StellarObject place) {
 		
 		NameGenerator randomName;
 		try {
@@ -40,7 +40,7 @@ public class Sophont implements Serializable {
 
 			int randomNummer = 2+ Dice.aLotOfd3(3);
 			this.name=randomName.compose(randomNummer)+" of "+place.getName();
-
+System.out.println(name);
 		} catch (Exception e) {
 			this.name = place.getName().substring(0,1+place.getName().length()/2)+"ians";
 			e.printStackTrace();
@@ -54,10 +54,11 @@ public class Sophont implements Serializable {
 	}
 
 	public Attribute addAttribute(String name, String description) {
-        Attribute attribute;
-		if(hasAttribute(name))attribute =  attributes.get(name).increaseLevel().addToDescription(description);
-		else attribute=attributes.put(name, new Attribute(name, description));
-        return attribute;
+
+		if(hasAttribute(name)) attributes.get(name).increaseLevel().addToDescription(description);
+		else attributes.put(name, new Attribute(name.trim().toLowerCase(), description));
+
+        return attributes.get(name);
 	}
 
 	public Attribute addAttribute(String name, int extras, String description) {
@@ -83,7 +84,7 @@ public class Sophont implements Serializable {
 	   return addAttribute(enummet.getName(), enummet.getDescription()).setEnumCode(enummet);
     }
 
-    public Attribute addAttribute(Attributes enummet, int levels){
+    public Attribute addAttribute(AttributeEnum enummet, int levels){
 
         return addAttribute(enummet.getName(),levels, enummet.getDescription()).setEnumCode(enummet);
     }

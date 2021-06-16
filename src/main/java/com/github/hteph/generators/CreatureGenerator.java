@@ -3,27 +3,26 @@ package com.github.hteph.generators;
 
 import com.github.hteph.repository.objects.CreatureBody;
 import com.github.hteph.repository.objects.Planet;
-import com.github.hteph.repository.objects.Sophont;
+import com.github.hteph.repository.objects.Creature;
 import com.github.hteph.repository.objects.StellarObject;
 import com.github.hteph.tables.BaseEnvironmentTable;
 import com.github.hteph.tables.EnvironmentalAttributesTable;
 import com.github.hteph.tables.TableMaker;
 import com.github.hteph.utils.Dice;
 import com.github.hteph.utils.NumberUtilities;
-import com.github.hteph.utils.enums.Attributes;
+import com.github.hteph.utils.enums.AttributeEnum;
 import com.github.hteph.utils.enums.ClimatePref;
 import com.github.hteph.utils.enums.EnvironmentalEnum;
 import com.github.hteph.utils.enums.Symmetry;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CreatureGenerator {
 
-    private CreatureGenerator() {
-        //No instances please
-    }
+    public static Creature generator(StellarObject place) {
 
-    public static Sophont generator(StellarObject place) {
-
-        Sophont lifeform= new Sophont(place);
+        Creature lifeform= new Creature(place);
         BaseEnvironmentTable environment = new BaseEnvironmentTable(place);
         EnvironmentalEnum[] baseEnvironment = environment.findBaseEnvironment();
 
@@ -41,7 +40,7 @@ public class CreatureGenerator {
 
     }
 
-    private static Sophont basicBodyShape(Sophont lifeform) {
+    private static void basicBodyShape(Creature lifeform) {
         int bonus=0;
         int bonus2=0;
         lifeform.setBody(new CreatureBody());
@@ -83,11 +82,9 @@ public class CreatureGenerator {
             lifeform.getBody().setBodySymmetry(Symmetry.NONE);
             lifeform.getBody().setLimbSegments(0);
         }
-
-        return lifeform;
     }
 
-    private static void gravityEffects(Sophont lifeform){
+    private static void gravityEffects(Creature lifeform){
 
     double gravity =((Planet)(lifeform.getHomeworld())).getGravity().doubleValue();
     int roll=Dice._3d6();
@@ -95,18 +92,18 @@ public class CreatureGenerator {
     if(gravity<0.7) {
         int gravityeffect = (int) (10*(gravity-1));
         roll +=gravityeffect;
-        lifeform.addAttribute(Attributes.STRENGTH, gravityeffect/2);
-        lifeform.addAttribute(Attributes.CONSTITUTION, -1);
+        lifeform.addAttribute(AttributeEnum.STRENGTH, gravityeffect/2);
+        lifeform.addAttribute(AttributeEnum.CONSTITUTION, -1);
         lifeform.addAttribute("G-Tolerance", -1,"The lifeform is sensitive to acceleration forces");
-        lifeform.addAttribute(Attributes.FRAME,gravityeffect/2);
+        lifeform.addAttribute(AttributeEnum.FRAME, gravityeffect/2);
 
     }else if (gravity>1.5) {
         int gravityEffects = (int) NumberUtilities.squared(gravity);
         roll +=gravityEffects;
         lifeform.addAttribute("G-Tolerance", 1,"The Lifeform is very tolerant towards acceleration forces");
-        lifeform.addAttribute(Attributes.STRENGTH,(int) NumberUtilities.sqrt((double) gravityEffects));
-        lifeform.addAttribute(Attributes.CONSTITUTION, gravityEffects/2);
-        lifeform.addAttribute(Attributes.FRAME,gravityEffects);
+        lifeform.addAttribute(AttributeEnum.STRENGTH, (int) NumberUtilities.sqrt((double) gravityEffects));
+        lifeform.addAttribute(AttributeEnum.CONSTITUTION, gravityEffects/2);
+        lifeform.addAttribute(AttributeEnum.FRAME, gravityEffects);
     }
 
         String choice = TableMaker.makeRoll(
@@ -130,7 +127,7 @@ public class CreatureGenerator {
         }
 }
 
-    private static void decideMetabolism(Sophont lifeform) {
+    private static void decideMetabolism(Creature lifeform) {
 
         int bonus=0;
         if(lifeform.isClimatePref(ClimatePref.COLD)) bonus +=1;
@@ -150,15 +147,15 @@ public class CreatureGenerator {
         switch (choice){
             case "Slow Metabolism":
                 lifeform.addAttribute("Slow Metabolism","The metabolic processes are so slow that the lifeform seems to live in another time paradigm. ");
-                lifeform.addAttribute(Attributes.SPEED,-2).addToDescription("The slow metabolism of this creature lowers its reaction times");
-                lifeform.addAttribute(Attributes.LIFESPAN,2);
-                lifeform.addAttribute(Attributes.SUSTENANCE,-2);
+                lifeform.addAttribute(AttributeEnum.SPEED, -2).addToDescription("The slow metabolism of this creature lowers its reaction times");
+                lifeform.addAttribute(AttributeEnum.LIFESPAN, 2);
+                lifeform.addAttribute(AttributeEnum.SUSTENANCE, -2);
                 break;
             case "Cold Blooded":
                 lifeform.addAttribute("Cold Blooded","The lifeform is dependent on the ambient temperatue to be above a certain temperature threshold.");
                 lifeform.addAttribute("Ectothermy", "Controlling body temperature through external metabolic processes, such as by basking in the sun");
-                lifeform.addAttribute(Attributes.LIFESPAN,1);
-                lifeform.addAttribute(Attributes.SUSTENANCE,-1);
+                lifeform.addAttribute(AttributeEnum.LIFESPAN, 1);
+                lifeform.addAttribute(AttributeEnum.SUSTENANCE, -1);
                 break;
             case "Warm Blooded":
                 lifeform.addAttribute("Warm Blooded","The metabolism of this lifeform can support it in a wide range of temperatures");
@@ -166,9 +163,9 @@ public class CreatureGenerator {
             case "Hyperactive":
                 lifeform.addAttribute("Hyperactive","Is equally home in water as on land");
                 lifeform.addAttribute("Homeothermy","The lifeform maintains a stable internal body temperature regardless of external influence.");
-                lifeform.addAttribute(Attributes.SPEED,1);
-                lifeform.addAttribute(Attributes.LIFESPAN,-1);
-                lifeform.addAttribute(Attributes.SUSTENANCE,2);
+                lifeform.addAttribute(AttributeEnum.SPEED, 1);
+                lifeform.addAttribute(AttributeEnum.LIFESPAN, -1);
+                lifeform.addAttribute(AttributeEnum.SUSTENANCE, 2);
                 break;
         }
     }
