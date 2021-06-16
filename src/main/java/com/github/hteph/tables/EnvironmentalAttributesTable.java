@@ -18,10 +18,10 @@ public class EnvironmentalAttributesTable {
         LocomotionModes[] walkModes;
         LocomotionModes locomotion;
 
-        StellarObject home = lifeform.getHomeworld();
+        var home = lifeform.getHomeworld();
 
-        if (home instanceof Planet) liquidStatus = ((Planet) home).getHydrosphereDescription();
-        else liquidStatus = HydrosphereDescription.NONE;
+         liquidStatus = home.getHydrosphereDescription();
+
         lifeform.setClimate(ClimatePref.WARM);
 
         switch (environ[0]) {
@@ -445,6 +445,7 @@ public class EnvironmentalAttributesTable {
         }
 
         if (lifeform.hasAttribute(LocomotionModes.BRACHIATOR.getName())) {
+            lifeform.addAttribute(AttributeEnum.REFLEXES, 1);
             lifeform.addAttribute(AttributeEnum.STRENGTH, 2)
                     .addCondition("Swinging Limbs","This lifeform has strong limbs specialised for swinging. ");
         }
@@ -498,6 +499,7 @@ public class EnvironmentalAttributesTable {
         }
 
         if(lifeform.hasAttribute(FLIER.getName())){
+
             int bonus =0;
             if( (lifeform.getClimate().equals(ClimatePref.COLD)
                     || lifeform.getHabitat().equals(EnvironmentalEnum.INTERTIDAL_AND_LITTORAL))) bonus=1;
@@ -514,9 +516,12 @@ public class EnvironmentalAttributesTable {
                 lifeform.addAttribute("Fragile","The lifeform has hollow bones or other weight reducing bodybuild. ");
                 lifeform.addAttribute(AttributeEnum.CONSTITUTION, -1);
             }
-           if(Dice._3d6(12) && lifeform.getAttributes().get(FLIER.getName()).hasCondition("Balloon")){
-               lifeform.addAttribute("Phobia", "Sharp objects, mild. ");
-           }
+
+            if (lifeform.getAttributes().get(FLIER.getName()).hasCondition("Balloon")) {
+                if (Dice._3d6(12)) {
+                    lifeform.addAttribute("Phobia", "Sharp objects, mild. ");
+                }
+            }else lifeform.addAttribute(AttributeEnum.REFLEXES, 1);
         }
     }
 }

@@ -21,6 +21,7 @@ public enum AttributeEnum implements baseEnum {
     LIFESPAN("Lifespan","How do the life length of the lifeforms scale to the average."),
     LIFESUPPORT("Lifesupport", "How well can the Lifeform  survive in a emergency or in a closed system with reduced needs."),
     MOVEMENT("Movement","How well is the lifeformsd body developed for the act of moving from place to place."),
+    REFLEXES("Reflexes","Reactions speed to incoming threats and feeding opportunities, as well as other events"),
     SMELL("Smell", "How well developed are the lifeforms sense of smell (airborne chemistry sense)."),
     STEALTH("Stealth","The act or characteristic of moving with extreme care and quietness, as to avoid detection"),
     STRENGTH("Strength", "Physical prowess, muscular strength"),

@@ -9,6 +9,7 @@ import com.github.hteph.repository.objects.Biosphere;
 import com.github.hteph.repository.objects.OrbitalFacts;
 import com.github.hteph.repository.objects.Planet;
 import com.github.hteph.repository.objects.Star;
+import com.github.hteph.repository.objects.wrappers.Homeworld;
 import com.github.hteph.tables.FindAtmoPressure;
 import com.github.hteph.utils.Dice;
 import com.github.hteph.utils.StreamUtilities;
@@ -79,6 +80,8 @@ public final class TerrestrialPlanetFactory {
                                   .stellarObjectType(StellarObjectType.TERRESTRIAL)
                                   .description(description)
                                   .classificationName(classificationName);
+
+
 
         var orbitalFacts = OrbitalFacts.builder();
         orbitalFacts.orbitsAround(star);
@@ -319,12 +322,21 @@ public final class TerrestrialPlanetFactory {
                            temperatureFacts.build().getRangeBandTempWinter(),
                            temperatureFacts.build().getRangeBandTempSummer());
 
+
+        var homeworld = Homeworld.builder();
+        homeworld.hydrosphereDescription(hydrosphereDescription)
+        .name(name)
+        .stellarObjectType(StellarObjectType.TERRESTRIAL)
+        .temperatureFacts(temperatureFacts.build())
+        .gravity(gravity)
+        .magneticField(magneticField);
+
+
         planetBuilder.orbitalFacts(orbitalFacts.build());
         planetBuilder.temperatureFacts(temperatureFacts.build());
-        var planet = planetBuilder.build();
-        //TODO create a wrapper with needed info instead of homeworld direct reference
-        if(hasGaia) planet.setLife(biosphere.homeworld(planet).build());
-        return planet;
+
+        if(hasGaia) planetBuilder.life(biosphere.homeworld(homeworld.build()).build());
+        return planetBuilder.build();
     }
 
     private static int getEccentryMod(char orbitalObjectClass) {

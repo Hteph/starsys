@@ -3,8 +3,9 @@ package com.github.hteph.tables;
 
 
 import com.github.hteph.repository.objects.Planet;
-import com.github.hteph.repository.objects.StellarObject;
+import com.github.hteph.repository.objects.wrappers.Homeworld;
 import com.github.hteph.utils.enums.EnvironmentalEnum;
+import com.github.hteph.utils.enums.StellarObjectType;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -16,33 +17,33 @@ import static com.github.hteph.utils.enums.EnvironmentalEnum.*;
 
 public class BaseEnvironmentTable {
 
-    private StellarObject planet;
+    private Homeworld place;
 
-    public BaseEnvironmentTable(StellarObject planet) {
+    public BaseEnvironmentTable(Homeworld planet) {
 
-        this.planet=planet;
+        this.place =planet;
     }
 
     public EnvironmentalEnum[] findBaseEnvironment(){
 
-        if(planet instanceof Planet) return findTerrestialPlanetbaseEnvironment((Planet)planet);
+        if(place.getStellarObjectType()== StellarObjectType.TERRESTRIAL) return findTerrestialPlanetbaseEnvironment(place);
 
         return new EnvironmentalEnum[]{EnvironmentalEnum.EXOTIC, NONE};
 
     }
 
-    private EnvironmentalEnum[] findTerrestialPlanetbaseEnvironment(Planet planet) {
+    private EnvironmentalEnum[] findTerrestialPlanetbaseEnvironment(Homeworld place) {
 
         TreeMap<Integer, EnvironmentalEnum> map = new TreeMap<>();
 
         for (EnvironmentalEnum anEnum : EnvironmentalEnum.values()) {
             int chance = 10;
             if (anEnum.getClassification().contains("Z")) continue; // No civilisation base environments sophonts yet
-            if (anEnum.getClassification().contains("H") && planet.getHydrosphere() < 5) continue;
-            if (anEnum.getClassification().contains("h")) chance += planet.getHydrosphere() / 10;
-            if (anEnum.getClassification().contains("d")) chance -= planet.getHydrosphere() / 10;
-            if (anEnum.getClassification().contains("c")) chance = (int) (chance / planet.getTemperatureFacts().getSurfaceTemp() / 274.0);
-            if (anEnum.getClassification().contains("t")) chance = (int) (chance * planet.getTemperatureFacts().getSurfaceTemp() / 274.0);
+            if (anEnum.getClassification().contains("H") && place.getHydrosphere() < 5) continue;
+            if (anEnum.getClassification().contains("h")) chance += place.getHydrosphere() / 10;
+            if (anEnum.getClassification().contains("d")) chance -= place.getHydrosphere() / 10;
+            if (anEnum.getClassification().contains("c")) chance = (int) (chance / place.getTemperatureFacts().getSurfaceTemp() / 274.0);
+            if (anEnum.getClassification().contains("t")) chance = (int) (chance * place.getTemperatureFacts().getSurfaceTemp() / 274.0);
             if (anEnum.getClassification().contains("u")) chance = (int) (chance * Math.random());
             //Add tectonics to chance of mountains?
 

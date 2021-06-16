@@ -404,11 +404,15 @@
                         <span th:text="${bio.getBaseElement().label}">-</span>
                         <br/>
                         <span><b>Gravity:</b></span>
-                        <span th:text="${bio.getHomeworld().getPresentations().getFacts().get('gravity')}">-</span>
+                        <span th:text="${bio.getHomeworld().getNiceGravity()}">-</span>
                     </td>
                     <td>
                         <span th:text="${bio.getCreature().getName()}">-</span>
+                        <br/>
                         <span th:text="${bio.getCreature().getDescription()}">-</span>
+                        <br/>
+                        <b>Climate preference:</b>
+                        <span th:text="${bio.getCreature().getClimate().getDescription()}">-</span>
                         <ul>
                             <div th:each="attribute:${bio.getCreature().getAttributes()}">
                                 <li>
