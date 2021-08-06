@@ -42,13 +42,10 @@ public class SystemController {
 
         lifeList.forEach(biosphere -> biosphere.setCreature(CreatureGenerator.generator(biosphere.getHomeworld())));
 
-        boolean hasMoons = hasMoons(systemList);
-
         model.addAttribute("objects", systemList);
-        model.addAttribute("hasMoons", hasMoons);
+        model.addAttribute("hasMoons", hasMoons(systemList));
         model.addAttribute("hasLife", lifeList.size() > 0);
         model.addAttribute("biospheres", lifeList);
-
 
         return "system";
     }
