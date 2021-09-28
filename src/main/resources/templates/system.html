@@ -310,7 +310,8 @@
                                 <span><b>Average Surface Temperature: : </b></span>
                                 <span th:text="${moon.getFacts().get('Surface temperature')}">-</span>
 
-                                <button class="parentCell"><small>Details</small>
+                                <button class="parentCell">
+                                    <small>Details</small>
                                     <span class="tooltip">
 
                                     <h2>Temperature Details</h2>
@@ -411,23 +412,31 @@
                         <br/>
                         <span th:text="${bio.getCreature().getDescription()}">-</span>
                         <br/>
-                        <b>Climate preference:</b>
-                        <span th:text="${bio.getCreature().getClimate().getDescription()}">-</span>
-                        <ul>
-                            <div th:each="attribute:${bio.getCreature().getAttributes()}">
-                                <li>
-                                    <span th:text="${attribute.getValue().getName()}"></span>
-                                    :
-                                    <span th:text="${attribute.getValue().getLevel()}"></span>
-[
+
+
+                        <div th:if="${bio.getCreature().getName()=='microorganisms'}">
+
+
+                            <b>Climate preference:</b>
+                            <span th:text="${bio.getCreature().getClimate().getDescription()}">-</span>
+                            <ul>
+                                <div th:each="attribute:${bio.getCreature().getAttributes()}">
+                                    <li>
+                                        <span th:text="${attribute.getValue().getName()}"></span>
+                                        :
+                                        <span th:text="${attribute.getValue().getLevel()}"></span>
+                                        [
                                         <small>
                                             <span th:text="${attribute.getValue().getDescription()}"></span>
                                         </small>
-]
+                                        ]
 
-                                </li>
-                            </div>
-                        </ul>
+                                    </li>
+                                </div>
+                            </ul>
+
+                        </div>
+
                     </td>
 
                 </tr>
@@ -486,11 +495,11 @@
     document.getElementById("defaultOpen").click();
 
 
-        // When the user clicks on <div>, open the popup
-        function myFunction() {
-            var popup = document.getElementById("myPopup");
-            popup.classList.toggle("show");
-        }
+    // When the user clicks on <div>, open the popup
+    function myFunction() {
+        var popup = document.getElementById("myPopup");
+        popup.classList.toggle("show");
+    }
 
 </script>
 

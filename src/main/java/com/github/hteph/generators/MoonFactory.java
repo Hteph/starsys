@@ -35,17 +35,14 @@ import static com.github.hteph.generators.utils.PlanetaryUtils.findAlbedo;
 import static com.github.hteph.generators.utils.PlanetaryUtils.findTectonicGroup;
 import static com.github.hteph.generators.utils.PlanetaryUtils.getDensity;
 import static com.github.hteph.generators.utils.PlanetaryUtils.getTectonicActivityGroup;
+import static com.github.hteph.utils.NumberUtilities.THREE;
+import static com.github.hteph.utils.NumberUtilities.TWO;
 import static com.github.hteph.utils.NumberUtilities.cubed;
 import static com.github.hteph.utils.NumberUtilities.sqrt;
 import static com.github.hteph.utils.NumberUtilities.squared;
 
 @NoArgsConstructor(access = AccessLevel.NONE)
 public final class MoonFactory {
-
-    static final MathContext TWO = new MathContext(2);
-    static final MathContext THREE = new MathContext(3);
-    static final MathContext FOUR = new MathContext(4);
-    static final MathContext FIVE = new MathContext(5);
 
     public static Planet generate(final String archiveID,
                                   final String name,

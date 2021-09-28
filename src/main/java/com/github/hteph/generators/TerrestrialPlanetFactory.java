@@ -33,17 +33,14 @@ import static com.github.hteph.generators.utils.PlanetaryUtils.findAlbedo;
 import static com.github.hteph.generators.utils.PlanetaryUtils.findTectonicGroup;
 import static com.github.hteph.generators.utils.PlanetaryUtils.getDensity;
 import static com.github.hteph.generators.utils.PlanetaryUtils.getTectonicActivityGroup;
+import static com.github.hteph.utils.NumberUtilities.THREE;
+import static com.github.hteph.utils.NumberUtilities.TWO;
 import static com.github.hteph.utils.NumberUtilities.cubed;
 import static com.github.hteph.utils.NumberUtilities.sqrt;
 import static com.github.hteph.utils.NumberUtilities.squared;
 
 @NoArgsConstructor(access = AccessLevel.NONE)
 public final class TerrestrialPlanetFactory {
-
-    static final MathContext TWO = new MathContext(2);
-    static final MathContext THREE = new MathContext(3);
-    static final MathContext FOUR = new MathContext(4);
-    static final MathContext FIVE = new MathContext(5);
 
     public static Planet generate(final String archiveID,
                                   final String name,
@@ -64,7 +61,7 @@ public final class TerrestrialPlanetFactory {
         int baseTemperature;
         HydrosphereDescription hydrosphereDescription;
         int hydrosphere;
-        Set<AtmosphericGases> atmoshericComposition;
+        Set<AtmosphericGases> atmosphericComposition;
 
         double albedo;
         String tectonicActivityGroup;
@@ -213,7 +210,7 @@ public final class TerrestrialPlanetFactory {
         planetBuilder.hydrosphere(hydrosphere);
 
         //Atmoshperic details
-        atmoshericComposition = MakeAtmosphere.createPlanetary(star,
+        atmosphericComposition = MakeAtmosphere.createPlanetary(star,
                                                                baseTemperature,
                                                                tectonicActivityGroup,
                                                                planetRadius,
@@ -226,7 +223,7 @@ public final class TerrestrialPlanetFactory {
                                                          hydrosphere,
                                                          tempPlanet.isBoilingAtmo(),
                                                          mass,
-                                                         atmoshericComposition);
+                                                         atmosphericComposition);
 
         // TODO Special considerations for c objects, this should be expanded upon when these gets more details
 
@@ -236,8 +233,8 @@ public final class TerrestrialPlanetFactory {
             else atmoPressure = 0.001;
         }
 
-        if (atmoPressure == 0) atmoshericComposition.clear();
-        if (atmoshericComposition.isEmpty()) { //There are edge cases where all of atmo has boiled away
+        if (atmoPressure == 0) atmosphericComposition.clear();
+        if (atmosphericComposition.isEmpty()) { //There are edge cases where all of atmo has boiled away
             atmoPressure = 0;
             if (hydrosphereDescription == HydrosphereDescription.LIQUID && hydrosphere > 0) {
                 planetBuilder.hydrosphereDescription(HydrosphereDescription.REMNANTS);
@@ -245,8 +242,8 @@ public final class TerrestrialPlanetFactory {
             }
 
         }
-        if (!atmoshericComposition.isEmpty())
-            MakeAtmosphere.checkAtmo(atmoshericComposition, atmoPressure);
+        if (!atmosphericComposition.isEmpty())
+            MakeAtmosphere.checkAtmo(atmosphericComposition, atmoPressure);
         // The composition could be adjusted for the existence of life, so is set below
 
         albedo = findAlbedo(IS_INNER_ZONE, atmoPressure, hydrosphereDescription, hydrosphere);
@@ -254,7 +251,7 @@ public final class TerrestrialPlanetFactory {
         //adjusting base Temperature for albedo
         baseTemperature = (int) (baseTemperature * albedo);
         //Bioshpere
-        double greenhouseFactor = findGreenhouseGases(atmoshericComposition,
+        double greenhouseFactor = findGreenhouseGases(atmosphericComposition,
                                                       atmoPressure,
                                                       baseTemperature,
                                                       hydrosphereDescription,
@@ -267,24 +264,24 @@ public final class TerrestrialPlanetFactory {
         hasGaia = LifeMethods.testLife(surfaceTemp,
                                        atmoPressure,
                                        hydrosphere,
-                                       atmoshericComposition,
+                                       atmosphericComposition,
                                        star.getAge().doubleValue(),
                                        magneticField, tectonicActivityGroup);
 
         var biosphere = Biosphere.builder();
         if (hasGaia) {
-            lifeType = LifeMethods.findLifeType(atmoshericComposition, star.getAge().doubleValue());
+            lifeType = LifeMethods.findLifeType(atmosphericComposition, star.getAge().doubleValue());
             if (lifeType.equals(Breathing.OXYGEN)) {
-                int oxygen = MakeAtmosphere.adjustForOxygen(atmoPressure, atmoshericComposition);
+                int oxygen = MakeAtmosphere.adjustForOxygen(atmoPressure, atmosphericComposition);
                 atmoPressure *= 1 + oxygen / 100d; //completly invented buff for atmopressure of oxygen breathers
             }
 
             biosphere.respiration(lifeType)
                      .baseElement(surfaceTemp < 360+Dice.d20() ? BaseElementOfLife.CARBON : BaseElementOfLife.SILICA);
         }
-        if (!atmoshericComposition.isEmpty()) MakeAtmosphere.checkAtmo(atmoshericComposition, atmoPressure);
+        if (!atmosphericComposition.isEmpty()) MakeAtmosphere.checkAtmo(atmosphericComposition, atmoPressure);
 
-        planetBuilder.atmosphericComposition(atmoshericComposition);
+        planetBuilder.atmosphericComposition(atmosphericComposition);
         planetBuilder.atmoPressure(BigDecimal.valueOf(atmoPressure).round(THREE));
 
         //Climate -------------------------------------------------------

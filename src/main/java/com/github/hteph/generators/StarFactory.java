@@ -18,14 +18,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.github.hteph.utils.NumberUtilities.THREE;
+import static com.github.hteph.utils.NumberUtilities.TWO;
+
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class StarFactory {
-
-    static final MathContext TWO = new MathContext(2);
-    static final MathContext THREE = new MathContext(3);
-    static final MathContext FOUR = new MathContext(4);
-    static final MathContext FIVE = new MathContext(5);
 
     public static Star get(String systemName, char systemPosition, Star star) {
 

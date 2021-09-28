@@ -46,10 +46,18 @@ public class Creature implements Serializable {
 
 		} catch (Exception e) {
 			this.name = place.getName().substring(0,1+place.getName().length()/2)+"ians";
-			e.printStackTrace();
+			log.warn("Error in naming of creature ={}", e.getMessage());
 		}
 		this.homeworld=place;
 		this.description = "";
+	}
+
+	public Creature(Homeworld place, boolean proto) {
+
+		this.name = "microorganisms";
+		this.homeworld = place;
+		this.description = "An ur-soup of microorganisms and basic building blocks of life";
+
 	}
 
 	public Map<String, Attribute> getAttributes() {

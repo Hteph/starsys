@@ -4,6 +4,7 @@ import com.github.hteph.generators.CreatureGenerator;
 import com.github.hteph.generators.StarFactory;
 import com.github.hteph.generators.StarSystemGenerator;
 import com.github.hteph.repository.objects.Biosphere;
+import com.github.hteph.repository.objects.Creature;
 import com.github.hteph.repository.objects.Planet;
 import com.github.hteph.repository.objects.StellarObject;
 import com.github.hteph.utils.enums.Breathing;
@@ -40,7 +41,13 @@ public class SystemController {
             if(safeCount>20) throw new RuntimeException("No life found");
         }while(findLife && lifeList.isEmpty());
 
-        lifeList.forEach(biosphere -> biosphere.setCreature(CreatureGenerator.generator(biosphere.getHomeworld())));
+        lifeList.forEach(biosphere -> {
+            if(biosphere.getRespiration() != Breathing.PROTO) {
+                biosphere.setCreature(CreatureGenerator.generator(biosphere.getHomeworld()));
+            } else {
+                biosphere.setCreature(new Creature(biosphere.getHomeworld(),true));
+            }
+        });
 
         model.addAttribute("objects", systemList);
         model.addAttribute("hasMoons", hasMoons(systemList));

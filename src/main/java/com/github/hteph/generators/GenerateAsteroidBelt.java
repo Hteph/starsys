@@ -16,17 +16,13 @@ import java.math.MathContext;
 import java.util.Arrays;
 import java.util.TreeSet;
 
+import static com.github.hteph.utils.NumberUtilities.THREE;
+import static com.github.hteph.utils.NumberUtilities.TWO;
 import static com.github.hteph.utils.NumberUtilities.sqrt;
 
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class GenerateAsteroidBelt {
-
-
-    static final MathContext TWO = new MathContext(2);
-    static final MathContext THREE = new MathContext(3);
-    static final MathContext FOUR = new MathContext(4);
-    static final MathContext FIVE = new MathContext(5);
 
 
     public static AsteroidBelt generator(String archiveID,
