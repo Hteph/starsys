@@ -32,30 +32,30 @@ public class LifeMethods {
             else lifeIndex -= 2;
         }else if( baseTemperature > 350) lifeIndex -= 3;
         else lifeIndex += 4;
-System.out.println("Index after temp="+lifeIndex +", temp="+baseTemperature);
+
         if (atmoPressure < 0.2) lifeIndex -= 5;
         else if (atmoPressure > 5) lifeIndex -= 1;
         else lifeIndex +=1;
-        System.out.println("Index after pressure="+lifeIndex);
+
 
         if (hydrosphere < 1) lifeIndex -= 5;
         else if (hydrosphere < 5) lifeIndex += 1;
         else lifeIndex += 4;
-        System.out.println("Index after hydro="+lifeIndex + ", hydro = "+ hydrosphere);
+
 
         if(magneticField < 0.3) lifeIndex += - 3;
         else if (magneticField > 5){
             //Perhaps exotic beings living of the Magnetic field energy?
             lifeIndex += 1;
         }
-        System.out.println("Index after magnetfield="+lifeIndex +", magnetic = "+magneticField);
+
 
 
         if (atmoshericComposition.stream().anyMatch(s -> s.getName().equals("NH3"))){
             //TODO rework this to work  in the same way as Oxygen?
             lifeIndex += 4;
         }
-        System.out.println("Index after ammonia="+lifeIndex);
+
 
         return lifeIndex > 0; //Nod to Gaia-theory, if there is any chance of life it will aways be life present
     }

@@ -8,6 +8,7 @@ import com.github.hteph.repository.objects.Creature;
 import com.github.hteph.repository.objects.Planet;
 import com.github.hteph.repository.objects.StellarObject;
 import com.github.hteph.utils.enums.Breathing;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,6 +21,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@Slf4j
 @Controller
 public class SystemController {
 
@@ -43,6 +45,7 @@ public class SystemController {
 
         lifeList.forEach(biosphere -> {
             if(biosphere.getRespiration() != Breathing.PROTO) {
+                log.info("This is the Breathing = {}",biosphere.getRespiration());
                 biosphere.setCreature(CreatureGenerator.generator(biosphere.getHomeworld()));
             } else {
                 biosphere.setCreature(new Creature(biosphere.getHomeworld(),true));

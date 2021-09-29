@@ -15,12 +15,15 @@ import com.github.hteph.utils.enums.EnvironmentalEnum;
 import com.github.hteph.utils.enums.Symmetry;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CreatureGenerator {
 
     public static Creature generator(Homeworld place) {
 
+        log.info("Generate creature breathing = {}", place.getRepsirating());
         Creature lifeform = new Creature(place);
         BaseEnvironmentTable environment = new BaseEnvironmentTable(place);
         EnvironmentalEnum[] baseEnvironment = environment.findBaseEnvironment();

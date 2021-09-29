@@ -32,11 +32,11 @@ public final class StarFactory {
 
         double mass;
         int temperature;
-        //TODO This is for type V stars, should be expanded to handle other types, if the mass is too low to generate a decent temperture,
-        // make a unique stellar object instead, a white dwarf or something, if to high make a giant star
+        //TODO This is for type V stars, should be expanded to handle other types, if the mass is too low to generate a
+        // decent temperture, make a unique stellar object instead, a white dwarf or something, if to high make a giant star
         do {
             mass = generateMass();
-            temperature = 100 * (int) (((500 + 4800 * Math.pow(mass, 0.5)) * (0.8 + Math.random() * 0.4)) / 100);
+            temperature = 100 * (int) (((500 + 4800 * Math.pow(mass, 0.5)) * (0.9 + Math.random() * 0.2)) / 100);
         }while (temperature<100 || temperature>28000);
 
         double diameter = Math.pow(mass, 2 / 3.0);//Solar relative units

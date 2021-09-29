@@ -54,6 +54,8 @@ public class BaseEnvironmentTable {
                 map.put(map.lastKey() + chance, anEnum);
             }
         }
+
+
 //Take one out of the mix
         EnvironmentalEnum prim = map.remove(map.floorKey((int) (1 + Math.random() * map.lastKey())));
 

@@ -67,17 +67,16 @@ public final class TerrestrialPlanetFactory {
         String tectonicActivityGroup;
 
         boolean hasGaia;
-        Breathing lifeType;
+        Breathing lifeType =null;
         double tidelock;
 
-        System.out.println(name);
+
         var planetBuilder = Planet.builder()
                                   .archiveID(archiveID)
                                   .name(name)
                                   .stellarObjectType(StellarObjectType.TERRESTRIAL)
                                   .description(description)
                                   .classificationName(classificationName);
-
 
 
         var orbitalFacts = OrbitalFacts.builder();
@@ -211,12 +210,12 @@ public final class TerrestrialPlanetFactory {
 
         //Atmoshperic details
         atmosphericComposition = MakeAtmosphere.createPlanetary(star,
-                                                               baseTemperature,
-                                                               tectonicActivityGroup,
-                                                               planetRadius,
-                                                               gravity,
-                                                               magneticField,
-                                                               planetBuilder);
+                                                                baseTemperature,
+                                                                tectonicActivityGroup,
+                                                                planetRadius,
+                                                                gravity,
+                                                                magneticField,
+                                                                planetBuilder);
         var tempPlanet = planetBuilder.build();
 
         double atmoPressure = FindAtmoPressure.calculate(tectonicActivityGroup,
@@ -277,7 +276,7 @@ public final class TerrestrialPlanetFactory {
             }
 
             biosphere.respiration(lifeType)
-                     .baseElement(surfaceTemp < 360+Dice.d20() ? BaseElementOfLife.CARBON : BaseElementOfLife.SILICA);
+                     .baseElement(surfaceTemp < 360 + Dice.d20() ? BaseElementOfLife.CARBON : BaseElementOfLife.SILICA);
         }
         if (!atmosphericComposition.isEmpty()) MakeAtmosphere.checkAtmo(atmosphericComposition, atmoPressure);
 
@@ -322,17 +321,18 @@ public final class TerrestrialPlanetFactory {
 
         var homeworld = Homeworld.builder();
         homeworld.hydrosphereDescription(hydrosphereDescription)
-        .name(name)
-        .stellarObjectType(StellarObjectType.TERRESTRIAL)
-        .temperatureFacts(temperatureFacts.build())
-        .gravity(gravity)
-        .magneticField(magneticField);
+                 .name(name)
+                 .repsirating(lifeType)
+                 .stellarObjectType(StellarObjectType.TERRESTRIAL)
+                 .temperatureFacts(temperatureFacts.build())
+                 .gravity(gravity)
+                 .magneticField(magneticField);
 
 
         planetBuilder.orbitalFacts(orbitalFacts.build());
         planetBuilder.temperatureFacts(temperatureFacts.build());
 
-        if(hasGaia) planetBuilder.life(biosphere.homeworld(homeworld.build()).build());
+        if (hasGaia) planetBuilder.life(biosphere.homeworld(homeworld.build()).build());
         return planetBuilder.build();
     }
 

@@ -49,6 +49,7 @@ public class StarClassificationTable {
         var starClass = map.get(baseTemp) ;
 
 
+        log.info("Temperature gives = {} : Class = {} from temp = {} and top Temp = {}",temperature, starClass + deciNumber, baseTemp, topTemp);
         return starClass + deciNumber;
     }
 }

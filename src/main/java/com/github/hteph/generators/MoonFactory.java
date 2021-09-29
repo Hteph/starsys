@@ -67,10 +67,10 @@ public final class MoonFactory {
 
         double moonsPlanetsRadii = 0;
 
-        Breathing lifeType;
+        Breathing lifeType = null; //TODO make this an Optional
         double tidalForce = 0;
 
-        System.out.println(name);
+
         var moonBuilder = Planet.builder()
                                 .archiveID(archiveID)
                                 .name(name)
@@ -313,9 +313,10 @@ public final class MoonFactory {
         if (!atmosphericComposition.isEmpty()) MakeAtmosphere.checkAtmo(atmosphericComposition, atmoPressure);
         moonBuilder.atmoPressure(BigDecimal.valueOf(atmoPressure).round(THREE));
 
-        var homeworld = Homeworld.builder();
+        var homeworld = Homeworld.builder(); //TODO this should probably only be delt if Life exists
         homeworld.hydrosphereDescription(hydrosphereDescription)
                  .name(name)
+                 .repsirating(lifeType)
                  .stellarObjectType(StellarObjectType.TERRESTRIAL)
                  .temperatureFacts(temperatureFacts.build())
                  .gravity(gravity)
