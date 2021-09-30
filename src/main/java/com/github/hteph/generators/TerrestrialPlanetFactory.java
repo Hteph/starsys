@@ -67,7 +67,7 @@ public final class TerrestrialPlanetFactory {
         String tectonicActivityGroup;
 
         boolean hasGaia;
-        Breathing lifeType =null;
+        Breathing lifeType = null;
         double tidelock;
 
 
@@ -267,6 +267,7 @@ public final class TerrestrialPlanetFactory {
                                        star.getAge().doubleValue(),
                                        magneticField, tectonicActivityGroup);
 
+
         var biosphere = Biosphere.builder();
         if (hasGaia) {
             lifeType = LifeMethods.findLifeType(atmosphericComposition, star.getAge().doubleValue());
@@ -274,6 +275,7 @@ public final class TerrestrialPlanetFactory {
                 int oxygen = MakeAtmosphere.adjustForOxygen(atmoPressure, atmosphericComposition);
                 atmoPressure *= 1 + oxygen / 100d; //completly invented buff for atmopressure of oxygen breathers
             }
+
 
             biosphere.respiration(lifeType)
                      .baseElement(surfaceTemp < 360 + Dice.d20() ? BaseElementOfLife.CARBON : BaseElementOfLife.SILICA);
@@ -322,7 +324,6 @@ public final class TerrestrialPlanetFactory {
         var homeworld = Homeworld.builder();
         homeworld.hydrosphereDescription(hydrosphereDescription)
                  .name(name)
-                 .repsirating(lifeType)
                  .stellarObjectType(StellarObjectType.TERRESTRIAL)
                  .temperatureFacts(temperatureFacts.build())
                  .gravity(gravity)

@@ -1,6 +1,7 @@
 package com.github.hteph.repository.objects.wrappers;
 
 import com.github.hteph.repository.objects.TemperatureFacts;
+import com.github.hteph.utils.enums.BaseElementOfLife;
 import com.github.hteph.utils.enums.Breathing;
 import com.github.hteph.utils.enums.HydrosphereDescription;
 import com.github.hteph.utils.enums.StellarObjectType;
@@ -22,7 +23,6 @@ public class Homeworld {
     private TemperatureFacts temperatureFacts;
     private double gravity;
     private double magneticField;
-    private Breathing repsirating;
 
     public String getNiceGravity(){
 

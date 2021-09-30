@@ -316,7 +316,6 @@ public final class MoonFactory {
         var homeworld = Homeworld.builder(); //TODO this should probably only be delt if Life exists
         homeworld.hydrosphereDescription(hydrosphereDescription)
                  .name(name)
-                 .repsirating(lifeType)
                  .stellarObjectType(StellarObjectType.TERRESTRIAL)
                  .temperatureFacts(temperatureFacts.build())
                  .gravity(gravity)
