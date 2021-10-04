@@ -38,7 +38,7 @@ public class BaseEnvironmentTable {
         && biosphere.getBaseElement() == BaseElementOfLife.CARBON){
             return findTerrestialPlanetbaseEnvironment(place);
         }
-
+//TODO write up the climate equvalents for the very cold and very hot
         return new EnvironmentalEnum[]{EnvironmentalEnum.EXOTIC, NONE};
 
     }

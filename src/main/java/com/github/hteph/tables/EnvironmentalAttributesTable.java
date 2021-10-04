@@ -447,7 +447,7 @@ public class EnvironmentalAttributesTable {
         if (lifeform.hasAttribute(LocomotionModes.BRACHIATOR.getName())) {
             lifeform.addAttribute(AttributeEnum.REFLEXES, 1);
             lifeform.addAttribute(AttributeEnum.STRENGTH, 2)
-                    .addCondition("Swinging Limbs","This lifeform has strong limbs specialised for swinging. ");
+                    .addCondition("Swinging Limbs","This lifeform has strong bodyStructure specialised for swinging. ");
         }
 
         if (lifeform.hasAttribute(LocomotionModes.CLIMBER.getName()) ){
@@ -466,7 +466,7 @@ public class EnvironmentalAttributesTable {
         }
 
         if (lifeform.hasAttribute(BURROWER.getName())) {
-            lifeform.addAttribute("Claws", "The lifeforms limbs has devolped harden parts to cause damage. ");
+            lifeform.addAttribute("Claws", "The lifeforms bodyStructure has devolped harden parts to cause damage. ");
             if(Dice._3d6(8)) lifeform.addAttribute("Nictating Membrane", "The lifeform have a transparent lens over the eyes that you can open and close like an eyelid. This protects the eyes from irritants. ");
             if(Dice._3d6(8)) lifeform.addAttribute(AttributeEnum.STRENGTH);
             lifeform.addAttribute("Tunnel Dweller","The lifeform evolved in selfbuilt tunnel systems. ");

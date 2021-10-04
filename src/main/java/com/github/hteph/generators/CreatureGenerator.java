@@ -1,6 +1,7 @@
 package com.github.hteph.generators;
 
 
+import com.github.hteph.repository.objects.Biosphere;
 import com.github.hteph.repository.objects.CreatureBody;
 import com.github.hteph.repository.objects.Creature;
 import com.github.hteph.repository.objects.wrappers.Homeworld;
@@ -21,15 +22,18 @@ import lombok.extern.slf4j.Slf4j;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CreatureGenerator {
 
-    public static Creature generator(Homeworld place) {
+    public static Creature generator(Biosphere biosphere) {
 
-        log.info("Generate creature breathing = {}", place.getRepsirating());
+        var place = biosphere.getHomeworld();
+
+        log.info("Generate creature breathing = {}", biosphere.getRespiration());
         Creature lifeform = new Creature(place);
-        BaseEnvironmentTable environment = new BaseEnvironmentTable(place);
+        BaseEnvironmentTable environment = new BaseEnvironmentTable(biosphere);
         EnvironmentalEnum[] baseEnvironment = environment.findBaseEnvironment();
 
         if (!(baseEnvironment[1] == EnvironmentalEnum.NONE)) {
-            lifeform.addAttribute("Dual Environment", baseEnvironment[0].getDescription() + "(" + baseEnvironment[1].getDescription() + ")");
+            lifeform.addAttribute("Dual Environment",
+                                  baseEnvironment[0].getDescription() + "(" + baseEnvironment[1].getDescription() + ")");
             lifeform.setHabitat(baseEnvironment[1]);
         } else lifeform.setHabitat(baseEnvironment[0]);
 

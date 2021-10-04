@@ -6,7 +6,6 @@ import com.github.hteph.tables.TableMaker;
 import com.github.hteph.utils.Dice;
 import com.github.hteph.utils.NumberUtilities;
 import com.github.hteph.utils.enums.AttributeEnum;
-import com.github.hteph.utils.enums.ClimatePref;
 import com.github.hteph.utils.enums.SegmentType;
 import com.github.hteph.utils.enums.SensorOrgan;
 
@@ -15,11 +14,11 @@ import java.util.List;
 
 public class BodySegmentsCreator {
 
-    public void make(Creature creature) {
+    public static void make(Creature creature) {
 
         List<BodySegment> bodySegements = new ArrayList<>();
-        SensorOrgan limbSensorials = SensorOrgan.ALL_IN_BODY;
-
+        SensorOrgan limbSensorials = SensorOrgan.ALL_IN_BODY_SEGMENTS;
+        creature.getBody().setBodyStructure(bodySegements);
 
         var flux = Dice.d6() - Dice.d6();
 
@@ -84,6 +83,7 @@ public class BodySegmentsCreator {
                                              .segmentType(SegmentType.FRONT)
                                              .organ("metabolic")
                                              .build());
+                break;
             case 2:
                 bodySegements.add(BodySegment.builder()
                                              .segmentType(SegmentType.FRONT)
@@ -118,6 +118,7 @@ public class BodySegmentsCreator {
                 creature.addAttribute(AttributeEnum.ALERTNESS, -1);
                 break;
         }
+        creature.getBody().setSensorOrgan(limbSensorials);
 
 //Limbs
         var locomotion = creature.getAttributes()
@@ -134,11 +135,11 @@ public class BodySegmentsCreator {
         do {
             switch (locomotion) {
                 case "Amphibious":
-                    break;
+                   // break;
                 case "Flier":
-                    break;
+                  //  break;
                 case "Swimmer":
-                    break;
+                 //   break;
 
                 default:
                     segment = TableMaker.makeRoll(
@@ -154,11 +155,11 @@ public class BodySegmentsCreator {
         do {
             switch (locomotion) {
                 case "Amphibious":
-                    break;
+                  //  break;
                 case "Flier":
-                    break;
+                  //  break;
                 case "Swimmer":
-                    break;
+                  //  break;
 
                 default:
                     int bonus = (int) NumberUtilities.squared(creature.getHomeworld().getGravity());
@@ -169,5 +170,7 @@ public class BodySegmentsCreator {
             }
             midSegments.add(segment);
         }while(segment.contains("+"));
+
+
     }
 }
