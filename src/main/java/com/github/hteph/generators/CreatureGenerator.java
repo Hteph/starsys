@@ -72,13 +72,10 @@ public class CreatureGenerator {
         if (lifeform.getHabitat().equals(EnvironmentalEnum.EXOTIC)) bonus2 -= 6;
 
 
-        if (Dice._3d6(16 + bonus + bonus2)) {
+        if (Dice._3d6(10 + bonus + bonus2)) {
             bodyBuilder.bodySymmetry(Symmetry.BILATERAL);
             lifeform.addToDescription("Bilateral body symmetry. ");
-            bodyBuilder.limbPerSegment(TableMaker.makeRoll(
-                    Dice.d6(),
-                    new int[]{1, 2, 6},
-                    new Integer[]{1, 2, Dice.d6() + 2}));
+            bodyBuilder.limbPerSegment(2);
 
         } else if (Dice._3d6(16 + bonus2)) {
             int sides = Dice.d6() + 2;
@@ -86,28 +83,30 @@ public class CreatureGenerator {
                 case 3:
                     bodyBuilder.bodySymmetry(Symmetry.TRILATERAL);
                     lifeform.addToDescription("Trilateral body symmetry. ");
+                    bodyBuilder.limbPerSegment(3);
                     break;
                 case 4:
                     bodyBuilder.bodySymmetry(Symmetry.QUADRAL);
                     lifeform.addToDescription("Quadratic body symmetry. ");
+                    bodyBuilder.limbPerSegment(4);
                     break;
                 case 5:
                     bodyBuilder.bodySymmetry(Symmetry.PENTRADAL);
                     lifeform.addToDescription("Pentagonal body symmetry. ");
+                    bodyBuilder.limbPerSegment(5);
                     break;
                 default:
                     bodyBuilder.bodySymmetry(Symmetry.RADIAL);
                     lifeform.addToDescription("Radial body symmetry. ");
+                    bodyBuilder.limbPerSegment(TableMaker.makeRoll(
+                            Dice._2d6(),
+                            new int[]{2, 6, 10},
+                            new Integer[]{1, 2, Dice.d6() + 2}));
                     break;
             }
-            bodyBuilder.limbPerSegment(TableMaker.makeRoll(
-                    Dice._2d6(),
-                    new int[]{2, 6, 10},
-                    new Integer[]{1, 2, Dice.d6() + 2}));
         } else {
             bodyBuilder.bodySymmetry(Symmetry.NONE);
-            lifeform.addToDescription("No distinguishable body symmetry. ");
-
+            lifeform.addToDescription("No distinguishable body symmetry. Each individual will have a unique body");
             bodyBuilder.limbPerSegment(0);
         }
 
