@@ -2,12 +2,14 @@ package com.github.hteph.utils;
 
 import com.valkryst.generator.MarkovGenerator;
 import io.micrometer.core.instrument.util.IOUtils;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+@Slf4j
 public class NameGenerator {
 
     public String compose(int numberOfLetters) {
@@ -41,7 +43,7 @@ public class NameGenerator {
             String data = IOUtils.toString(fis, StandardCharsets.UTF_8);
             trainingNames = List.of(data.split(" "));
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            log.error("++++++++++++++++++++++++++Name generator error", e);
         }
 
         final MarkovGenerator generator = new MarkovGenerator(trainingNames);

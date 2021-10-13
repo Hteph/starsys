@@ -72,7 +72,7 @@ public class CreatureGenerator {
         if (lifeform.getHabitat().equals(EnvironmentalEnum.EXOTIC)) bonus2 -= 6;
 
 
-        if (Dice._3d6(10 + bonus + bonus2)) {
+        if (Dice._3d6(10 + bonus + bonus2)) {// changed to 10 for testing, schould be higher 14? 16?
             bodyBuilder.bodySymmetry(Symmetry.BILATERAL);
             lifeform.addToDescription("Bilateral body symmetry. ");
             bodyBuilder.limbPerSegment(2);
@@ -100,7 +100,7 @@ public class CreatureGenerator {
                     lifeform.addToDescription("Radial body symmetry. ");
                     bodyBuilder.limbPerSegment(TableMaker.makeRoll(
                             Dice._2d6(),
-                            new int[]{2, 6, 10},
+                            new int[]{2, 4, 6},
                             new Integer[]{1, 2, Dice.d6() + 2}));
                     break;
             }
