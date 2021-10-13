@@ -36,47 +36,49 @@ public class BodySegmentsCreator {
 
 
 
-        String segment="";
+        String limb;
         do {
             switch (locomotionType) {
                 case "Amphibious":
-                    segment = TableMaker.makeRoll(
+                    limb = TableMaker.makeRoll(
                             Dice.d6() - Dice.d6(),
                             new int[]{-6, -4, -1, 2},
                             new String[]{"arm+", "arm", "leg", "fin"});
                    break;
                 case "Flier":
-                    segment = TableMaker.makeRoll(
+                    limb = TableMaker.makeRoll(
                             Dice.d6() - Dice.d6(),
                             new int[]{-6, -4, -1, 2, 4  },
                             new String[]{"arm+", "arm", "wing", "wing+", "leg"});
                     break;
                 case "Swimmer":
-                    segment = TableMaker.makeRoll(
+                    limb = TableMaker.makeRoll(
                             Dice.d6() - Dice.d6(),
                             new int[]{-6, -3, -2, -1},
                             new String[]{"arm+", "arm", "leg", "fin"});
                     break;
 
                 default:
-                    segment = TableMaker.makeRoll(
+                    limb = TableMaker.makeRoll(
                             Dice.d6() - Dice.d6(),
                             new int[]{-6, -4, -1, 2, 5},
                             new String[]{"arm+", "arm", "leg", "arm", "arm+"});
             }
-            bodySegements.get(bodySegements.size()-1).setLimbs(getLimb(segment));
-            if(segment.contains("+")){
+            bodySegements.get(bodySegements.size()-1).setLimbs(getLimb(limb));
+            if(limb.contains("+")){
                bodySegements.add(BodySegment.builder()
                                             .segmentType(SegmentType.FRONT)
                                             .organ("metabolic")
                                             .build()) ;
             }
 
-        }while(segment.contains("+"));
+        }while(limb.contains("+"));
 
         List<String> midSegments = new ArrayList<>();
 
         do {
+
+            if(creature.getBody().getBodySymmetry() == Symmetry.NONE && Dice.d6(4)) break;
             switch (locomotionType) {
                 case "Amphibious":
                   //  break;
@@ -87,13 +89,19 @@ public class BodySegmentsCreator {
 
                 default:
                     int bonus = (int) NumberUtilities.squared(creature.getHomeworld().getGravity());
-                    segment = TableMaker.makeRoll(
+                    limb = TableMaker.makeRoll(
                             Dice.d6() - Dice.d6()+bonus,
                             new int[]{-6, -3, 3},
                             new String[]{"leg+", "leg", "leg+"});
             }
 
-        }while(segment.contains("+"));
+            bodySegements.add(BodySegment.builder()
+                                         .segmentType(SegmentType.MID)
+                                         .limbs(getLimb(limb))
+                                         .organ("metabolic")
+                                         .build()) ;
+
+        }while(limb.contains("+"));
 
     }
 
