@@ -35,12 +35,6 @@ public class Creature implements Serializable {
     private ClimatePref climate;
     private CreatureBody body;
 
-// Constructor -------------------------------------------
-
-
-    public Creature() {
-    }
-
     public Creature(Homeworld place) {
 
         NameGenerator randomName;
@@ -53,7 +47,7 @@ public class Creature implements Serializable {
 
         } catch (Exception e) {
             this.name = place.getName().substring(0, 1 + place.getName().length() / 2) + "ians";
-            log.warn("Error in naming of creature ={}", e.getMessage());
+            log.warn("Error in naming of creature", e);
         }
         this.homeworld = place;
         this.description = "";

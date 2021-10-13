@@ -1,10 +1,10 @@
 package com.github.hteph.generators;
 
 
+import com.github.hteph.generators.utils.BodySegmentsCreator;
 import com.github.hteph.repository.objects.Biosphere;
 import com.github.hteph.repository.objects.CreatureBody;
 import com.github.hteph.repository.objects.Creature;
-import com.github.hteph.repository.objects.wrappers.Homeworld;
 import com.github.hteph.tables.BaseEnvironmentTable;
 import com.github.hteph.tables.EnvironmentalAttributesTable;
 import com.github.hteph.tables.TableMaker;
@@ -17,6 +17,8 @@ import com.github.hteph.utils.enums.Symmetry;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import static com.github.hteph.generators.utils.BodySegmentsCreator.setOtherBodySymmetry;
 
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -41,7 +43,7 @@ public class CreatureGenerator {
         decideMetabolism(lifeform);
         gravityEffects(lifeform);
         basicBodyShape(lifeform);
-
+        BodySegmentsCreator.make(lifeform);
         cleanAttributes(lifeform);
 
         return lifeform;
@@ -72,38 +74,13 @@ public class CreatureGenerator {
         if (lifeform.getHabitat().equals(EnvironmentalEnum.EXOTIC)) bonus2 -= 6;
 
 
-        if (Dice._3d6(10 + bonus + bonus2)) {// changed to 10 for testing, schould be higher 14? 16?
+        if (Dice._3d6(10 + bonus + bonus2)) {// changed to 10 for testing, should be higher 14? 16?
             bodyBuilder.bodySymmetry(Symmetry.BILATERAL);
             lifeform.addToDescription("Bilateral body symmetry. ");
-            bodyBuilder.limbPerSegment(2);
+            bodyBuilder.limbPerSegment(2*getMultiple(new int[]{2, 9, 12}));
 
         } else if (Dice._3d6(16 + bonus2)) {
-            int sides = Dice.d6() + 2;
-            switch (sides) {
-                case 3:
-                    bodyBuilder.bodySymmetry(Symmetry.TRILATERAL);
-                    lifeform.addToDescription("Trilateral body symmetry. ");
-                    bodyBuilder.limbPerSegment(3);
-                    break;
-                case 4:
-                    bodyBuilder.bodySymmetry(Symmetry.QUADRAL);
-                    lifeform.addToDescription("Quadratic body symmetry. ");
-                    bodyBuilder.limbPerSegment(4);
-                    break;
-                case 5:
-                    bodyBuilder.bodySymmetry(Symmetry.PENTRADAL);
-                    lifeform.addToDescription("Pentagonal body symmetry. ");
-                    bodyBuilder.limbPerSegment(5);
-                    break;
-                default:
-                    bodyBuilder.bodySymmetry(Symmetry.RADIAL);
-                    lifeform.addToDescription("Radial body symmetry. ");
-                    bodyBuilder.limbPerSegment(TableMaker.makeRoll(
-                            Dice._2d6(),
-                            new int[]{2, 4, 6},
-                            new Integer[]{1, 2, Dice.d6() + 2}));
-                    break;
-            }
+            setOtherBodySymmetry(lifeform, bodyBuilder);
         } else {
             bodyBuilder.bodySymmetry(Symmetry.NONE);
             lifeform.addToDescription("No distinguishable body symmetry. Each individual will have a unique body");
@@ -112,6 +89,17 @@ public class CreatureGenerator {
 
         lifeform.setBody(bodyBuilder.build());
     }
+
+    private static Integer getMultiple( int[] distribution) {
+
+        return TableMaker.makeRoll(
+                Dice._2d6(),
+                distribution,
+                new Integer[]{1, 2, Dice.d6() + 2});
+    }
+
+
+
 
     private static void gravityEffects(Creature lifeform) {
 
