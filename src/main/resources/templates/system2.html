@@ -1,0 +1,115 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html" lang="">
+<head>
+    <title>Star system facts</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link th:href="@{/tabs_screen.css}" rel="stylesheet"/>
+    <link th:href="@{/demo_screen.css}" rel="stylesheet"/>
+    <meta
+            name="viewport"
+            content="width=device-width,height=device-height,initial-scale=1"
+    >
+<!--    <link-->
+<!--            rel="stylesheet"-->
+<!--            href="/static/demo_screen.css"-->
+<!--            media="screen,projection,tv"-->
+<!--    >-->
+<!--    <link-->
+<!--            rel="stylesheet"-->
+<!--            href="/tabs_screen.css"-->
+<!--            media="screen,projection,tv"-->
+<!--    >-->
+    <title>
+        Tabbed Interface Without JavaScript
+    </title>
+
+</head><body>
+
+<header>
+
+    <h1>
+        Tabbed Interface Without JavaScript
+    </h1>
+
+</header>
+
+<main>
+
+    <p>
+        Thanks to CSS3 a great deal of what people waste javascript on simply flat out no longer needs JavaScript. Likewise the endless pointless idiotic slopping of classes onto everything can go in the trash as well thanks to the increased number of available semantic tags.
+    </p><p>
+    <a href=https://medium.com/@deathshadow/tabbed-interfaces-without-javascript-661bab1eaec8>The full article describing this can be found on Medium.</a>
+</p>
+
+    <div class="tabset">
+        <input
+                type="radio"
+                name="tabset_1"
+                id="tabset_1_description"
+                hidden
+                aria-hidden="true"
+                checked
+        >
+        <input
+                type="radio"
+                name="tabset_1"
+                id="tabset_1_statistics"
+                hidden
+                aria-hidden="true"
+        >
+        <input
+                type="radio"
+                name="tabset_1"
+                id="tabset_1_reviews"
+                hidden
+                aria-hidden="true"
+        >
+        <input
+                type="radio"
+                name="tabset_1"
+                id="tabset_1_contact"
+                hidden
+                aria-hidden="true"
+        >
+        <ul hidden aria-hidden="true">
+            <li><label for="tabset_1_description">Description</label></li>
+            <li><label for="tabset_1_statistics">Statistics</label></li>
+            <li><label for="tabset_1_reviews">Reviews</label></li>
+            <li><label for="tabset_1_contact">Contact</label></li>
+        </ul>
+        <div>
+            <section>
+                <h2>Description</h2>
+                <p>
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec id elementum neque, ac pharetra tortor. Vivamus ac vehicula augue. Curabitur pretium commodo nisi id pellentesque.
+                </p>
+            </section><section>
+            <h2>Statistics</h2>
+            <p>
+                Sed ut leo in turpis efficitur convallis at bibendum erat. Curabitur in egestas ex. Etiam efficitur sagittis molestie. Praesent condimentum elementum ipsum sit amet euismod. Sed vestibulum, leo ac iaculis fringilla, felis nulla placerat turpis, eu aliquam elit risus vel tellus.
+            </p>
+        </section><section>
+            <h2>Reviews</h2>
+            <p>
+                Donec non nunc ac augue ornare aliquam. Aenean sed volutpat arcu. Sed molestie lacus placerat nisl gravida condimentum.
+            </p>
+        </section><section>
+            <h2>Contact</h2>
+            <p>
+                Nullam nec condimentum lacus. Integer dapibus velit nec ipsum varius, a pharetra arcu imperdiet. Donec pretium libero a tincidunt vulputate. Mauris feugiat tempor lectus, quis placerat mi congue sit amet.
+            </p>
+        </section>
+        </div>
+        <!-- .tabset --></div>
+
+</main>
+
+<footer>
+
+    This demo by Jason M. Knight, Sept 2020<br>
+    Released to the Public Domain.<br>
+
+</footer>
+
+</body></html>

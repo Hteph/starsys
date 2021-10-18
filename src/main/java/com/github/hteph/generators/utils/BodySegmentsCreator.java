@@ -74,23 +74,34 @@ public class BodySegmentsCreator {
 
         }while(limb.contains("+"));
 
-        List<String> midSegments = new ArrayList<>();
+        boolean createSegment = creature.getBody().getBodySymmetry() != Symmetry.NONE && Dice.d6(4);
 
-        do {
+        while (createSegment) {
 
-            if(creature.getBody().getBodySymmetry() == Symmetry.NONE && Dice.d6(4)) break;
             switch (locomotionType) {
                 case "Amphibious":
-                  //  break;
+                    limb = TableMaker.makeRoll(
+                            Dice.d6() - Dice.d6(),
+                            new int[]{-6, -4, -2, 3},
+                            new String[]{"leg+", "leg", "fin", "fin+"});
+                    break;
                 case "Flier":
-                  //  break;
+                    limb = TableMaker.makeRoll(
+                            Dice.d6() - Dice.d6(),
+                            new int[]{-6, -3, 4, 5},
+                            new String[]{"wing", "leg", "arm", "arm+"});
+                    break;
                 case "Swimmer":
-                  //  break;
+                    limb = TableMaker.makeRoll(
+                            Dice.d6() - Dice.d6(),
+                            new int[]{-6, -4, -2},
+                            new String[]{"fin+", "fin", "none"});
+                  break;
 
                 default:
                     int bonus = (int) NumberUtilities.squared(creature.getHomeworld().getGravity());
                     limb = TableMaker.makeRoll(
-                            Dice.d6() - Dice.d6()+bonus,
+                            Dice.d6() - Dice.d6() + bonus,
                             new int[]{-6, -3, 3},
                             new String[]{"leg+", "leg", "leg+"});
             }
@@ -99,9 +110,10 @@ public class BodySegmentsCreator {
                                          .segmentType(SegmentType.MID)
                                          .limbs(getLimb(limb))
                                          .organ("metabolic")
-                                         .build()) ;
+                                         .build());
 
-        }while(limb.contains("+"));
+            createSegment = limb.contains("+");
+        };
 
     }
 

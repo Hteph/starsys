@@ -5,25 +5,24 @@ import com.github.hteph.generators.StarFactory;
 import com.github.hteph.generators.StarSystemGenerator;
 import com.github.hteph.repository.objects.Biosphere;
 import com.github.hteph.repository.objects.Creature;
-import com.github.hteph.repository.objects.Planet;
 import com.github.hteph.repository.objects.StellarObject;
+import com.github.hteph.starsys.utils.thymeleafUtils;
 import com.github.hteph.utils.enums.Breathing;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Slf4j
 @Controller
 public class SystemController {
+
+    private final com.github.hteph.starsys.utils.thymeleafUtils thymeleafUtils = new thymeleafUtils();
 
     @GetMapping("/system")
     public String greeting(@RequestParam(name = "name", required = false, defaultValue = "random") String name, Model model) {
@@ -38,7 +37,7 @@ public class SystemController {
             safeCount++;
             var star = StarFactory.get(name, 'A', null);
             systemList = StarSystemGenerator.Generator(star);
-            lifeList = getLife(systemList);
+            lifeList = thymeleafUtils.getLife(systemList);
 
             if(safeCount>20) throw new RuntimeException("No life found");
         }while(findLife && lifeList.isEmpty());
@@ -53,34 +52,16 @@ public class SystemController {
         });
 
         model.addAttribute("objects", systemList);
-        model.addAttribute("hasMoons", hasMoons(systemList));
+        model.addAttribute("hasMoons", thymeleafUtils.hasMoons(systemList));
         model.addAttribute("hasLife", lifeList.size() > 0);
         model.addAttribute("biospheres", lifeList);
 
         return "system";
     }
 
-    private List<Biosphere> getLife(ArrayList<StellarObject> systemList) {
+    @PostMapping("/system2")
+    public String systemFacts(Model model){
 
-        var planetStream = systemList.stream()
-                                     .filter(stellarObject -> stellarObject instanceof Planet);
-
-        var moonStream = systemList.stream()
-                                   .filter(stellarObject -> stellarObject instanceof Planet)
-                                   .map(stellarObject -> ((Planet) stellarObject).getMoonList())
-                                   .flatMap(Collection::stream);
-
-
-        return Stream.concat(planetStream, moonStream)
-                     .map(planet -> ((Planet) planet).getLife())
-                     .filter(Objects::nonNull)
-                     .collect(Collectors.toList());
-
-    }
-
-    private boolean hasMoons(ArrayList<StellarObject> systemList) {
-        return systemList.stream()
-                         .filter(o -> o instanceof Planet)
-                         .anyMatch(p -> ((Planet) p).getMoonList() != null && !((Planet) p).getMoonList().isEmpty());
+        return "system2";
     }
 }
