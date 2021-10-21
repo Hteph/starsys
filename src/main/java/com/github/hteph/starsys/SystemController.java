@@ -6,11 +6,9 @@ import com.github.hteph.generators.StarSystemGenerator;
 import com.github.hteph.repository.objects.Biosphere;
 import com.github.hteph.repository.objects.Creature;
 import com.github.hteph.repository.objects.StellarObject;
-import com.github.hteph.starsys.utils.RequestSystem;
 import com.github.hteph.starsys.utils.ThymeleafUtils;
 import com.github.hteph.utils.enums.Breathing;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,6 +25,37 @@ import java.util.stream.Collectors;
 @Slf4j
 @Controller
 public class SystemController {
+
+
+    @GetMapping("/")
+    public String index(Model model) {
+
+//        var tempPage = new StringBuilder();
+//
+//        tempPage.append("<!DOCTYPE html>");
+//        tempPage.append("<html>");
+//        tempPage.append("<body>");
+//
+//        tempPage.append("<h2>HTML Forms</h2>");
+//
+//        tempPage.append("<form action=\"/system2\" method=post>");
+//        tempPage.append("<label for=\"name\">System name:</label><br>");
+//        tempPage.append("<input type=\"text\" id=\"name\" name=\"name\" value=\"Random\"><br>");
+//        tempPage.append("<input type=\"checkbox\" id=\"life\" name=\"life\" value=\"yes\">");
+//        tempPage.append("<label for=\"vehicle1\">I require life</label><br>");
+//        tempPage.append("<input type=\"submit\" value=\"Submit\">");
+//        tempPage.append("</form>");
+//
+//        tempPage.append("<p>If you click the \"Submit\" button, the form-data will be sent to a page called \"/system2\".</p>");
+//
+//        tempPage.append("</body>");
+//        tempPage.append("</html>");
+//
+//
+//        return tempPage.toString();
+
+        return "lcars_index";
+    }
 
     @GetMapping("/system")
     public String greeting(@RequestParam(name = "name", required = false, defaultValue = "random") String name, Model model) {
@@ -99,4 +128,5 @@ public class SystemController {
 
         return "system2";
     }
+
 }
