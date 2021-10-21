@@ -1,6 +1,7 @@
 <!DOCTYPE HTML>
 <html xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html" lang="">
 <head>
+    <!--  Modeled after an example written by by Jason M. Knight, Sept 2020-->
     <title>Star system facts</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -10,26 +11,27 @@
             name="viewport"
             content="width=device-width,height=device-height,initial-scale=1"
     >
-<!--    <link-->
-<!--            rel="stylesheet"-->
-<!--            href="/static/demo_screen.css"-->
-<!--            media="screen,projection,tv"-->
-<!--    >-->
-<!--    <link-->
-<!--            rel="stylesheet"-->
-<!--            href="/tabs_screen.css"-->
-<!--            media="screen,projection,tv"-->
-<!--    >-->
+    <!--    <link-->
+    <!--            rel="stylesheet"-->
+    <!--            href="/static/demo_screen.css"-->
+    <!--            media="screen,projection,tv"-->
+    <!--    >-->
+    <!--    <link-->
+    <!--            rel="stylesheet"-->
+    <!--            href="/tabs_screen.css"-->
+    <!--            media="screen,projection,tv"-->
+    <!--    >-->
     <title>
-        Tabbed Interface Without JavaScript
+        Star System Fact Sheet
     </title>
 
-</head><body>
+</head>
+<body>
 
 <header>
 
     <h1>
-        Tabbed Interface Without JavaScript
+        Star System Generator
     </h1>
 
 </header>
@@ -37,16 +39,23 @@
 <main>
 
     <p>
-        Thanks to CSS3 a great deal of what people waste javascript on simply flat out no longer needs JavaScript. Likewise the endless pointless idiotic slopping of classes onto everything can go in the trash as well thanks to the increased number of available semantic tags.
-    </p><p>
-    <a href=https://medium.com/@deathshadow/tabbed-interfaces-without-javascript-661bab1eaec8>The full article describing this can be found on Medium.</a>
-</p>
+        Here there will be information about the Star system creator that I develop on my (limited) free time. The goal
+        is to produce a web page that produces a complete (fictional) star's celestial system with added info about as
+        possible (inhabitants, politics, factions, various social metrics) to be used as a source of inspiration for
+        rpg players or authors.<br/>
+
+        But it is mainly a tool for me to test things while I learning new stuff, so the codebase is fluid and nothing
+        to neither to learn from nor expect any coherence in.<br/>
+
+        So it is mainly created for my own amusement and as a learning opportunity, so warning for strange behaviour,
+        sometimes incomplete implementations and frequent changes.<br/>
+    </p>
 
     <div class="tabset">
         <input
                 type="radio"
                 name="tabset_1"
-                id="tabset_1_description"
+                id="tabset_1_celestial"
                 hidden
                 aria-hidden="true"
                 checked
@@ -54,52 +63,432 @@
         <input
                 type="radio"
                 name="tabset_1"
-                id="tabset_1_statistics"
+                id="tabset_1_ecology"
                 hidden
                 aria-hidden="true"
         >
         <input
                 type="radio"
                 name="tabset_1"
-                id="tabset_1_reviews"
+                id="tabset_1_sophonts"
                 hidden
                 aria-hidden="true"
         >
         <input
                 type="radio"
                 name="tabset_1"
-                id="tabset_1_contact"
+                id="tabset_1_notes"
                 hidden
                 aria-hidden="true"
         >
         <ul hidden aria-hidden="true">
-            <li><label for="tabset_1_description">Description</label></li>
-            <li><label for="tabset_1_statistics">Statistics</label></li>
-            <li><label for="tabset_1_reviews">Reviews</label></li>
-            <li><label for="tabset_1_contact">Contact</label></li>
+            <li><label for="tabset_1_celestial">Celestial</label></li>
+            <li><label for="tabset_1_ecology">Ecology</label></li>
+            <li><label for="tabset_1_sophonts">Sophont</label></li>
+            <li><label for="tabset_1_notes">Notes</label></li>
         </ul>
         <div>
             <section>
-                <h2>Description</h2>
-                <p>
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec id elementum neque, ac pharetra tortor. Vivamus ac vehicula augue. Curabitur pretium commodo nisi id pellentesque.
+                <h2>Celestial</h2>
+                <p>This lists the major, organised objects in the system. in addition to these there are thousands of
+                    small objects in irregular orbits. If you need one of those just take a look at the outermost
+                    objects of a gas giant for now.<br/>
+                    There will be a list of examples later on, as well as inclusion of trojan points content etc
                 </p>
-            </section><section>
-            <h2>Statistics</h2>
-            <p>
-                Sed ut leo in turpis efficitur convallis at bibendum erat. Curabitur in egestas ex. Etiam efficitur sagittis molestie. Praesent condimentum elementum ipsum sit amet euismod. Sed vestibulum, leo ac iaculis fringilla, felis nulla placerat turpis, eu aliquam elit risus vel tellus.
-            </p>
-        </section><section>
-            <h2>Reviews</h2>
-            <p>
-                Donec non nunc ac augue ornare aliquam. Aenean sed volutpat arcu. Sed molestie lacus placerat nisl gravida condimentum.
-            </p>
-        </section><section>
-            <h2>Contact</h2>
-            <p>
-                Nullam nec condimentum lacus. Integer dapibus velit nec ipsum varius, a pharetra arcu imperdiet. Donec pretium libero a tincidunt vulputate. Mauris feugiat tempor lectus, quis placerat mi congue sit amet.
-            </p>
-        </section>
+                <table>
+                    <tr>
+                        <th>No</th>
+                        <th>Distance [AU]</th>
+                        <th>Description</th>
+                        <th>Name</th>
+                        <th>Celestial Facts</th>
+                        <th>Planetary Facts</th>
+                        <th>Atmospheric Facts</th>
+                    </tr>
+                    <tr th:each="object, objStat : ${objects}">
+
+                        <td style="text-align:center" th:text="${objStat.count -1 }">1</td>
+                        <td style="text-align:center" th:if="${object.stellarObjectType.getLabel() == 'A'}">
+                            <span th:text="${object.getPresentations().getFacts().get('width')}">N/A</span>
+                        </td>
+                        <td style="text-align:center" th:unless="${object.stellarObjectType.getLabel() == 'A'}">
+                            <span th:text="${object.getOrbitalFacts().getOrbitalDistance().doubleValue()}">N/A</span>
+                        </td>
+                        <td th:text="${object.getDescription()}">N/A</td>
+                        <td th:text="${object.getName()}">N/A</td>
+                        <!--Celestial facts-->
+                        <td th:switch="${object.stellarObjectType.getLabel()}">
+
+                            <div th:case="'T'">
+                                <span><b>Mass: </b></span>
+                                <span th:text="${object.getPresentations().getFacts().get('mass')}">-</span>
+                                <span> eMass </span>
+                                <br/>
+                                <span><b>Radius: </b></span>
+                                <span th:text="${object.getPresentations().getFacts().get('radius')}">-</span>
+                                <span> km</span>
+                                <br/>
+                                <span><b>Calendar: </b></span>
+                                <span th:text="${object.getPresentations().getFacts().get('orbital period')}">-</span>
+                                <span> years with days of </span>
+                                <span th:text="${object.getPresentations().getFacts().get('rotation period')}">-</span>
+                                <span> hours</span>
+                                <span th:if="${object.getPresentations().getFacts().get('tidelocked') == 'true'}">(tide locked to star)</span>
+                                <span th:if="${object.getPresentations().getFacts().get('resonance') == 'true'}">(tide locked to star)</span>
+                                <br/>
+                                <span><b>Orbital eccentricity: </b></span>
+                                <span th:text="${object.getPresentations().getFacts().get('orbital eccentricity')}">-</span>
+                                <br/>
+                                <span><b>Orbital inclination: </b></span>
+                                <span th:text="${object.getPresentations().getFacts().get('inclination')}">-</span>
+                                <br/>
+                                <div th:if="${#maps.containsKey(object.getPresentations().getFacts(), 'number of moons')}">
+                                    <b> Number of moons: </b>
+                                    <span th:text="${object.getPresentations().getFacts().get('number of moons')}">-</span>
+                                </div>
+
+
+                            </div>
+                            <div th:case="'S'">
+                                <span><b>Mass: </b></span>
+                                <span th:text="${object.getPresentations().getFacts().get('mass')}">-</span>
+                                <br/>
+                                <span><b>Luminosity: </b></span>
+                                <span th:text="${object.getPresentations().getFacts().get('luminosity')}">-</span>
+                                <span> eSun </span>
+                                <br/>
+                                <span><b>Age: </b></span>
+                                <span th:text="${object.getPresentations().getFacts().get('age')}">-</span>
+                                <span> Gy</span>
+                                <br/>
+                                <span><b>Resources Level: </b></span>
+                                <span th:text="${object.getPresentations().getFacts().get('abundance')}">-</span>
+                            </div>
+
+                            <div th:case="'J'">
+                                <span><b>Mass: </b></span>
+                                <span th:text="${object.getPresentations().getFacts().get('mass')}">-</span>
+                                <span>eMass</span>
+                                <br/>
+                                <span><b>Radius: </b></span>
+                                <span th:text="${object.getPresentations().getFacts().get('radius')}">-</span>
+                                <span> km</span>
+                                <br/>
+                                <span><b>Calendar: </b></span>
+                                <span th:text="${object.getPresentations().getFacts().get('orbital period')}">-</span>
+                                <span> years with days of </span>
+                                <span th:text="${object.getPresentations().getFacts().get('rotation period')}">-</span>
+                                <span> hours</span>
+                                <br/>
+                                <div th:if="${#maps.containsKey(object.getPresentations().getFacts(), 'number of moons')}">
+                                    <b> Number of moons: </b>
+                                    <span th:text="${object.getPresentations().getFacts().get('number of moons')}">-</span>
+                                </div>
+
+                            </div>
+                            <div th:case="'A'">
+
+                                <span><b>Size Distribution [km]: </b></span>
+                                <span th:text="${object.getPresentations().getFacts().get('size distribution')}">-</span>
+
+                            </div>
+                            <p th:case="*">This is something else</p>
+                        </td>
+
+                        <!--Planetary Facts-->
+                        <td th:switch="${object.stellarObjectType.getLabel()}">
+                            <div th:case="'T'">
+                                <span><b>Core: </b></span>
+                                <span th:text="${object.getPresentations().getFacts().get('tectonic core')}">-</span>
+                                <br/>
+                                <span><b>Tectonics: </b></span>
+                                <span th:text="${object.getPresentations().getFacts().get('tectonic activity group')}">-</span>
+                                <br/>
+                                <span><b>Density: </b></span>
+                                <span th:text="${object.getPresentations().getFacts().get('density')}">-</span>
+                                <span> eNormal </span>
+                                <br/>
+                                <span><b>Gravity: </b></span>
+                                <span th:text="${object.getPresentations().getFacts().get('gravity')}">-</span>
+                                <span> g</span>
+                                <br/>
+                                <span><b>Axial Tilt: </b></span>
+                                <span th:text="${object.getPresentations().getFacts().get('axial tilt')}">-</span>
+                                <br/>
+                                <span><b>Magnetic field: </b></span>
+                                <span th:text="${object.getPresentations().getFacts().get('magnetic field')}">-</span>
+                                <span> eNormal </span>
+                                <br/>
+                                <span><b>Hydrospheric description: </b></span>
+                                <span th:text="${object.getPresentations().getFacts().get('Hydrosphere description')}">-</span>
+                                (<span th:text="${object.getPresentations().getFacts().get('hydrosphere')}">-</span>%)
+                                <br/>
+                                <span><b>Average Surface Temperature: : </b></span>
+                                <span th:text="${object.getPresentations().getFacts().get('Surface temperature')}">-</span>
+                                <!--                    <div th:unless="${object.getPresentations().getFacts().get('tide locked to star') == 'true'}">-->
+                                <button class="parentCell"
+                                        th:unless="${object.getPresentations().getFacts().get('tide locked to star') == 'true'}">
+                                    <small>Details</small>
+
+                                    <span class="tooltip">
+                            <h2>Temperature Details</h2>
+                                <p>
+                            <span><b>Max Day Increase/Night decrease : </b></span>
+                            <span th:text="${object.getPresentations.getFacts.get('dayNight')}">-</span>
+                             <span><b>Variations due to eccentricity: </b>
+                             <span th:text="${object.getPresentations().getFacts().get('eccentricityVariation')}">-</span>
+                             </span>
+                                </p>
+                            <br/>
+                            <table class="center">
+                                <tr>
+                                    <th>Label</th>
+                                    <th>Equator</th>
+                                    <th>10°</th>
+                                    <th>20°</th>
+                                    <th>30°</th>
+                                    <th>40°</th>
+                                    <th>50°</th>
+                                    <th>60°</th>
+                                    <th>70°</th>
+                                    <th>80°</th>
+                                    <th>Pole</th>
+                                </tr>
+                                <tr>
+                        <span style="text-align:center"
+                              th:utext="${object.getPresentations().getFacts().get('average rangeband temperature')}">missing</span>
+                                </tr>
+                                <tr>
+                        <span style="text-align:center"
+                              th:utext="${object.getPresentations().getFacts().get('summer rangeband temperature')}">missing</span>
+                                </tr>
+                                <tr>
+                        <span style="text-align:center"
+                              th:utext="${object.getPresentations().getFacts().get('winter rangeband temperature')}">missing</span>
+                                </tr>
+
+                            </table>
+
+                        </span>
+                                </button>
+
+                            </div>
+
+                            <div th:case="'J'">
+
+                                <span><b>Magnetic field: </b></span>
+                                <span th:text="${object.getPresentations().getFacts().get('magnetic field')}">-</span>
+                                <span> eNormal </span>
+                                <br/>
+                                <span><b>Axial Tilt: </b></span>
+                                <span th:text="${object.getPresentations().getFacts().get('axial tilt')}">-</span>
+                                <br/>
+                                <span><b>Magnetic field: </b></span>
+                                <span th:text="${object.getPresentations().getFacts().get('magnetic field')}">-</span>
+                                <span> eNormal </span>
+
+                            </div>
+                            <div th:case="'A'">
+                                <span><b>Type: </b></span>
+                                <span th:text="${object.getPresentations().getFacts().get('type')}">-</span>
+
+                            </div>
+                            <p th:case="*">N/A</p>
+                        </td>
+
+                        <!--Atmospheric Facts-->
+                        <td th:switch="${object.stellarObjectType.getLabel()}">
+                            <div th:case="'T'">
+                                <span><b>Surface Pressure: </b></span>
+                                <span th:text="${object.getPresentations().getFacts().get('pressure')}">-</span>
+                                <span> eAtm</span>
+                                <br/>
+                                <span th:text="${object.getPresentations().getFacts().get('composition')}">-</span>
+                                <br/>
+                                <div th:if="${#maps.containsKey(object.getPresentations().getFacts(), 'life type')}">
+                                    <b> Biosphere: </b>
+                                    <span th:text="${object.getPresentations().getFacts().get('life type')}">-</span>
+                                </div>
+                            </div>
+                            <p th:case="*">N/A</p>
+                        </td>
+
+                    </tr>
+                </table>
+
+                <!--                Moons -->
+                <div th:if="${hasMoons}">
+
+
+<!--Moons-->
+                        <!--    <h2 th:if="${hasMoons}">Moon Facts</h2>-->
+                        <div th:each="object, objStat : ${objects}">
+
+                            <div th:if="${#maps.containsKey(object.getPresentations().getFacts(), 'number of moons')}">
+                                <button class="accordion">Moon Facts -
+                                    <span th:text="${object.getName()}">N/A</span>
+                                </button>
+
+                                <div class="panel">
+                                <table>
+                                    <tr>
+                                        <th>No</th>
+                                        <th>Distance [km]</th>
+                                        <th>Description</th>
+                                        <th>Name</th>
+                                        <th>Celestial Facts</th>
+                                        <th>Planetary Facts</th>
+                                        <th>Atmospheric Facts</th>
+
+                                    </tr>
+
+                                    <tr th:each="moon, moonStat : ${object.getPresentations().getMoonPresentations()}">
+                                        <td style="text-align:center" th:text="${moonStat.count }">-</td>
+
+                                        <td style="text-align:center" th:text="${moon.getFacts().get('orbitDistance')}">
+                                            N/A
+                                        </td>
+                                        <td th:text="${moon.getFacts().get('description')}">N/A</td>
+                                        <td th:text="${moon.getFacts().get('name')}">N/A</td>
+                                        <td>
+                                            <span><b>Mass: </b></span>
+                                            <span th:text="${moon.getFacts().get('mass')}">-</span>
+                                            <span> eMass </span>
+                                            <br/>
+                                            <span><b>Radius: </b></span>
+                                            <span th:text="${moon.getFacts().get('radius')}">-</span>
+                                            <span> km</span>
+                                            <br/>
+                                            <span><b>Orbital period: </b></span>
+                                            <span th:text="${moon.getFacts().get('lunarOrbitalPeriod')}">-</span>
+                                            <span> days</span>
+                                            <span th:if="${#maps.containsKey(moon.getFacts(), 'planetLocked')}">(Planet locked)</span>
+                                            <span th:unless="${#maps.containsKey(moon.getFacts(), 'planetLocked')}">
+                                                <span><b>Lunar rotation: </b></span>
+                                                <span th:text="${moon.getFacts().get('rotation')}">-</span>
+                                                <span> hours</span>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span><b>Core: </b></span>
+                                            <span th:text="${moon.getFacts().get('tectonic core')}">-</span>
+                                            <br/>
+                                            <span><b>Tectonics: </b></span>
+                                            <span th:text="${moon.getFacts().get('tectonic activity group')}">-</span>
+                                            <br/>
+                                            <span><b>Density: </b></span>
+                                            <span th:text="${moon.getFacts().get('density')}">-</span>
+                                            <span> eNormal </span>
+                                            <br/>
+                                            <span><b>Gravity: </b></span>
+                                            <span th:text="${moon.getFacts().get('gravity')}">-</span>
+                                            <span> g</span>
+                                            <br/>
+                                            <span><b>Axial Tilt: </b></span>
+                                            <span th:text="${moon.getFacts().get('axial tilt')}">-</span>
+                                            <span> degrees </span>
+                                            <br/>
+                                            <span><b>Magnetic field: </b></span>
+                                            <span th:text="${moon.getFacts().get('magnetic field')}">-</span>
+                                            <span> eNormal </span>
+                                            <br/>
+                                            <span><b>Hydrospheric description: </b></span>
+                                            <span th:text="${moon.getFacts().get('Hydrosphere description')}">-</span>
+                                            (<span th:text="${moon.getFacts().get('hydrosphere')}">-</span>%)
+                                            <br/>
+                                            <span><b>Average Surface Temperature: : </b></span>
+                                            <span th:text="${moon.getFacts().get('Surface temperature')}">-</span>
+
+                                            <button class="parentCell">
+                                                <small>Details</small>
+                                                <span class="tooltip">
+
+                                    <h2>Temperature Details</h2>
+                        <span><b>Max Day Increase/Night decrease: </b>
+                <span th:text="${moon.getFacts.get('dayNight')}">-</span></span>
+                                        <span><b>Variations due to eccentricity: </b>
+                <span th:text="${moon.getFacts.get('eccentricityVariation')}">-</span></span>
+
+                <table class="center">
+                    <tr>
+                        <th>Label</th>
+                        <th>Equator</th>
+                        <th>10°</th>
+                        <th>20°</th>
+                        <th>30°</th>
+                        <th>40°</th>
+                        <th>50°</th>
+                        <th>60°</th>
+                        <th>70°</th>
+                        <th>80°</th>
+                        <th>Pole</th>
+                    </tr>
+                    <tr>
+                        <span style="text-align:center"
+                              th:utext="${moon.getFacts.get('average rangeband temperature')}">missing</span>
+                    </tr>
+                         <tr>
+                        <span style="text-align:center"
+                              th:utext="${moon.getFacts().get('summer rangeband temperature')}">missing</span>
+                    </tr>
+                         <tr>
+                        <span style="text-align:center"
+                              th:utext="${moon.getFacts().get('winter rangeband temperature')}">missing</span>
+                    </tr>
+
+                </table>
+                                </span>
+                                            </button>
+                                        </td>
+
+                                        <td>
+                                            <span><b>Surface Pressure: </b></span>
+                                            <span th:text="${moon.getFacts().get('pressure')}">-</span>
+                                            <span> atm</span>
+                                            <br/>
+                                            <span th:text="${moon.getFacts().get('composition')}">-</span>
+                                            <br/>
+                                            <div th:if="${#maps.containsKey(moon.getFacts(), 'life type')}">
+                                                <b> Biosphere: </b>
+                                                <span th:text="${moon.getFacts().get('life type')}">-</span>
+                                            </div>
+                                        </td>
+
+                                    </tr>
+                                </table>
+                                <br/>
+
+                            </div>
+
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+            </section>
+
+            <section>
+                <h2>Ecology</h2>
+                <p>
+                    Some examples of the living fauna originating in the system.
+                </p>
+            </section>
+
+            <section>
+                <h2>Sophonts</h2>
+                <p>
+                    Facts about the Sophonts inhabiting the system, either as natives or coloniser.
+                </p>
+            </section>
+
+            <section>
+                <h2>Notes</h2>
+                <p>
+                    Here is a list of notes about the novelties and enigmas found in the system.
+                </p>
+            </section>
         </div>
         <!-- .tabset --></div>
 
@@ -107,9 +496,60 @@
 
 <footer>
 
-    This demo by Jason M. Knight, Sept 2020<br>
-    Released to the Public Domain.<br>
+    By Schedim Productions<br>
+    [probably something about usage and compyright something probably] <br>
 
 </footer>
 
-</body></html>
+<script>
+    var acc = document.getElementsByClassName("accordion");
+    var i;
+
+    for (i = 0; i < acc.length; i++) {
+        acc[i].addEventListener("click", function () {
+            this.classList.toggle("active");
+            var panel = this.nextElementSibling;
+            if (panel.style.display === "block") {
+                panel.style.display = "none";
+            } else {
+                panel.style.display = "block";
+            }
+        });
+    }
+
+    function openPage(pageName, elmnt, color) {
+        // Hide all elements with class="tabcontent" by default */
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+
+        // Remove the background color of all tablinks/buttons
+        tablinks = document.getElementsByClassName("tablink");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].style.backgroundColor = "";
+        }
+
+        // Show the specific tab content
+        document.getElementById(pageName).style.display = "block";
+
+        // Add the specific color to the button used to open the tab content
+        elmnt.style.backgroundColor = color;
+    }
+
+    // Get the element with id="defaultOpen" and click on it
+    document.getElementById("defaultOpen").click();
+
+
+    // When the user clicks on <div>, open the popup
+    function myFunction() {
+        var popup = document.getElementById("myPopup");
+        popup.classList.toggle("show");
+    }
+
+</script>
+
+
+</body>
+</html>

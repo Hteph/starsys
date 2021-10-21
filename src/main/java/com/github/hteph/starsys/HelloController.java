@@ -6,32 +6,32 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RestController
 public class HelloController {
 
-	@RequestMapping("/")
-	public String index() {
+    @RequestMapping("/")
+    public String index() {
 
-		var tempPage = new StringBuilder();
+        var tempPage = new StringBuilder();
 
-		tempPage.append("<!DOCTYPE html>");
-		tempPage.append("<html>");
-		tempPage.append("<body>");
+        tempPage.append("<!DOCTYPE html>");
+        tempPage.append("<html>");
+        tempPage.append("<body>");
 
-				tempPage.append("<h2>HTML Forms</h2>");
+        tempPage.append("<h2>HTML Forms</h2>");
 
-				tempPage.append("<form action=\"/system2\" method=post>" );
-				tempPage.append("<label for=\"fname\">First name:</label><br>");
-				tempPage.append("<input type=\"text\" id=\"fname\" name=\"fname\" value=\"John\"><br>");
-				tempPage.append("<label for=\"lname\">Last name:</label><br>");
-				tempPage.append("<input type=\"text\" id=\"lname\" name=\"lname\" value=\"Doe\"><br><br>");
-				tempPage.append("<input type=\"submit\" value=\"Submit\">");
-				tempPage.append("</form>");
+        tempPage.append("<form action=\"/system2\" method=post>");
+        tempPage.append("<label for=\"name\">System name:</label><br>");
+        tempPage.append("<input type=\"text\" id=\"name\" name=\"name\" value=\"Random\"><br>");
+        tempPage.append("<input type=\"checkbox\" id=\"life\" name=\"life\" value=\"yes\">");
+        tempPage.append("<label for=\"vehicle1\">I require life</label><br>");
+        tempPage.append("<input type=\"submit\" value=\"Submit\">");
+        tempPage.append("</form>");
 
-				tempPage.append("<p>If you click the \"Submit\" button, the form-data will be sent to a page called \"/system2\".</p>");
+        tempPage.append("<p>If you click the \"Submit\" button, the form-data will be sent to a page called \"/system2\".</p>");
 
-				tempPage.append("</body>");
-				tempPage.append("</html>");
+        tempPage.append("</body>");
+        tempPage.append("</html>");
 
 
-		return tempPage.toString();
-	}
+        return tempPage.toString();
+    }
 
 }

@@ -11,11 +11,11 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class thymeleafUtils {
-    public thymeleafUtils() {
+public class ThymeleafUtils {
+    public ThymeleafUtils() {
     }
 
-    public List<Biosphere> getLife(ArrayList<StellarObject> systemList) {
+    public static List<Biosphere> getLife(ArrayList<StellarObject> systemList) {
 
         var planetStream = systemList.stream()
                                      .filter(stellarObject -> stellarObject instanceof Planet);
@@ -33,7 +33,7 @@ public class thymeleafUtils {
 
     }
 
-    public boolean hasMoons(ArrayList<StellarObject> systemList) {
+    public static boolean hasMoons(ArrayList<StellarObject> systemList) {
         return systemList.stream()
                          .filter(o -> o instanceof Planet)
                          .anyMatch(p -> ((Planet) p).getMoonList() != null && !((Planet) p).getMoonList().isEmpty());
