@@ -195,8 +195,9 @@
                             <p th:case="*">This is something else</p>
                         </td>
 
-                        <!--Planetary Facts-->
+<!--Facts-->
                         <td th:switch="${object.stellarObjectType.getLabel()}">
+  <!--Terrestial-->
                             <div th:case="'T'">
                                 <span><b>Core: </b></span>
                                 <span th:text="${object.getPresentations().getFacts().get('tectonic core')}">-</span>
@@ -273,7 +274,7 @@
                                 </button>
 
                             </div>
-
+<!--Jovian-->
                             <div th:case="'J'">
 
                                 <span><b>Magnetic field: </b></span>
@@ -283,11 +284,12 @@
                                 <span><b>Axial Tilt: </b></span>
                                 <span th:text="${object.getPresentations().getFacts().get('axial tilt')}">-</span>
                                 <br/>
-                                <span><b>Magnetic field: </b></span>
+<!--                                <span><b>Magnetic field: </b></span>
                                 <span th:text="${object.getPresentations().getFacts().get('magnetic field')}">-</span>
-                                <span> eNormal </span>
+                                <span> eNormal </span>-->
 
                             </div>
+<!--Asteroid-->
                             <div th:case="'A'">
                                 <span><b>Type: </b></span>
                                 <span th:text="${object.getPresentations().getFacts().get('type')}">-</span>
@@ -339,12 +341,10 @@
                                         <th>Celestial Facts</th>
                                         <th>Planetary Facts</th>
                                         <th>Atmospheric Facts</th>
-
                                     </tr>
 
                                     <tr th:each="moon, moonStat : ${object.getPresentations().getMoonPresentations()}">
                                         <td style="text-align:center" th:text="${moonStat.count }">-</td>
-
                                         <td style="text-align:center" th:text="${moon.getFacts().get('orbitDistance')}">
                                             N/A
                                         </td>
@@ -440,7 +440,6 @@
                                 </span>
                                             </button>
                                         </td>
-
                                         <td>
                                             <span><b>Surface Pressure: </b></span>
                                             <span th:text="${moon.getFacts().get('pressure')}">-</span>
