@@ -72,7 +72,7 @@ td:first-child, th:first-child {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 50%;
+    width: 200px;
     z-index: 100;
     border:solid rgba(148, 49, 38 ,0.5) 3px;
     border-radius:5px;
@@ -105,7 +105,6 @@ body, html {
     padding: 14px 16px;
     font-size: 17px;
     width: 300px;
-
 }
 
 .tablink:hover {
@@ -118,7 +117,6 @@ body, html {
     display: none;
     padding: 100px 20px;
     height: 100%;
-
 }
 
 #Home {background-color: rgba(51, 206, 255,0.1);}
