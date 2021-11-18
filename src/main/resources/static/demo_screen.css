@@ -1,0 +1,164 @@
+/* null margins and padding to give good cross-browser baseline */
+html, body, address, blockquote, div,
+form, fieldset, caption,
+h1, h2, h3, h4, h5, h6,
+hr, ul, li, ol, ul, dl, dt, dd,
+table, tr, td, th, p, img {
+    margin: 0;
+    padding: 0;
+}
+
+img, fieldset {
+    border: none;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+hr {
+    display: none;
+    /*
+        HR in my code are for semantic breaks in topic/section,  NOT
+        style/presenation,  so hide them from screen.css users
+    */
+}
+
+@media (max-width: 480px) {
+    /* Fix for pre "viewport <meta>" mobile browsers */
+    * {
+        -webkit-text-size-adjust: none;
+        -ms-text-size-adjust: none;
+    }
+}
+
+html, body {
+    height: 100%;
+}
+
+body, button, input, table, textarea, select {
+    font: normal 1em arial, helvetica, sans-serif;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    background: hsl(220, 100%, 95%);
+}
+
+body > header,
+body > footer {
+    flex: 0 0 auto;
+    padding: 1em;
+    background: hsl(220, 100%, 90%);
+}
+
+body > header {
+    border-bottom: 1px solid hsl(220, 100%, 60%);
+}
+
+body > footer {
+    text-align: center;
+    border-top: 1px solid hsl(220, 100%, 60%);
+}
+
+main {
+    flex: 1 0 auto;
+    /*max-width: 48em;*/
+    margin: 0 auto;
+    padding: 1.5em;
+}
+
+h1 {
+    font-size: 2em;
+
+}
+
+p {
+    padding-bottom: 1.5em;
+}
+
+/*The accordion tables*/
+
+table {
+    border-collapse:separate;
+    border:double rgba(148, 49, 38 ,1) 10px;
+    border-radius:10px;
+    -moz-border-radius:10px;
+    width:95%;
+    /*background: white;*/
+    margin: 20px;
+}
+
+table.center {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+td, th {
+    border-left:solid rgba(148, 49, 38 ,1) 1px;
+    border-top:solid rgba(148, 49, 38 ,1) 1px;
+    padding: 5px;
+}
+
+th {
+    background-color:rgba(51, 206, 255,0.1);
+    border-top: none;
+}
+
+td:first-child, th:first-child {
+    border-left: none;
+}
+
+.accordion {
+    background-color: rgba(51, 206, 255,0.1);
+    border-radius:10px;
+    color: #444;
+    cursor: pointer;
+    padding: 18px;
+    width: 95%;
+    text-align: left;
+    border:double #B03A2E 3px;
+    outline: none;
+    transition: 0.4s;
+    margin: 10px;
+}
+
+/* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
+.accordion:hover {
+    background-color: rgba(51, 206, 255,0.5);
+}
+
+/* Style the accordion panel. Note: hidden by default */
+.panel {
+    padding: 5px 0;
+    background-color: white;
+    display: none;
+    overflow: hidden;
+}
+
+.parentCell{
+    position: relative;
+    border:solid #B03A2E 1px;
+    background-color: rgba(51, 206, 255,0.1);
+    margin: 2px;
+}
+.tooltip{
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 800px;
+    z-index: 100;
+    border:solid rgba(148, 49, 38 ,0.5) 3px;
+    border-radius:5px;
+    background-color: white;
+    padding: 10px;
+    color: black;
+}
+.parentCell:hover span.tooltip{
+    display:block;
+}
+
+* {box-sizing: border-box}

@@ -72,7 +72,7 @@ td:first-child, th:first-child {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 200px;
+    width: 250px;
     z-index: 100;
     border:solid rgba(148, 49, 38 ,0.5) 3px;
     border-radius:5px;
