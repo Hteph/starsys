@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html" lang="">
+<head>
+    <title>Hteph Starting Page/title>
+        <title>Star system facts</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link th:href="@{/tabs_screen.css}" rel="stylesheet"/>
+    <link th:href="@{/demo_screen.css}" rel="stylesheet"/>
+    <meta
+            name="viewport"
+            content="width=device-width,height=device-height,initial-scale=1"
+    >
+</head>
+<style>
+    /* Header/logo Title */
+    .header {
+        padding: 50px;
+        text-align: center;
+    }
+
+    /* Increase the font size of the heading */
+    .header h1 {
+        font-size: 40px;
+    }
+
+    /* Style the top navigation bar */
+    .navbar {
+        /*overflow: hidden;*/
+        background-color: lightcyan;
+        border: double darkred 3px;
+        border-radius: 10px;
+        margin-bottom: 5px;
+    }
+
+    /* Style the navigation bar links */
+    .navbar a {
+        float: left;
+        display: block;
+        color: darkred;
+        text-align: center;
+        padding: 14px 20px;
+        text-decoration: none;
+    }
+
+    /* Right-aligned link */
+    .navbar a.right {
+        float: right;
+    }
+
+    /* Change color on hover */
+    .navbar a:hover {
+        background-color: lightyellow;
+        color: darkgreen;
+        border-radius: 5px;
+    }
+
+    /* Column container */
+    .row {
+        display: -ms-flexbox; /* IE10 */
+        display: flex;
+        -ms-flex-wrap: wrap; /* IE10 */
+        flex-wrap: wrap;
+    }
+
+    /* Create two unequal columns that sits next to each other */
+    /* Sidebar/left column */
+    .side {
+        -ms-flex: 30%; /* IE10 */
+        flex: 30%;
+        padding: 20px;
+    }
+
+    /* Main column */
+    .main {
+        -ms-flex: 70%; /* IE10 */
+        flex: 70%;
+        padding: 20px;
+    }
+
+    .card{
+        border: double darkred 3px;
+        background-color: whitesmoke;
+        border-radius: 10px;
+        padding: 10px;
+    }
+
+    /* Fake image, just for this example */
+    .fakeimg {
+        background-color: #aaa;
+        width: 100%;
+        padding: 20px;
+    }
+
+</style>
+
+<body th:style="'background: url(SF_background.jpg); background-size: 300px 300px;'">
+
+<div class="header">
+    <h1>Hteph Productions</h1>
+    <p>A website for hosting my experimental code creations</p>
+</div>
+
+<div class="navbar">
+    <a href="#">Link</a>
+    <a href="http://star.schedim.com/system">Simple StarSys API</a>
+    <a href="https://github.com/Hteph/starsys/wiki">StarSys Wiki</a>
+    <a href="#" class="right">Link</a>
+</div>
+
+<div class="row">
+    <div class="side">
+        <h2>About Me:</h2>
+        <h5>Photo of me:</h5>
+        <div class="fakeimg" style="height:200px;">Image</div>
+        <p>I should fix this and put up something at least</p>
+        <!--<h3>More Text</h3>
+        <p>Perhaps there is something more I want to show?</p>
+        <div class="fakeimg" style="height:60px;">Image</div>
+        <br>
+        <div class="fakeimg" style="height:60px;">Image</div>
+        <br>
+        <div class="fakeimg" style="height:60px;">Image</div>-->
+    </div>
+    <div class="main">
+        <div class="card">
+            <h2>Generate a Star system</h2>
+            <h5>currently the only service avaiable</h5>
+            <p>
+                Here there will be information about the Star system creator that I develop on my (limited) free time.
+                The goal
+                is to produce a web page that produces a complete (fictional) star's celestial system with added info
+                about as
+                possible (inhabitants, politics, factions, various social metrics) to be used as a source of inspiration
+                for
+                rpg players or authors.<br/>
+
+                But it is mainly a tool for me to test things while I learning new stuff, so the codebase is fluid and
+                nothing
+                to neither to learn from nor expect any coherence in.<br/>
+
+                So it is mainly created for my own amusement and as a learning opportunity, so warning for strange
+                behaviour,
+                sometimes incomplete implementations and frequent changes.<br/>
+            </p>
+            <p> If Life is set to required the generator will run and try a number of times and hopefully get a system
+                containing life </p>
+            <form action="/system2" method=post>
+                <label for="name">System name:</label><br>
+                <input type="text" id="name" name="name" value="random"><br>
+                <input type="checkbox" id="life" name="life" value="yes">
+                <label for="life">I require life</label><br>
+                <input type="submit" value="Submit">
+            </form>
+            <p>The "simple" link above uses a plain get request that takes a parameter as system name for a simpler api.
+                The wiki link is for the Github wiki which contains further information</p>
+        </div>
+    </div>
+</div>
+
+<div class="footer">
+    By Schedim Productions<br>
+    [probably something about usage and copyright something probably] <br>
+</div>
+
+</body>
+</html>

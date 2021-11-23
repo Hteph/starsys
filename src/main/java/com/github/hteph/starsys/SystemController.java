@@ -54,7 +54,7 @@ public class SystemController {
 //
 //        return tempPage.toString();
 
-        return "lcars_index";
+        return "my_index";
     }
 
     @GetMapping("/system")

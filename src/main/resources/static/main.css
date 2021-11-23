@@ -2,7 +2,6 @@
 body {
     color: black;
     background-color: white;
-
 }
 
 table {
@@ -176,3 +175,4 @@ body, html {
     from {opacity: 0;}
     to {opacity:1 ;}
 }
+

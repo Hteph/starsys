@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html" lang="">
+<html xmlns:th="http://thymeleaf.org" xmlns="http://www.w3.org/1999/html" lang="">
 <head>
     <!--  Modeled after an example written by by Jason M. Knight, Sept 2020-->
     <title>Star system facts</title>
@@ -7,26 +7,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link th:href="@{/tabs_screen.css}" rel="stylesheet"/>
     <link th:href="@{/demo_screen.css}" rel="stylesheet"/>
+    <link th:href="@{/tables.css}" rel="stylesheet"/>
     <meta
             name="viewport"
             content="width=device-width,height=device-height,initial-scale=1"
     >
-    <!--    <link-->
-    <!--            rel="stylesheet"-->
-    <!--            href="/static/demo_screen.css"-->
-    <!--            media="screen,projection,tv"-->
-    <!--    >-->
-    <!--    <link-->
-    <!--            rel="stylesheet"-->
-    <!--            href="/tabs_screen.css"-->
-    <!--            media="screen,projection,tv"-->
-    <!--    >-->
+
     <title>
         Star System Fact Sheet
     </title>
 
 </head>
-<body>
+<body th:style="'background: url(SF_background.jpg); background-size: 300px 300px;'">
 
 <header>
 
@@ -38,18 +30,6 @@
 
 <main>
 
-    <p>
-        Here there will be information about the Star system creator that I develop on my (limited) free time. The goal
-        is to produce a web page that produces a complete (fictional) star's celestial system with added info about as
-        possible (inhabitants, politics, factions, various social metrics) to be used as a source of inspiration for
-        rpg players or authors.<br/>
-
-        But it is mainly a tool for me to test things while I learning new stuff, so the codebase is fluid and nothing
-        to neither to learn from nor expect any coherence in.<br/>
-
-        So it is mainly created for my own amusement and as a learning opportunity, so warning for strange behaviour,
-        sometimes incomplete implementations and frequent changes.<br/>
-    </p>
 
     <div class="tabset">
         <input
@@ -90,11 +70,11 @@
         <div>
             <section>
                 <h2>Celestial</h2>
-                <p>This lists the major, organised objects in the system. in addition to these there are thousands of
-                    small objects in irregular orbits. If you need one of those just take a look at the outermost
-                    objects of a gas giant for now.<br/>
-                    There will be a list of examples later on, as well as inclusion of trojan points content etc
-                </p>
+                <p>This lists the major objects in the system. In addition to these there are thousands of
+                    small objects in irregular orbits. <br/>
+                    TODO: There will be a list of examples later on, as well as inclusion of trojan points content etc.<br/>
+                    If you need one of those just take a look at the outermost
+                    objects of a gas giant for now.</p>
                 <table>
                     <tr>
                         <th>No</th>
