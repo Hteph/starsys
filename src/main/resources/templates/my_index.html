@@ -13,6 +13,10 @@
     >
 </head>
 <style>
+
+    img {
+        width: 50%;
+    }
     /* Header/logo Title */
     .header {
         padding: 50px;
@@ -80,9 +84,13 @@
 
     .card{
         border: double darkred 3px;
-        background-color: whitesmoke;
+        background-color: lightcyan;
         border-radius: 10px;
         padding: 10px;
+    }
+
+    .footer{
+        position: center ;
     }
 
     /* Fake image, just for this example */
@@ -102,18 +110,17 @@
 </div>
 
 <div class="navbar">
-    <a href="#">Link</a>
+    <!--<a href="#">Link</a>-->
     <a href="http://star.schedim.com/system">Simple StarSys API</a>
     <a href="https://github.com/Hteph/starsys/wiki">StarSys Wiki</a>
-    <a href="#" class="right">Link</a>
+    <!--<a href="#" class="right">Link</a>-->
 </div>
 
 <div class="row">
     <div class="side">
-        <h2>About Me:</h2>
-        <h5>Photo of me:</h5>
-        <div class="fakeimg" style="height:200px;">Image</div>
-        <p>I should fix this and put up something at least</p>
+        <h2>About This Place:</h2>
+        <img th:src="@{under-construction.png}"/>
+        <p>This is a place for me to experiment and test stuff. It may sometimes be a bit ... chaotic.</p>
         <!--<h3>More Text</h3>
         <p>Perhaps there is something more I want to show?</p>
         <div class="fakeimg" style="height:60px;">Image</div>
@@ -125,25 +132,20 @@
     <div class="main">
         <div class="card">
             <h2>Generate a Star system</h2>
-            <h5>currently the only service avaiable</h5>
+            <h5>(currently the only service avaiable)</h5>
             <p>
                 Here there will be information about the Star system creator that I develop on my (limited) free time.
-                The goal
-                is to produce a web page that produces a complete (fictional) star's celestial system with added info
-                about as
-                possible (inhabitants, politics, factions, various social metrics) to be used as a source of inspiration
-                for
-                rpg players or authors.<br/>
+                The end  goal is to produce a web page that produces a complete (fictional) star's celestial system with added info
+                about as much as possible (inhabitants, politics, factions, various social metrics) to be used as a source of inspiration
+                for rpg players or authors.<br/>
 
-                But it is mainly a tool for me to test things while I learning new stuff, so the codebase is fluid and
-                nothing
-                to neither to learn from nor expect any coherence in.<br/>
+                But it is mainly a place for me to test things while I'm learning new stuff, so the codebase is fluid and
+                nothing to neither to learn from nor expect any coherence in.<br/>
 
                 So it is mainly created for my own amusement and as a learning opportunity, so warning for strange
-                behaviour,
-                sometimes incomplete implementations and frequent changes.<br/>
+                behaviour, sometimes incomplete implementations and frequent changes.<br/>
             </p>
-            <p> If Life is set to required the generator will run and try a number of times and hopefully get a system
+            <p> If Life is set to require the generator will run and try a number of times and hopefully get a system
                 containing life </p>
             <form action="/system2" method=post>
                 <label for="name">System name:</label><br>

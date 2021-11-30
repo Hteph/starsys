@@ -4,6 +4,13 @@
     left:-100%;
 }
 
+.tabset{
+    margin: 20px;
+    padding: 5px;
+    position: absolute;
+    left: 0;
+}
+
 .tabset > ul {
     position:relative;
     z-index:999;
@@ -14,13 +21,13 @@
 
 .tabset > ul label,
 .tabset > div {
-    border:1px solid hsl(220, 100%, 60%);
+    border:1px solid darkred;
 }
 
 .tabset > ul label {
     display:inline-block;
     padding:0.25em 1em;
-    background:hsl(220, 100%, 90%);
+    background:lightcyan;
     border-right-width:0;
 }
 
@@ -35,7 +42,7 @@
 
 .tabset > div {
     position:relative;
-    background:hsl(220, 100%, 98%);
+    background:lightcyan;
     border-radius:0 0.5em 0.5em 0.5em;
 }
 
@@ -60,8 +67,21 @@
 .tabset > input:nth-child(7):checked ~ ul li:nth-child(7) label,
 .tabset > input:nth-child(8):checked ~ ul li:nth-child(8) label,
 .tabset > input:nth-child(9):checked ~ ul li:nth-child(9) label {
-    background:hsl(220, 100%, 98%);
-    border-bottom-color:hsl(220, 100%, 98%);
+    background:lightcyan;
+    border-bottom-color:lightcyan;
+}
+
+.tabset > input:nth-child(1):hover ~ ul li:nth-child(1) label,
+.tabset > input:nth-child(2):hover ~ ul li:nth-child(2) label,
+.tabset > input:nth-child(3):hover ~ ul li:nth-child(3) label,
+.tabset > input:nth-child(4):hover ~ ul li:nth-child(4) label,
+.tabset > input:nth-child(5):hover ~ ul li:nth-child(5) label,
+.tabset > input:nth-child(6):hover ~ ul li:nth-child(6) label,
+.tabset > input:nth-child(7):hover ~ ul li:nth-child(7) label,
+.tabset > input:nth-child(8):hover ~ ul li:nth-child(8) label,
+.tabset > input:nth-child(9):hover ~ ul li:nth-child(9) label {
+    background-color: lightyellow;
+    color: darkgreen;
 }
 
 .tabset > div > section,
@@ -83,7 +103,7 @@
 .tabset > input:nth-child(7):checked ~ div > section:nth-child(7),
 .tabset > input:nth-child(8):checked ~ div > section:nth-child(8),
 .tabset > input:nth-child(9):checked ~ div > section:nth-child(9) {
-    position:Static;
+    position: static;
 }
 
 .tabset > ul label {

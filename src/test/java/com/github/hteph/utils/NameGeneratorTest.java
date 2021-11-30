@@ -1,19 +1,20 @@
 package com.github.hteph.utils;
 
+import com.valkryst.VNameGenerator.generator.MarkovGenerator;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.valkryst.generator.MarkovGenerator;
+import com.valkryst.VNameGenerator.markov.MarkovChain;
 
 class NameGeneratorTest {
 
     @Test
     public void testOfName(){
 
-        List<String> trainingNames = List.of(
+        String[] trainingNames = new String[]{
                 "ailios", "ailisl", "aimil", "aingealag", "anabla", "anna",
                 "aoife", "barabal", "baraball", "barabla", "bearnas", "beasag",
                 "beathag", "beileag", "beitidh", "beitiris", "beitris",
@@ -35,11 +36,11 @@ class NameGeneratorTest {
                 "peigi", "raghnaid", "raodhailt", "raonaid", "raonaild", "rut",
                 "seasaìdh", "seonag", "seònaid", "simeag", "siubhan", "siùsaidh",
                 "siùsan", "sorcha", "stineag", "sìle", "sìleas", "sìlis", "sìne",
-                "sìneag", "sìonag", "teasag", "teàrlag", "ùna", "una");
+                "sìneag", "sìonag", "teasag", "teàrlag", "ùna", "una"};
 
         var testGenerator = new MarkovGenerator(trainingNames);
 
-        var name = testGenerator.generateName(5);
+        var name = testGenerator.generate(5);
 
         assertThat(name).isNotNull();
     }

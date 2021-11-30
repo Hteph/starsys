@@ -102,11 +102,12 @@ public class SystemController {
         List<Biosphere> lifeList;
         boolean findLife = requests.containsKey("life");
         ArrayList<StellarObject> systemList;
+        String systemName = requests.getOrDefault("name","Schedim");
 
         int safeCount=0;
         do {
             safeCount++;
-            var star = StarFactory.get(requests.getOrDefault("name","Schedim"), 'A', null);
+            var star = StarFactory.get(systemName, 'A', null);
             systemList = StarSystemGenerator.Generator(star);
             lifeList = ThymeleafUtils.getLife(systemList);
 
@@ -121,6 +122,7 @@ public class SystemController {
             }
         });
 
+        model.addAttribute("name", systemName);
         model.addAttribute("objects", systemList);
         model.addAttribute("hasMoons", ThymeleafUtils.hasMoons(systemList));
         model.addAttribute("hasLife", lifeList.size() > 0);

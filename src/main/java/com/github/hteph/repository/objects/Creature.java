@@ -42,8 +42,9 @@ public class Creature implements Serializable {
             randomName = new NameGenerator();
 
 
-            this.name = randomName.compose(2 + Dice.aLotOfd3(3)) + " " +
-                    randomName.compose(2 + Dice.aLotOfd3(3));
+
+            this.name = randomName.compose(3 + Dice.aLotOfd3(3) ) + " " +
+                    randomName.compose(3 + Dice.aLotOfd3(3));
 
         } catch (Exception e) {
             this.name = place.getName().substring(0, 1 + place.getName().length() / 2) + "ians";

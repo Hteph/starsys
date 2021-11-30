@@ -14,6 +14,7 @@ class CreatureGeneratorTest {
 
         var creature = CreatureGenerator.generator(Biosphere.builder()
                                              .homeworld(Homeworld.builder()
+                                                                .name("TestName")
                                                                  .gravity(1.0)
                                                                  .build())
                                              .build());

@@ -61,10 +61,10 @@ public final class StarFactory {
         String starName;
         if(systemName.equals("random") || systemName.equals("life")) {
             try {
-                starName = randomNameGenerator.compose((3 + Dice.d6()));
+                starName = randomNameGenerator.compose((5 + Dice.aLotOfd3(3)));
             } catch (Exception e) {
                 starName = "Unknown";
-                log.warn("++++++++++Name failed+++++++++++++");
+                log.warn("++++++++++Name failed+++++++++++++",e);
             }
         } else{
             starName = systemName;
