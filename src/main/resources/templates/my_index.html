@@ -147,9 +147,14 @@
             </p>
             <p> If Life is set to require the generator will run and try a number of times and hopefully get a system
                 containing life </p>
+            <p>This lists the major objects in the system. In addition to these there are thousands of small objects in irregular orbits.<br/>
+            TODO: There will be a list of examples later on, as well as inclusion of trojan points content etc.<br/>
+                If you need one of those just take a look at the outermost objects of a gas giant for now.<br/></p>
+
+            <p> <b>WARNING: Due to the lack of support for Java 17 in AWS the random name generator do not work</b></p>
             <form action="/system2" method=post>
                 <label for="name">System name:</label><br>
-                <input type="text" id="name" name="name" value="random"><br>
+                <input type="text" id="name" name="name" required<br>
                 <input type="checkbox" id="life" name="life" value="yes">
                 <label for="life">I require life</label><br>
                 <input type="submit" value="Submit">

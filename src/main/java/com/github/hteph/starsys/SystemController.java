@@ -30,30 +30,6 @@ public class SystemController {
     @GetMapping("/")
     public String index(Model model) {
 
-//        var tempPage = new StringBuilder();
-//
-//        tempPage.append("<!DOCTYPE html>");
-//        tempPage.append("<html>");
-//        tempPage.append("<body>");
-//
-//        tempPage.append("<h2>HTML Forms</h2>");
-//
-//        tempPage.append("<form action=\"/system2\" method=post>");
-//        tempPage.append("<label for=\"name\">System name:</label><br>");
-//        tempPage.append("<input type=\"text\" id=\"name\" name=\"name\" value=\"Random\"><br>");
-//        tempPage.append("<input type=\"checkbox\" id=\"life\" name=\"life\" value=\"yes\">");
-//        tempPage.append("<label for=\"vehicle1\">I require life</label><br>");
-//        tempPage.append("<input type=\"submit\" value=\"Submit\">");
-//        tempPage.append("</form>");
-//
-//        tempPage.append("<p>If you click the \"Submit\" button, the form-data will be sent to a page called \"/system2\".</p>");
-//
-//        tempPage.append("</body>");
-//        tempPage.append("</html>");
-//
-//
-//        return tempPage.toString();
-
         return "my_index";
     }
 
@@ -102,12 +78,12 @@ public class SystemController {
         List<Biosphere> lifeList;
         boolean findLife = requests.containsKey("life");
         ArrayList<StellarObject> systemList;
-        String systemName = requests.getOrDefault("name","Schedim");
+
 
         int safeCount=0;
         do {
             safeCount++;
-            var star = StarFactory.get(systemName, 'A', null);
+            var star = StarFactory.get(requests.getOrDefault("name","random"), 'A', null);
             systemList = StarSystemGenerator.Generator(star);
             lifeList = ThymeleafUtils.getLife(systemList);
 
@@ -122,7 +98,7 @@ public class SystemController {
             }
         });
 
-        model.addAttribute("name", systemName);
+        model.addAttribute("systemName", systemList.get(0).getName());
         model.addAttribute("objects", systemList);
         model.addAttribute("hasMoons", ThymeleafUtils.hasMoons(systemList));
         model.addAttribute("hasLife", lifeList.size() > 0);

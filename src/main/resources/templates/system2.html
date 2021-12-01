@@ -17,7 +17,7 @@
 
 </head>
 <style>
-        /* null margins and padding to give good cross-browser baseline */
+    /* null margins and padding to give good cross-browser baseline */
     html, body, address, blockquote, div,
     form, fieldset, caption,
     h1, h2, h3, h4, h5, h6,
@@ -56,7 +56,7 @@
         padding: 5px;
     }
 
-    body, button, input, table, textarea, select {
+    body, button {
         font: normal 1em arial, helvetica, sans-serif;
         color: darkred;
     }
@@ -95,12 +95,12 @@
     }
 
     .tabset > input {
-        display:block; /* "enable" hidden elements in IE/edge */
-        position:absolute; /* then hide them off-screen */
-        left:-100%;
+        display: block; /* "enable" hidden elements in IE/edge */
+        position: absolute; /* then hide them off-screen */
+        left: -100%;
     }
 
-    .tabset{
+    .tabset {
         margin: 20px;
         padding: 5px;
         position: absolute;
@@ -108,38 +108,38 @@
     }
 
     .tabset > ul {
-        position:relative;
-        z-index:999;
-        list-style:none;
-        display:flex;
-        margin-bottom:-1px;
+        position: relative;
+        z-index: 999;
+        list-style: none;
+        display: flex;
+        margin-bottom: -1px;
     }
 
     .tabset > ul label,
     .tabset > div {
-        border:1px solid darkred;
+        border: 1px solid darkred;
     }
 
     .tabset > ul label {
-        display:inline-block;
-        padding:0.25em 1em;
-        background:lightcyan;
-        border-right-width:0;
+        display: inline-block;
+        padding: 0.25em 1em;
+        background: lightcyan;
+        border-right-width: 0;
     }
 
     .tabset > ul li:first-child label {
-        border-radius:0.5em 0 0 0;
+        border-radius: 0.5em 0 0 0;
     }
 
     .tabset > ul li:last-child label {
-        border-right-width:1px;
-        border-radius:0 0.5em 0 0;
+        border-right-width: 1px;
+        border-radius: 0 0.5em 0 0;
     }
 
     .tabset > div {
-        position:relative;
-        background:lightcyan;
-        border-radius:0 0.5em 0.5em 0.5em;
+        position: relative;
+        background: lightcyan;
+        border-radius: 0 0.5em 0.5em 0.5em;
     }
 
     .tabset > input:nth-child(1):focus ~ ul li:nth-child(1) label,
@@ -151,7 +151,7 @@
     .tabset > input:nth-child(7):focus ~ ul li:nth-child(7) label,
     .tabset > input:nth-child(8):focus ~ ul li:nth-child(8) label,
     .tabset > input:nth-child(9):focus ~ ul li:nth-child(9) label {
-        text-decoration:underline;
+        text-decoration: underline;
     }
 
     .tabset > input:nth-child(1):checked ~ ul li:nth-child(1) label,
@@ -163,8 +163,8 @@
     .tabset > input:nth-child(7):checked ~ ul li:nth-child(7) label,
     .tabset > input:nth-child(8):checked ~ ul li:nth-child(8) label,
     .tabset > input:nth-child(9):checked ~ ul li:nth-child(9) label {
-        background:lightcyan;
-        border-bottom-color:lightcyan;
+        background: lightcyan;
+        border-bottom-color: lightcyan;
     }
 
     .tabset > input:nth-child(1):hover ~ ul li:nth-child(1) label,
@@ -182,12 +182,13 @@
 
     .tabset > div > section,
     .tabset > div > section h2 {
-        position:absolute;
-        top:-999em;
-        left:-999em;
+        position: absolute;
+        top: -999em;
+        left: -999em;
     }
+
     .tabset > div > section {
-        padding:1em 1em 0;
+        padding: 1em 1em 0;
     }
 
     .tabset > input:nth-child(1):checked ~ div > section:nth-child(1),
@@ -203,24 +204,24 @@
     }
 
     .tabset > ul label {
-        -webkit-touch-callout:none;
-        -webkit-user-select:none;
-        -khtml-user-select:none;
-        -moz-user-select:none;
-        -ms-user-select:none;
-        user-select:none;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
     }
 
     /*The accordion tables*/
     table {
-        border-collapse:separate;
-        border:double rgba(148, 49, 38 ,1) 10px;
-        border-radius:10px;
-        -moz-border-radius:10px;
+        border-collapse: separate;
+        border: double rgba(148, 49, 38, 1) 10px;
+        border-radius: 10px;
+        -moz-border-radius: 10px;
         /*    border:  solid transparent;
             border-width: 40px 60px 60px 20px;
             border-image: url("metal-border.png") 8% 12% 12% 4%;*/
-        width:95%;
+        width: 95%;
         /*background: white;*/
         margin: 20px;
     }
@@ -232,13 +233,13 @@
     }
 
     td, th {
-        border-left:solid rgba(148, 49, 38 ,1) 1px;
-        border-top:solid rgba(148, 49, 38 ,1) 1px;
+        border-left: solid rgba(148, 49, 38, 1) 1px;
+        border-top: solid rgba(148, 49, 38, 1) 1px;
         padding: 5px;
     }
 
     th {
-        background-color:rgba(51, 206, 255,0.1);
+        background-color: rgba(51, 206, 255, 0.1);
         border-top: none;
     }
 
@@ -248,13 +249,13 @@
 
     .accordion {
         background-color: lightcyan;
-        border-radius:10px;
+        border-radius: 10px;
         color: darkred;
         cursor: pointer;
         padding: 18px;
         width: 95%;
         text-align: left;
-        border:double darkred 3px;
+        border: double darkred 3px;
         outline: none;
         transition: 0.4s;
         margin: 10px;
@@ -274,19 +275,19 @@
         overflow: hidden;
     }
 
-    .parentCell{
+    .parentCell {
         position: relative;
-        border:solid darkred 1px;
+        border: solid darkred 1px;
         background-color: lightblue;
         margin: 2px;
     }
 
-    /*.parentCell:hover{
+    .parentCell:hover{
         background: lightyellow;
         color: darkgreen;
-    }*/
-
-    .tooltip{
+    }
+/*Details button*/
+    .tooltip {
         display: none;
         position: fixed;
         top: 50%;
@@ -294,23 +295,33 @@
         transform: translate(-50%, -50%);
         width: 800px;
         z-index: 100;
-        border:solid darkred 3px;
-        border-radius:5px;
+        border: solid darkred 3px;
+        border-radius: 5px;
         background-color: lightyellow;
         padding: 10px;
         color: black;
     }
 
-    .parentCell:hover span.tooltip{
-        display:block;
+    .parentCell:hover span.tooltip {
+        display: block;
+    }
+ /*download button   */
+    .download{
+        position: absolute;
+        right: 5px;
+        background: lightcyan;
+        border: solid darkred 3px;
+        border-radius: 5px;
+        padding: 3px;
     }
 
-    * {box-sizing: border-box}
-
-
+    .download:hover{
+        background: lightyellow;
+        color: darkgreen;
+    }
 </style>
 
-<body th:style="'background: url(starsandnebula.jpeg);'">
+<body th:style="'background: url(starsandnebula.jpeg); background-color: black;'">
 
 <header>
 
@@ -321,9 +332,9 @@
 </header>
 
 <main>
-
-
-    <a href="#" onclick="downloadPage(this,event);" download>Download entire page.</a>
+    <button class="download">
+        <a href="#" onclick="downloadPage(this,event);" download>Download System Facts</a>
+    </button>
 
     <div class="tabset">
         <input
@@ -364,11 +375,7 @@
         <div>
             <section>
                 <h2>Celestial</h2>
-                <p>This lists the major objects in the system. In addition to these there are thousands of
-                    small objects in irregular orbits. <br/>
-                    TODO: There will be a list of examples later on, as well as inclusion of trojan points content etc.<br/>
-                    If you need one of those just take a look at the outermost
-                    objects of a gas giant for now.</p>
+
                 <table>
                     <tr>
                         <th>No</th>
@@ -391,7 +398,7 @@
                         <td th:text="${object.getDescription()}">N/A</td>
                         <td th:text="${object.getName()}">N/A</td>
 
-<!--Celestial facts-->
+                        <!--Celestial facts-->
                         <td th:switch="${object.stellarObjectType.getLabel()}">
 
                             <div th:case="'T'">
@@ -470,9 +477,9 @@
                             <p th:case="*">This is something else</p>
                         </td>
 
-<!--Planetary Facts-->
+                        <!--Planetary Facts-->
                         <td th:switch="${object.stellarObjectType.getLabel()}">
-  <!--Terrestial-->
+                            <!--Terrestial-->
                             <div th:case="'T'">
                                 <span><b>Core: </b></span>
                                 <span th:text="${object.getPresentations().getFacts().get('tectonic core')}">-</span>
@@ -549,7 +556,7 @@
                                 </button>
 
                             </div>
-<!--Jovian-->
+                            <!--Jovian-->
                             <div th:case="'J'">
 
                                 <span><b>Magnetic field: </b></span>
@@ -559,12 +566,12 @@
                                 <span><b>Axial Tilt: </b></span>
                                 <span th:text="${object.getPresentations().getFacts().get('axial tilt')}">-</span>
                                 <br/>
-<!--                                <span><b>Magnetic field: </b></span>
-                                <span th:text="${object.getPresentations().getFacts().get('magnetic field')}">-</span>
-                                <span> eNormal </span>-->
+                                <!--                                <span><b>Magnetic field: </b></span>
+                                                                <span th:text="${object.getPresentations().getFacts().get('magnetic field')}">-</span>
+                                                                <span> eNormal </span>-->
 
                             </div>
-<!--Asteroid-->
+                            <!--Asteroid-->
                             <div th:case="'A'">
                                 <span><b>Type: </b></span>
                                 <span th:text="${object.getPresentations().getFacts().get('type')}">-</span>
@@ -573,7 +580,7 @@
                             <p th:case="*">N/A</p>
                         </td>
 
-<!--Atmospheric Facts-->
+                        <!--Atmospheric Facts-->
                         <td th:switch="${object.stellarObjectType.getLabel()}">
                             <div th:case="'T'">
                                 <span><b>Surface Pressure: </b></span>
@@ -597,16 +604,16 @@
                 <div th:if="${hasMoons}">
 
 
-<!--Moons-->
-                        <!--    <h2 th:if="${hasMoons}">Moon Facts</h2>-->
-                        <div th:each="object, objStat : ${objects}">
+                    <!--Moons-->
+                    <!--    <h2 th:if="${hasMoons}">Moon Facts</h2>-->
+                    <div th:each="object, objStat : ${objects}">
 
-                            <div th:if="${#maps.containsKey(object.getPresentations().getFacts(), 'number of moons')}">
-                                <button class="accordion">Moon Facts -
-                                    <span th:text="${object.getName()}">N/A</span>
-                                </button>
+                        <div th:if="${#maps.containsKey(object.getPresentations().getFacts(), 'number of moons')}">
+                            <button class="accordion">Moon Facts -
+                                <span th:text="${object.getName()}">N/A</span>
+                            </button>
 
-                                <div class="panel">
+                            <div class="panel">
                                 <table>
                                     <tr>
                                         <th>No</th>
@@ -771,8 +778,6 @@
 
 <script th:inline="javascript">
 
-
-
     var acc = document.getElementsByClassName("accordion");
     var i;
 
@@ -820,16 +825,19 @@
     }
 
     function downloadPage(element, event) {
+
+        var nameOfPage = [[${systemName}]];
+        var pageName = nameOfPage + '.html';
         var isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
 
         if ((navigator.userAgent.indexOf("MSIE") !== -1) || (!!document.documentMode === true)) {
-            document.execCommand('SaveAs', '1', 'page.html');
+            document.execCommand('SaveAs', '1', pageName);
             event.preventDefault();
         } else {
-            if(isChrome) {
-                element.setAttribute('href','data:text/html;charset=UTF-8,'+encodeURIComponent('<!doctype html>' + document.documentElement.outerHTML));
+            if (isChrome) {
+                element.setAttribute('href', 'data:text/html;charset=UTF-8,' + encodeURIComponent('<!doctype html>' + document.documentElement.outerHTML));
             }
-            element.setAttribute('download', 'page.html');
+            element.setAttribute('download', pageName);
         }
     }
 </script>

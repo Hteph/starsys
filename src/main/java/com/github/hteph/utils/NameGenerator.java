@@ -1,8 +1,8 @@
 package com.github.hteph.utils;
 
 
-import com.valkryst.VNameGenerator.generator.MarkovGenerator;
-import com.valkryst.VNameGenerator.markov.MarkovChain;
+//import com.valkryst.VNameGenerator.generator.MarkovGenerator;
+//import com.valkryst.VNameGenerator.markov.MarkovChain;
 import io.micrometer.core.instrument.util.IOUtils;
 import lombok.extern.slf4j.Slf4j;
 
@@ -15,8 +15,9 @@ import java.util.List;
 public class NameGenerator {
 
     public String compose(int numberOfLetters) {
-
-        String[] trainingNames = new String[]{
+return "Unknown";
+    }
+/*        String[] trainingNames = new String[]{
                 "ailios", "ailisl", "aimil", "aingealag", "anabla", "anna",
                 "aoife", "barabal", "baraball", "barabla", "bearnas", "beasag",
                 "beathag", "beileag", "beitidh", "beitiris", "beitris",
@@ -49,7 +50,6 @@ public class NameGenerator {
             log.error("++++++++Namefile missing in generator error+++++++++++++\n", e);
         }
 
-
         final MarkovGenerator generator = new MarkovGenerator(trainingNames);
 
         var buggedName = generator.generate(numberOfLetters);
@@ -61,7 +61,5 @@ public class NameGenerator {
     private String bugFixedName(String buggedName) {
 
         return buggedName.substring(1).substring(0, 1).toUpperCase() + buggedName.substring(2);
-    }
-
-
+    }*/
 }
