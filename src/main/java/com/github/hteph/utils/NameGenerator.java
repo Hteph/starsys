@@ -10,12 +10,29 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Random;
 
 @Slf4j
 public class NameGenerator {
 
     public String compose(int numberOfLetters) {
-return "Unknown";
+
+        Random rand = new Random();
+
+        StringBuilder name = new StringBuilder();
+
+        do {
+            String abc = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+            char letter = abc.charAt(rand.nextInt(abc.length()));
+
+            name.append(letter);
+        } while (name.length() <4);
+
+        name.append("-");
+        name.append(rand.nextInt(999));
+
+        return name.toString();
     }
 /*        String[] trainingNames = new String[]{
                 "ailios", "ailisl", "aimil", "aingealag", "anabla", "anna",

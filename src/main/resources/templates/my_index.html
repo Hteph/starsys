@@ -153,10 +153,10 @@
 
             <p> <b>WARNING: Due to the lack of support for Java 17 in AWS the random name generator do not work</b></p>
             <form action="/system2" method=post>
-                <label for="name">System name:</label><br>
-                <input type="text" id="name" name="name" required<br>
+                <label for="name">System name:</label><br/>
+                <input type="text" id="name" name="name" value="random"><br/>
                 <input type="checkbox" id="life" name="life" value="yes">
-                <label for="life">I require life</label><br>
+                <label for="life">I require life</label><br/>
                 <input type="submit" value="Submit">
             </form>
             <p>The "simple" link above uses a plain get request that takes a parameter as system name for a simpler api.

@@ -71,6 +71,7 @@ public class SystemController {
     @PostMapping(path = "/system2")
     public String systemFacts(@RequestBody String request, Model model){
 
+        if(request.equals("name=")) request="name=random";
         Map<String,String> requests = Arrays.stream(request.split("&"))
                                             .map( s -> s.split("="))
                                             .collect(Collectors.toMap( sa-> sa[0], sb ->sb[1]));
