@@ -27,7 +27,7 @@
 .tabset > ul label {
     display:inline-block;
     padding:0.25em 1em;
-    background:lightcyan;
+    background:ivory;
     border-right-width:0;
 }
 
@@ -42,7 +42,7 @@
 
 .tabset > div {
     position:relative;
-    background:lightcyan;
+    background:ivory;
     border-radius:0 0.5em 0.5em 0.5em;
 }
 
@@ -67,8 +67,8 @@
 .tabset > input:nth-child(7):checked ~ ul li:nth-child(7) label,
 .tabset > input:nth-child(8):checked ~ ul li:nth-child(8) label,
 .tabset > input:nth-child(9):checked ~ ul li:nth-child(9) label {
-    background:lightcyan;
-    border-bottom-color:lightcyan;
+    background:ivory;
+    border-bottom-color:ivory;
 }
 
 .tabset > input:nth-child(1):hover ~ ul li:nth-child(1) label,

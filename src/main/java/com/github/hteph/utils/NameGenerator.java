@@ -16,7 +16,7 @@ import java.util.Random;
 public class NameGenerator {
 
     public String compose(int numberOfLetters) {
-
+//Scintific garble is generated until AWS supports coretto 17 servers in Elastic Beanstalk
         Random rand = new Random();
 
         StringBuilder name = new StringBuilder();

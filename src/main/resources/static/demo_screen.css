@@ -51,7 +51,7 @@ body > header,
 body > footer {
     flex: 0 0 auto;
     padding: 1em;
-    background: lightcyan;
+    background: ivory;
     border-radius: 5px;
     border: 3px solid darkred;
 }
