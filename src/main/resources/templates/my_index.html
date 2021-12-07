@@ -11,6 +11,8 @@
             name="viewport"
             content="width=device-width,height=device-height,initial-scale=1"
     >
+    <!--Tracking-->
+    <script>(function(n,i,v,r,s,c,x,z){x=window.AwsRumClient={q:[],n:n,i:i,v:v,r:r,c:c};window[n]=function(c,p){x.q.push({c:c,p:p});};z=document.createElement('script');z.async=true;z.src=s;document.head.insertBefore(z,document.getElementsByTagName('script')[0]);})('cwr','5caeabbf-af84-43a5-b4f9-e9e68150dff4','1.0.0','us-east-2','https://client.rum.us-east-1.amazonaws.com/1.0.2/cwr.js',{sessionSampleRate:1,guestRoleArn:"arn:aws:iam::182651423265:role/RUM-Monitor-us-east-2-182651423265-3750697588361-Unauth",identityPoolId:"us-east-2:fc6bcca8-4064-479d-b62f-5d473b0fa70f",endpoint:"https://dataplane.rum.us-east-2.amazonaws.com",telemetries:["performance","errors","http"],allowCookies:true,enableXRay:false});</script>
 </head>
 <style>
 
@@ -119,7 +121,7 @@
 <div class="row">
     <div class="side">
         <h2>About This Place:</h2>
-        <img th:src="@{under-construction.png}"/>
+        <img th:src="@{under-construction.png}" alt="Under construction"/>
         <p>This is a place for me to experiment and test stuff. It may sometimes be a bit ... chaotic.</p>
         <!--<h3>More Text</h3>
         <p>Perhaps there is something more I want to show?</p>

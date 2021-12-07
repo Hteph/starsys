@@ -62,12 +62,12 @@ public final class MoonFactory {
 
         String tectonicActivityGroup;
 
-        double moonsPlanetMass = 0;
+        double moonsPlanetMass;
         double lunarOrbitalPeriod;
 
-        double moonsPlanetsRadii = 0;
+        double moonsPlanetsRadii;
 
-        Breathing lifeType = null; //TODO make this an Optional
+        Breathing lifeType; //TODO make this an Optional
         double tidalForce = 0;
 
 
@@ -341,11 +341,11 @@ public final class MoonFactory {
         //TODO add greater varity for moon objects, depending on planet
         int baseSize = 10;
         if (orbitalObjectClass == 'M') {
-            List<Integer> baseSizeList = Arrays.asList(150, 200, 300, 400, 500, 600, 700, 800, 900, 1000);
+            List<Integer> baseSizeList = Arrays.asList(420, 450, 500, 550, 600, 650, 700,750, 800, 900, 1000);
             baseSize = TableMaker.makeRoll(Dice.d10(), baseSizeList);
 
         } else if (orbitalObjectClass == 'm') {
-            List<Integer> baseSizeList = Arrays.asList(5, 10, 15, 20, 25, 30, 40, 50, 60, 75);
+            List<Integer> baseSizeList = Arrays.asList(5, 10, 15, 20, 25, 30, 35, 40, 50, 60, 70);
             baseSize = TableMaker.makeRoll(Dice.d10(), baseSizeList);
 
         } else if (orbitalObjectClass == 'c') baseSize = 90;
