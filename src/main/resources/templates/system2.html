@@ -14,6 +14,8 @@
     <title>
         Star System Fact Sheet
     </title>
+<!--Tracking-->
+    <script>(function(n,i,v,r,s,c,x,z){x=window.AwsRumClient={q:[],n:n,i:i,v:v,r:r,c:c};window[n]=function(c,p){x.q.push({c:c,p:p});};z=document.createElement('script');z.async=true;z.src=s;document.head.insertBefore(z,document.getElementsByTagName('script')[0]);})('cwr','5caeabbf-af84-43a5-b4f9-e9e68150dff4','1.0.0','us-east-2','https://client.rum.us-east-1.amazonaws.com/1.0.2/cwr.js',{sessionSampleRate:1,guestRoleArn:"arn:aws:iam::182651423265:role/RUM-Monitor-us-east-2-182651423265-3750697588361-Unauth",identityPoolId:"us-east-2:fc6bcca8-4064-479d-b62f-5d473b0fa70f",endpoint:"https://dataplane.rum.us-east-2.amazonaws.com",telemetries:["performance","errors","http"],allowCookies:true,enableXRay:false});</script>
 
 </head>
 <style>
@@ -375,6 +377,7 @@
         <div>
             <section>
                 <h2>Celestial</h2>
+                [eN = Earth normal]
 
                 <table>
                     <tr>
@@ -489,7 +492,7 @@
                                 <br/>
                                 <span><b>Density: </b></span>
                                 <span th:text="${object.getPresentations().getFacts().get('density')}">-</span>
-                                <span> eNormal </span>
+                                <span> eN </span>
                                 <br/>
                                 <span><b>Gravity: </b></span>
                                 <span th:text="${object.getPresentations().getFacts().get('gravity')}">-</span>
@@ -500,13 +503,13 @@
                                 <br/>
                                 <span><b>Magnetic field: </b></span>
                                 <span th:text="${object.getPresentations().getFacts().get('magnetic field')}">-</span>
-                                <span> eNormal </span>
+                                <span> eN </span>
                                 <br/>
-                                <span><b>Hydrospheric description: </b></span>
+                                <span><b>Hydrosphere: </b></span>
                                 <span th:text="${object.getPresentations().getFacts().get('Hydrosphere description')}">-</span>
                                 (<span th:text="${object.getPresentations().getFacts().get('hydrosphere')}">-</span>%)
                                 <br/>
-                                <span><b>Average Surface Temperature: : </b></span>
+                                <span><b>Average Surface Temperature: </b></span>
                                 <span th:text="${object.getPresentations().getFacts().get('Surface temperature')}">-</span>
                                 <!--                    <div th:unless="${object.getPresentations().getFacts().get('tide locked to star') == 'true'}">-->
                                 <button class="parentCell"
@@ -516,13 +519,13 @@
                                     <span class="tooltip">
                             <h2>Temperature Details</h2>
                                 <p>
-                            <span><b>Max Day Increase/Night decrease : </b></span>
+                            <span><b>Max Day Increase/Night decrease: </b></span>
                             <span th:text="${object.getPresentations.getFacts.get('dayNight')}">-</span>
                              <span><b>Variations due to eccentricity: </b>
                              <span th:text="${object.getPresentations().getFacts().get('eccentricityVariation')}">-</span>
                              </span>
                                 </p>
-                            <br/>
+
                             <table class="center">
                                 <tr>
                                     <th>Label</th>
@@ -561,7 +564,7 @@
 
                                 <span><b>Magnetic field: </b></span>
                                 <span th:text="${object.getPresentations().getFacts().get('magnetic field')}">-</span>
-                                <span> eNormal </span>
+                                <span> eN </span>
                                 <br/>
                                 <span><b>Axial Tilt: </b></span>
                                 <span th:text="${object.getPresentations().getFacts().get('axial tilt')}">-</span>
@@ -660,7 +663,7 @@
                                             <br/>
                                             <span><b>Density: </b></span>
                                             <span th:text="${moon.getFacts().get('density')}">-</span>
-                                            <span> eNormal </span>
+                                            <span> eN </span>
                                             <br/>
                                             <span><b>Gravity: </b></span>
                                             <span th:text="${moon.getFacts().get('gravity')}">-</span>
@@ -672,13 +675,13 @@
                                             <br/>
                                             <span><b>Magnetic field: </b></span>
                                             <span th:text="${moon.getFacts().get('magnetic field')}">-</span>
-                                            <span> eNormal </span>
+                                            <span> eN </span>
                                             <br/>
                                             <span><b>Hydrospheric description: </b></span>
                                             <span th:text="${moon.getFacts().get('Hydrosphere description')}">-</span>
                                             (<span th:text="${moon.getFacts().get('hydrosphere')}">-</span>%)
                                             <br/>
-                                            <span><b>Average Surface Temperature: : </b></span>
+                                            <span><b>Average Surface Temperature: </b></span>
                                             <span th:text="${moon.getFacts().get('Surface temperature')}">-</span>
 
                                             <button class="parentCell">
@@ -737,37 +740,31 @@
 
                                     </tr>
                                 </table>
-                                <br/>
 
                             </div>
-
-
                         </div>
-
                     </div>
-
-
                 </div>
             </section>
 
             <section>
                 <h2>Ecology</h2>
                 <p>
-                    Some examples of the living fauna originating in the system.
+                    Some examples of the living fauna originating in the system will be presented here.
                 </p>
             </section>
 
             <section>
                 <h2>Sophonts</h2>
                 <p>
-                    Facts about the Sophonts inhabiting the system, either as natives or coloniser.
+                    Here there will be facts about the Sophonts inhabiting the system, either as natives or coloniser.
                 </p>
             </section>
 
             <section>
                 <h2>Notes</h2>
                 <p>
-                    Here is a list of notes about the novelties and enigmas found in the system.
+                    Here there will be a list of notes about the novelties and enigmas found in the system.
                 </p>
             </section>
         </div>
