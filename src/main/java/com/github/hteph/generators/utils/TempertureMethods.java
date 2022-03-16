@@ -3,11 +3,15 @@ package com.github.hteph.generators.utils;
 import com.github.hteph.repository.objects.TemperatureFacts;
 import com.github.hteph.utils.Dice;
 import com.github.hteph.utils.NumberUtilities;
-import com.github.hteph.utils.enums.Breathing;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.OptionalDouble;
 import java.util.stream.DoubleStream;
 
+import static com.github.hteph.utils.NumberUtilities.TWO;
 import static com.github.hteph.utils.NumberUtilities.sqrt;
 
 public class TempertureMethods {
@@ -114,7 +118,6 @@ public class TempertureMethods {
                                      double greenhouseFactor) {
 
 
-
         double surfaceTemp;
         if (baseTemperature > 220 && baseTemperature < 400) {
 
@@ -135,16 +138,15 @@ public class TempertureMethods {
         //Assymerical sigmoidal:  5-parameter logistic (5PL)
 
         var increasePerHourFactor = -1.554015 + (0.9854966 - -1.554015) / Math.pow(1 + Math.pow(atmoPressure / 19056230d, 0.5134927), 1094.463);
-        increasePerHourFactor = Math.max(0.01,increasePerHourFactor);
+        increasePerHourFactor = Math.max(0.01, increasePerHourFactor);
         var maxDayIncreaseMultiple = 7.711577 + (0.2199364 - 7.711577) / Math.pow(1 + Math.pow(atmoPressure / 2017503d, 1.004679), 757641.3);
         var incomingRadiation = luminosity / sqrt(orbitDistance);
         var daytimeMax = Math.min(incomingRadiation * increasePerHourFactor * rotationPeriod / 2d,
-                                  Math.min(1000+ Dice._2d6()*25, baseTemperature * incomingRadiation * maxDayIncreaseMultiple));
-
+                                  Math.min(1000 + Dice._2d6() * 25, baseTemperature * incomingRadiation * maxDayIncreaseMultiple));
 
 
         var decresePerHour = -0.5906138 + (19.28838 - -0.5906138) / Math.pow(1 + Math.pow(atmoPressure / 291099200d, 0.5804294), 172207.2);
-        decresePerHour = Math.max(decresePerHour,0.1);
+        decresePerHour = Math.max(decresePerHour, 0.1);
         var maxNigthDecreaseMultiple = 0.03501408 + (0.7690167 - 0.03501408) / Math.pow(1 + Math.pow(atmoPressure / 6815738d, 0.7782145), 322006.2);
 
         var nighttimeMin = -Math.min(decresePerHour * rotationPeriod / 2d,
@@ -167,5 +169,42 @@ public class TempertureMethods {
         variation.min(findBaseTemp(orbitDistance * (1 + eccentricity), luminosity) - base);
 
         return variation.build();
+    }
+
+    public static List<BigDecimal> getDayTempCurve(double dayLength, double emissions, double incoming) {
+
+        int localHour = (int) Math.ceil(dayLength);
+
+        double[] hourlyTempArray = new double[localHour];
+
+        double daytempAmplitude = (1d * incoming);
+
+        hourlyTempArray[0] = 0;
+
+        for (int i = 1; i < localHour; i++) {
+
+            double daytimePlus = Math.sin(-Math.PI / 2 + 2 * Math.PI * i / localHour) * daytempAmplitude;
+
+            var change = (daytimePlus > 0 ? daytimePlus : 0) - emissions;
+
+            hourlyTempArray[i] = hourlyTempArray[i - 1] + change;
+
+        }
+
+        ArrayList<BigDecimal> tempProfile = new ArrayList<>();
+
+
+        for (int n = 0; n < hourlyTempArray.length; n++) {
+
+            double surplusEmmisons = 0;
+            if (n > localHour / 2) {
+
+                surplusEmmisons = (hourlyTempArray[0] - (hourlyTempArray[n - 1]) - emissions * (localHour - n)) / (localHour - n);
+            }
+            hourlyTempArray[n] -= surplusEmmisons;
+            tempProfile.add(BigDecimal.valueOf(hourlyTempArray[n]).round(TWO));
+        }
+
+        return tempProfile;
     }
 }
