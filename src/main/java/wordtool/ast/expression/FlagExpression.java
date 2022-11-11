@@ -58,9 +58,8 @@ public class FlagExpression implements Expression {
 		if (isPreceding) {
 			return true;
 		}
-		
-		final boolean hasFlag = nextSyllable.hasFlag(flags);
-		return hasFlag;
+
+		return nextSyllable.hasFlag(flags);
 	}
 
 	@Override

@@ -29,7 +29,7 @@ public class NameGenParserTest {
 
 	private File getFileForRes(final String resFielName) {
 		ClassLoader classLoader = getClass().getClassLoader();
-		File file = new File(classLoader.getResource("at/lume/wordgen/lib/" + resFielName).getFile());
+		File file = new File(classLoader.getResource(resFielName).getFile());
 		return file;
 	}
 	

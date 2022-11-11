@@ -1,6 +1,7 @@
 package wordtool.scanner;
 
 
+import lombok.extern.slf4j.Slf4j;
 import wordtool.scanner.stats.FrequencyStats;
 import wordtool.scanner.stats.Stats;
 import wordtool.util.CollectionsUtil;
@@ -12,11 +13,12 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
+@Slf4j
 public class Scanner {
-	
-	private final static String FORBIDDEN_CHARS = "[«¦»!\"§$%&/\\(\\)=\\?1234567890\\{\\}\\[\\]\\\\\\+\\-\\*/;:,\\.<>|#'~–]";
-	
-	private final static String REMOVE_CHARS = "[,?!]$";
+
+	private static final String FORBIDDEN_CHARS = "[«¦»!\"§$%&/\\(\\)=\\?1234567890\\{\\}\\[\\]\\\\\\+\\-\\*/;:,\\.<>|#'~–]";
+
+	private static final String REMOVE_CHARS = "[,?!]$";
 	
 	public static class ScanConfig {
 		final File file;
@@ -169,12 +171,8 @@ public class Scanner {
 	}
 	
 	private void processScanConfig(final ScanConfig sc, final Map<String, Set<String>> wordMap, final Set<String> words) {
-		Set<String> wordSet = wordMap.get(sc.getExprAndFlags() == null ? "" : sc.getExprAndFlags());
-		if (wordSet == null) {
-			wordSet = new TreeSet<>();
-			wordMap.put((String) (sc.getExprAndFlags() == null ? "" : sc.getExprAndFlags()), wordSet);
-		}
-		wordSet.addAll(words);		
+		Set<String> wordSet = wordMap.computeIfAbsent(sc.getExprAndFlags() == null ? "" : sc.getExprAndFlags(), k -> new TreeSet<>());
+		wordSet.addAll(words);
 	}
 
 	private String processWordMap(final Map<String, Set<String>> wordMap, final String modifier) {
@@ -191,7 +189,7 @@ public class Scanner {
 
 	/**
 	 * scans files for rules (and initially for words)
-	 * @param file
+	 * @param files
 	 * @return
 	 * @throws IOException
 	 */
@@ -226,7 +224,7 @@ public class Scanner {
 			}
 		}
 
-		//System.out.println(fs3.prettyPrint());
+		log.debug(fs3.prettyPrint());
 		
 		final List<String> rules = new ArrayList<>();
 		rules.add(generateRules(startMap, "-"));
@@ -243,22 +241,14 @@ public class Scanner {
 			if (e.getValue().getStartCount() > 0) {
 				for (final Entry<String, FrequencyStats.FrequencyPositionStats> ce : CollectionsUtil.getByPrefix(fsLonger.getCountMap(), e.getKey()).entrySet()) {
 					if (ce.getValue().getStartCount() > 0) {
-						Set<String> curMod = startMap.get(e.getKey().substring(0,1));
-						if (curMod == null) {
-							curMod = new TreeSet<>();
-							startMap.put(e.getKey().substring(0,1), curMod);
-						}
-						curMod.add(ce.getKey().substring(1));						
+						Set<String> curMod = startMap.computeIfAbsent(e.getKey().substring(0, 1), k -> new TreeSet<>());
+						curMod.add(ce.getKey().substring(1));
 						
 						final String subKey = e.getKey().substring(1) + ce.getKey().substring(e.getKey().length());
 						for (final Entry<String, FrequencyStats.FrequencyPositionStats> subCe : CollectionsUtil.getByPrefix(fsLonger.getCountMap(), subKey).entrySet()) {
 							if (subCe.getValue().getStartCount() > 0) {
-								curMod = startMap.get(e.getKey());
-								if (curMod == null) {
-									curMod = new TreeSet<>();
-									startMap.put(e.getKey(), curMod);
-								}
-								curMod.add(subCe.getKey().substring(1));								
+								curMod = startMap.computeIfAbsent(e.getKey(), k -> new TreeSet<>());
+								curMod.add(subCe.getKey().substring(1));
 							}
 						}
 					}
@@ -280,22 +270,14 @@ public class Scanner {
 						final String subKey = e.getKey().substring(1) + ce.getKey().substring(e.getKey().length());
 						for (final Entry<String, FrequencyStats.FrequencyPositionStats> subCe : CollectionsUtil.getByPrefix(fsLonger.getCountMap(), subKey).entrySet()) {
 							if (subCe.getValue().getMidCount() > 0) {
-								Set<String> curMod = midMap.get(e.getKey());
-								if (curMod == null) {
-									curMod = new TreeSet<>();
-									midMap.put(e.getKey(), curMod);
-								}
+								Set<String> curMod = midMap.computeIfAbsent(e.getKey(), k -> new TreeSet<>());
 								curMod.add(subCe.getKey().substring(1));
 							}
 						}
 					}
 					
 					if (ce.getValue().getEndCount() > 0) {
-						Set<String> curMod = midMap.get(e.getKey().substring(0,1));
-						if (curMod == null) {
-							curMod = new TreeSet<>();
-							midMap.put(e.getKey().substring(0,1), curMod);
-						}
+						Set<String> curMod = midMap.computeIfAbsent(e.getKey().substring(0, 1), k -> new TreeSet<>());
 						curMod.add(ce.getKey().substring(1));
 					}
 				}
@@ -303,7 +285,7 @@ public class Scanner {
 		}
 		return midMap;
 	}
-	
+
 	private String generateRules(final Collection<String> syls, final String prefix) {
 		final StringBuilder sb = new StringBuilder();
 		for (final String s : syls) {
@@ -316,7 +298,7 @@ public class Scanner {
 		final StringBuilder sb = new StringBuilder();
 		for (final Entry<String, Set<String>> e : sylMap.entrySet()) {
 			sb.append(prefix).append("[").append(e.getKey()).append("]");
-			if (e.getValue() != null && e.getValue().size() > 0) {
+			if (e.getValue() != null && !e.getValue().isEmpty()) {
 				sb.append(" +accept(");
 				final Iterator<String> it = e.getValue().iterator();
 				while (it.hasNext()) {

@@ -32,7 +32,7 @@ public class AcceptParser implements WordGenParser.ExpressionParser<AcceptExpres
 		// group 2 = accept or accept_strict
 		// group 3 = syllables: (syllable,syllable,...)
 		if (matcher.groupCount() == 3) {
-			Boolean isPreceding = !"+".equals(matcher.group(1));
+			boolean isPreceding = !"+".equals(matcher.group(1));
 			final AcceptExpression expr = new AcceptExpression();
 			expr.setAcceptList(new ArrayList<String>());
 			expr.getAcceptList().addAll(Arrays.asList(matcher.group(3).split(",")));

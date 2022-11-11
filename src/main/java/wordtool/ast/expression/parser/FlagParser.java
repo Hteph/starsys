@@ -32,7 +32,7 @@ public class FlagParser implements WordGenParser.ExpressionParser<FlagExpression
 		// group 2 = flag
 		// group 3 = flags: (flag,flag,...)
 		if (matcher.groupCount() == 3) {
-			Boolean isPreceding = !"+".equals(matcher.group(1));
+			boolean isPreceding = !"+".equals(matcher.group(1));
 			final FlagExpression expr = new FlagExpression();
 			expr.setFlags(new ArrayList<Flag>());
 			for (final String s : matcher.group(3).split(",")) {

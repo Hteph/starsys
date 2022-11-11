@@ -15,9 +15,13 @@
  *******************************************************************************/
 package wordtool.ast.expression;
 
+import lombok.Data;
 
+import lombok.extern.slf4j.Slf4j;
 import wordtool.WordGenParser;
 
+@Data
+@Slf4j
 public abstract class CharacterMatchExpression implements Expression {
 
 	protected String vowels = WordGenParser.VOWELS;
@@ -26,31 +30,14 @@ public abstract class CharacterMatchExpression implements Expression {
 	
 	protected CharacterMatchOption option;
 	
-	public CharacterMatchExpression(final CharacterMatchOption option) {
+	public CharacterMatchExpression(CharacterMatchOption option) {
+
+		if(option == null){
+			log.warn("Null option set i n word creator");
+			option = CharacterMatchOption.NUMBER;
+		}
+
 		this.option = option;
 	}
-	
-	public CharacterMatchOption getOption() {
-		return option;
-	}
 
-	public void setOption(CharacterMatchOption option) {
-		this.option = option;
-	}
-
-	public String getVowels() {
-		return vowels;
-	}
-
-	public void setVowels(String vowels) {
-		this.vowels = vowels;
-	}
-
-	public String getNumbers() {
-		return numbers;
-	}
-
-	public void setNumbers(String numbers) {
-		this.numbers = numbers;
-	}
 }

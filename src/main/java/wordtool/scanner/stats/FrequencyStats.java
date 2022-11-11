@@ -1,13 +1,17 @@
 package wordtool.scanner.stats;
 
+import lombok.Data;
+
 import java.util.Formatter;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 
+@Data
 public class FrequencyStats implements Stats {
-	
+
+	@Data
 	public static class FrequencyPositionStats {
 		int startCount = 0;
 		int midCount = 0;
@@ -26,24 +30,6 @@ public class FrequencyStats implements Stats {
 		}
 		public void incMidCount() {
 			midCount+=1;
-		}
-		public int getStartCount() {
-			return startCount;
-		}
-		public void setStartCount(int startCount) {
-			this.startCount = startCount;
-		}
-		public int getMidCount() {
-			return midCount;
-		}
-		public void setMidCount(int midCount) {
-			this.midCount = midCount;
-		}
-		public int getEndCount() {
-			return endCount;
-		}
-		public void setEndCount(int endCount) {
-			this.endCount = endCount;
 		}
 		public int getTotalCount() {
 			return startCount+midCount+endCount;
@@ -80,29 +66,9 @@ public class FrequencyStats implements Stats {
 		return this;
 	}
 
-	public int getStringLength() {
-		return stringLength;
-	}
-
 	public FrequencyStats setStringLength(int stringLength) {
 		this.stringLength = stringLength;
 		return this;
-	}
-
-	public TreeMap<String, Float> getFrequencyMap() {
-		return frequencyMap;
-	}
-
-	public void setFrequencyMap(TreeMap<String, Float> frequencyMap) {
-		this.frequencyMap = frequencyMap;
-	}
-
-	public TreeMap<String, FrequencyPositionStats> getCountMap() {
-		return countMap;
-	}
-
-	public void setCountMap(TreeMap<String, FrequencyPositionStats> countMap) {
-		this.countMap = countMap;
 	}
 
 	@Override
@@ -118,17 +84,15 @@ public class FrequencyStats implements Stats {
 					count = new FrequencyPositionStats();
 					countMap.put(singleCharacter, count);
 				}
-				
+
 				if (i==0) {
 					count.incStartCount();
-				}
-				else if (i == (word.length()-stringLength)) {
+				} else if (i == (word.length()-stringLength)) {
 					count.incEndCount();
-				}
-				else {
+				} else {
 					count.incMidCount();
 				}
-				
+
 				totalCount++;
 			}
 		}
@@ -140,8 +104,7 @@ public class FrequencyStats implements Stats {
 			if (e.getValue().getTotalCount() == 1 && ignoreSingles) {
 				it.remove();
 				frequencyMap.remove(e.getKey());
-			}
-			else {
+			} else {
 				frequencyMap.put(e.getKey(), (float)e.getValue().getTotalCount() / (float)totalCount);
 			}
 		}

@@ -31,9 +31,9 @@ public class LengthParser implements WordGenParser.ExpressionParser<LengthExpres
 		// group 3 = (min)len
 		// group 4 = (max)len (len only)
 		if (matcher.groupCount() == 4) {
-			Integer len1 = 0;
-			Integer len2 = -1;
-			Boolean isPreceding = !"+".equals(matcher.group(1));
+			int len1 = 0;
+			int len2 = -1;
+			boolean isPreceding = !"+".equals(matcher.group(1));
 			final String func = matcher.group(2);
 			final LengthExpression expr = new LengthExpression();
 			if ("len".equals(func)) {
