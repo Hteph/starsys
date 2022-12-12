@@ -204,7 +204,6 @@ public class WordGenParser {
     		curIndex = 1;
     	} else {
     		sylPos = Syllable.SyllablePosition.MID;
-    		curIndex = 0;
     	}
     	
 
@@ -245,7 +244,7 @@ public class WordGenParser {
     		}
     	}
     	
-		if (expressionList.size() > 0) {
+		if (!expressionList.isEmpty()) {
 			syllable.setModifers(expressionList);
 		}
     	
