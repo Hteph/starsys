@@ -1,6 +1,5 @@
 package com.github.hteph.generators;
 
-import com.github.hteph.repository.objects.Planet;
 import com.github.hteph.repository.objects.Star;
 import com.github.hteph.repository.objects.StellarObject;
 import com.github.hteph.repository.objects.TempOrbitalObject;
@@ -25,7 +24,7 @@ import static com.github.hteph.utils.NumberUtilities.squared;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class StarSystemGenerator {
 
-    public static ArrayList<StellarObject> Generator(Star star) {
+    public static ArrayList<StellarObject> getSystem(Star star) {
 
         //TODO should move away from the primitives and ENUM
 
@@ -59,7 +58,7 @@ public final class StarSystemGenerator {
         }
         tempOrbitalObjects.forEach(s -> setGeneralOrbitContent(INNER_LIMIT, SNOW_LINE, OUTER_LIMIT, s));
 
-        //If object is a Brown Dwarf is is easiest to remove the Super Jovians
+        //If object is a Brown Dwarf it is easiest to remove the Super Jovians
         if(star.getMass().doubleValue()<0.05) tempOrbitalObjects.forEach(s ->{
             if(s.getOrbitObject()== 'J') s.setOrbitObject('j');
         } );
@@ -95,7 +94,7 @@ public final class StarSystemGenerator {
                     description = "Small Terrestrial";
                 case 'C':
                     if (classificationName == null) classificationName = "Caught Terrestrial";
-                    if (description == null) description = "Large Terrestrial (caugth)";
+                    if (description == null) description = "Large Terrestrial (caught)";
                 case 'T':
                     if (classificationName == null) classificationName = "Terrestrial";
                     if (description == null) description = "Large Terrestrial";

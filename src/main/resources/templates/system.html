@@ -380,6 +380,7 @@
 
 <div id="News" class="tabcontent">
 
+    <p><span th:text="${hasLife}"></span></p>
     <p th:unless="${hasLife}">No native biosphere was found in this system</p>
     <div th:if="${hasLife}">
         <button class="accordion">Biosphere Facts</button>
@@ -443,6 +444,7 @@
             </table>
         </div>
     </div>
+
 </div>
 
 <div id="Contact" class="tabcontent">

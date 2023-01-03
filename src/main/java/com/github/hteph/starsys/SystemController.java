@@ -8,6 +8,7 @@ import com.github.hteph.repository.objects.Creature;
 import com.github.hteph.repository.objects.StellarObject;
 import com.github.hteph.starsys.utils.ThymeleafUtils;
 import com.github.hteph.utils.enums.Breathing;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Controller
+@NoArgsConstructor
 public class SystemController {
 
 
@@ -34,7 +36,7 @@ public class SystemController {
     }
 
     @GetMapping("/system")
-    public String greeting(@RequestParam(name = "name", required = false, defaultValue = "random") String name, Model model) {
+    public String createSystem(@RequestParam(name = "name", required = false, defaultValue = "random") String name, Model model) {
 
         boolean findLife = false;
         List<Biosphere> lifeList;
@@ -45,7 +47,7 @@ public class SystemController {
         do {
             safeCount++;
             var star = StarFactory.get(name, 'A', null);
-            systemList = StarSystemGenerator.Generator(star);
+            systemList = StarSystemGenerator.getSystem(star);
             lifeList = ThymeleafUtils.getLife(systemList);
 
             if(safeCount>20) throw new RuntimeException("No life found");
@@ -85,7 +87,7 @@ public class SystemController {
         do {
             safeCount++;
             var star = StarFactory.get(requests.getOrDefault("name","random"), 'A', null);
-            systemList = StarSystemGenerator.Generator(star);
+            systemList = StarSystemGenerator.getSystem(star);
             lifeList = ThymeleafUtils.getLife(systemList);
 
             if(safeCount>20) throw new RuntimeException("No life found");
