@@ -62,7 +62,7 @@ public class SystemController {
 
         model.addAttribute("objects", systemList);
         model.addAttribute("hasMoons", ThymeleafUtils.hasMoons(systemList));
-        model.addAttribute("hasLife", lifeList.size() > 0);
+        model.addAttribute("hasLife", !lifeList.isEmpty());
         model.addAttribute("biospheres", lifeList);
 
         return "system";
@@ -102,7 +102,7 @@ public class SystemController {
         model.addAttribute("systemName", systemList.get(0).getName());
         model.addAttribute("objects", systemList);
         model.addAttribute("hasMoons", ThymeleafUtils.hasMoons(systemList));
-        model.addAttribute("hasLife", lifeList.size() > 0);
+        model.addAttribute("hasLife", !lifeList.isEmpty());
         model.addAttribute("biospheres", lifeList);
 
         return "system2";
