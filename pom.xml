@@ -20,12 +20,6 @@
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
     </properties>
-    <repositories>
-        <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
-        </repository>
-    </repositories>
 
     <dependencies>
         <dependency>
@@ -34,18 +28,9 @@
             <version>1.16</version>
         </dependency>
         <dependency>
-            <groupId>com.github.Valkryst</groupId>
-            <artifactId>VNameGenerator</artifactId>
-            <version>2021.04.13</version>
-        </dependency>
-        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-maven-plugin</artifactId>
-            <version>2.5.6</version>
+            <version>3.0.1</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
         <dependency>
@@ -57,6 +42,7 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
+            <version>3.0.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -66,6 +52,7 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
+            <version>3.0.1</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -75,13 +62,13 @@
         </dependency>
     </dependencies>
 
-    <reporting>
+<!--    <reporting>
         <plugins>
-            <!-- remember this: mvn versions:display-dependency-updates -->
+            &lt;!&ndash; remember this: mvn versions:display-dependency-updates &ndash;&gt;
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>versions-maven-plugin</artifactId>
-                <version>2.8.1</version>
+                <version>2.14.2</version>
                 <reportSets>
                     <reportSet>
                         <reports>
@@ -93,21 +80,14 @@
                 </reportSets>
             </plugin>
         </plugins>
-    </reporting>
+    </reporting>-->
 
     <build>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <exclude>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                        </exclude>
-                    </excludes>
-                </configuration>
+
             </plugin>
         </plugins>
     </build>

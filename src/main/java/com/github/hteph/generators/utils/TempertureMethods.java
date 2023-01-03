@@ -180,6 +180,7 @@ public class TempertureMethods {
         double daytempAmplitude = (1d * incoming);
 
         hourlyTempArray[0] = 0;
+        ArrayList<BigDecimal> tempProfile = new ArrayList<>();
 
         for (int i = 1; i < localHour; i++) {
 
@@ -187,22 +188,16 @@ public class TempertureMethods {
 
             var change = (daytimePlus > 0 ? daytimePlus : 0) - emissions;
 
-            hourlyTempArray[i] = hourlyTempArray[i - 1] + change;
-
-        }
-
-        ArrayList<BigDecimal> tempProfile = new ArrayList<>();
-
-
-        for (int n = 0; n < hourlyTempArray.length; n++) {
-
             double surplusEmmisons = 0;
-            if (n > localHour / 2) {
+            if (i > localHour / 2) {
 
-                surplusEmmisons = (hourlyTempArray[0] - (hourlyTempArray[n - 1]) - emissions * (localHour - n)) / (localHour - n);
+                var tempEmisson = (hourlyTempArray[i])/(2*(localHour-i));
+                surplusEmmisons = tempEmisson>(emissions*(localHour-i))?tempEmisson:0;
             }
-            hourlyTempArray[n] -= surplusEmmisons;
-            tempProfile.add(BigDecimal.valueOf(hourlyTempArray[n]).round(TWO));
+
+            hourlyTempArray[i] = hourlyTempArray[i - 1] + change - surplusEmmisons;
+
+            tempProfile.add(BigDecimal.valueOf(hourlyTempArray[i]).round(TWO));
         }
 
         return tempProfile;

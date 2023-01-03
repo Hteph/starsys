@@ -33,7 +33,7 @@ public class CreatureGenerator {
         BaseEnvironmentTable environment = new BaseEnvironmentTable(biosphere);
         EnvironmentalEnum[] baseEnvironment = environment.findBaseEnvironment();
 
-        if (!(baseEnvironment[1] == EnvironmentalEnum.NONE)) {
+        if (baseEnvironment[1] != EnvironmentalEnum.NONE) {
             lifeform.addAttribute("Dual Environment",
                                   baseEnvironment[0].getDescription() + "(" + baseEnvironment[1].getDescription() + ")");
             lifeform.setHabitat(baseEnvironment[1]);
