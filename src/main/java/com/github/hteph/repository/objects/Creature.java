@@ -1,9 +1,10 @@
 package com.github.hteph.repository.objects;
 
 
+import com.github.hteph.generators.NameGenerators;
 import com.github.hteph.repository.objects.wrappers.Homeworld;
 import com.github.hteph.utils.Dice;
-import com.github.hteph.utils.NameGenerator;
+import com.github.hteph.utils.AsteroidNameGenerator;
 import com.github.hteph.utils.enums.AttributeEnum;
 import com.github.hteph.utils.enums.ClimatePref;
 import com.github.hteph.utils.enums.EnvironmentalEnum;
@@ -37,14 +38,11 @@ public class Creature implements Serializable {
 
     public Creature(Homeworld place) {
 
-        NameGenerator randomName;
+        AsteroidNameGenerator randomName;
         try {
-            randomName = new NameGenerator();
-
-
-
-            this.name = randomName.compose(3 + Dice.aLotOfd3(3) ) + " " +
-                    randomName.compose(3 + Dice.aLotOfd3(3));
+            
+            this.name = NameGenerators.femaleRomanNameGenerator.generate(3 + Dice.aLotOfd3(3) ) + " " +
+                NameGenerators.femaleRomanNameGenerator.generate(3 + Dice.aLotOfd3(3));
 
         } catch (Exception e) {
             this.name = place.getName().substring(0, 1 + place.getName().length() / 2) + "ians";
@@ -140,8 +138,7 @@ public class Creature implements Serializable {
     public boolean isThrophicLevel(TrophicLevels level) {
         return this.throphicLevel == level;
     }
-
-
+    
     public boolean isClimatePref(ClimatePref climate) {
         return this.climate.equals(climate);
     }
@@ -151,15 +148,15 @@ public class Creature implements Serializable {
         StringBuilder attributeDesc = new StringBuilder();
 
         for (Map.Entry<String, Attribute> entry : getAttributes().entrySet()) {
-
+            
             attributeDesc.append(entry.getValue().toString()).append("\n");
         }
 
-        return "Sophont\n" +
-                "name= " + name + "\n" +
-                "description= " + description + "\n" +
-                "homeworld= " + "Somewhere" + "\n" +
-                "attributes= " + attributeDesc.toString() +
-                "----------------";
+        return "Sophont\n"
+            + "name= " + name + "\n"
+            + "description= " + description + "\n"
+            + "homeworld= " + "Somewhere" + "\n"
+            + "attributes= " + attributeDesc
+            + "----------------";
     }
 }

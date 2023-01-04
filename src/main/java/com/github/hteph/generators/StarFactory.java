@@ -5,17 +5,14 @@ import com.github.hteph.repository.objects.Star;
 import com.github.hteph.tables.StarClassificationTable;
 import com.github.hteph.tables.TableMaker;
 import com.github.hteph.utils.Dice;
-import com.github.hteph.utils.NameGenerator;
-import com.github.hteph.utils.NumberUtilities;
+import com.github.hteph.utils.AsteroidNameGenerator;
 import com.github.hteph.utils.enums.StellarObjectType;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
-import java.math.MathContext;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static com.github.hteph.utils.NumberUtilities.THREE;
@@ -28,7 +25,7 @@ public final class StarFactory {
     public static Star get(String systemName, char systemPosition, Star star) {
 
         List<String> descriptors = new ArrayList<>();
-        var randomNameGenerator = new NameGenerator();
+        var randomNameGenerator = new AsteroidNameGenerator();
 
         double mass;
         int temperature;
@@ -61,7 +58,7 @@ public final class StarFactory {
         String starName;
         if(systemName.equals("random") || systemName.equals("life")) {
             try {
-                starName = randomNameGenerator.compose((5 + Dice.aLotOfd3(3)));
+                starName = NameGenerators.femaleGreekNameGenerator.generate((1 + Dice.aLotOfd3(3)));
             } catch (Exception e) {
                 starName = "Unknown";
                 log.warn("++++++++++Name failed+++++++++++++",e);
