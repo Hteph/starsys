@@ -6,18 +6,18 @@ import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-public class ConsonantVowelGeneratorTest {
+class ConsonantVowelGeneratorTest {
 	private final ConsonantVowelGenerator generator = new ConsonantVowelGenerator();
 
 	@Test
-	public void canGenerateName() {
+	void canGenerateName() {
 		final var result = generator.generate(10).length();
 		Assertions.assertTrue(result <= 10);
 		Assertions.assertTrue(result > 0);
 	}
 
 	@Test
-	public void canGenerateNameWithArbitraryLength() {
+	void canGenerateNameWithArbitraryLength() {
 		final var threadLocalRandom = ThreadLocalRandom.current();
 
 		for (int i = 0 ; i < 4 ; i++) {
@@ -29,14 +29,14 @@ public class ConsonantVowelGeneratorTest {
 	}
 
     @Test
-    public void cannotGenerateNameWithZeroAsMaxLength() {
+	void cannotGenerateNameWithZeroAsMaxLength() {
 		Assertions.assertThrows(IllegalArgumentException.class, () -> {
 			generator.generate(0);
 		});
     }
 
 	@Test
-	public void canSetConsonants() throws NoSuchFieldException, IllegalAccessException {
+	void canSetConsonants() throws NoSuchFieldException, IllegalAccessException {
 		final String[] consonants = new String[] { "z" };
 		generator.setConsonants(consonants);
 
@@ -47,7 +47,7 @@ public class ConsonantVowelGeneratorTest {
 	}
 
 	@Test
-	public void canSetVowels() throws NoSuchFieldException, IllegalAccessException {
+	void canSetVowels() throws NoSuchFieldException, IllegalAccessException {
 		final String[] vowels = new String[] { "z" };
 		generator.setVowels(vowels);
 
