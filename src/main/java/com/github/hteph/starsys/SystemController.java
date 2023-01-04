@@ -35,6 +35,7 @@ public class SystemController {
         return "my_index";
     }
 
+    @Deprecated
     @GetMapping("/system")
     public String createSystem(@RequestParam(name = "name", required = false, defaultValue = "random") String name, Model model) {
 

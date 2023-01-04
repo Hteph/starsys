@@ -113,7 +113,7 @@
 
 <div class="navbar">
     <!--<a href="#">Link</a>-->
-    <a href="http://schedim.com/system">Simple StarSys API</a>
+    <a href="http://schedim.com/system">Legacy StarSys API</a>
     <a href="https://github.com/Hteph/starsys/wiki">StarSys Wiki</a>
     <!--<a href="#" class="right">Link</a>-->
 </div>
@@ -147,14 +147,14 @@
                 So it is mainly created for my own amusement and as a learning opportunity, so warning for strange
                 behaviour, sometimes incomplete implementations and frequent changes.<br/>
             </p>
-            <p> If Life is set to require the generator will run and try a number of times and hopefully get a system
+            <p> If Life is set to require the namegenerator will run and try a number of times and hopefully get a system
                 containing life </p>
             <p>This lists the major objects in the system. In addition to these there are thousands of small objects in irregular orbits.<br/>
             TODO: There will be a list of examples later on, as well as inclusion of trojan points content etc.<br/>
                 If you need one of those just take a look at the outermost objects of a gas giant for now.<br/></p>
 
-            <p> <b>WARNING: Due to the lack of support for Java 17 in AWS the random name generator do not work
-                properly and a placeholder generating "scientific" garble is used</b></p>
+            <p> <b>WARNING: Due to the lack of support for Java 17 in AWS the random name namegenerator do not work
+                properly and a placeholder generating "scientific" garble is used - this is to be changed</b></p>
             <form action="/system2" method=post>
                 <label for="name">System name:</label><br/>
                 <input type="text" id="name" name="name" value="random"><br/>
@@ -162,7 +162,7 @@
                 <label for="life">I require life</label><br/>
                 <input type="submit" value="Submit">
             </form>
-            <p>The "simple" link above uses a plain get request that takes a parameter as system name for a simpler api.
+            <p>The "legacy" link above points to an older version of the api.
                 The wiki link is for the Github wiki which contains further information</p>
         </div>
     </div>

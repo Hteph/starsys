@@ -1,4 +1,0 @@
--[aaaa] +maxlen(5)
-[bb]
-[c][d]
-+[c]

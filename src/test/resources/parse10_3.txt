@@ -1,6 +1,0 @@
--[b] +acceptStrict(e)
-[a]
-[ex] +acceptStrict(e)
-[fe]
-+[ez]
-+[fe]

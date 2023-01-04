@@ -1,5 +1,0 @@
--[p] +noRepeat
-[p] +noRepeat
-[e] +noRepeat
-+[p]
-+[e]

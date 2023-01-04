@@ -12,15 +12,22 @@
     <artifactId>starsys</artifactId>
     <version>0.5.5-SNAPSHOT</version>
     <name>starsys</name>
-    <description>A star system generator</description>
+    <description>A star system namegenerator</description>
 
     <properties>
         <java.version>11</java.version>
         <log4j2.version>2.15.0</log4j2.version>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <springboot.version>2.4.5</springboot.version>
     </properties>
+
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
 
     <dependencies>
         <dependency>
@@ -28,17 +35,24 @@
             <artifactId>protonpack</artifactId>
             <version>1.16</version>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-            <version>${springboot.version}</version>
-        </dependency>
+
         <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.22</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.Valkryst</groupId>
+            <artifactId>VParser_CFG</artifactId>
+            <version>2022.01.08-2</version>
+        </dependency>
+        <!--  SPRING -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <version>${springboot.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -63,25 +77,6 @@
         </dependency>
     </dependencies>
 
-<!--    <reporting>
-        <plugins>
-            &lt;!&ndash; remember this: mvn versions:display-dependency-updates &ndash;&gt;
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>versions-maven-plugin</artifactId>
-                <version>2.14.2</version>
-                <reportSets>
-                    <reportSet>
-                        <reports>
-                            <report>dependency-updates-report</report>
-                            <report>plugin-updates-report</report>
-                            <report>property-updates-report</report>
-                        </reports>
-                    </reportSet>
-                </reportSets>
-            </plugin>
-        </plugins>
-    </reporting>-->
 
     <build>
         <plugins>

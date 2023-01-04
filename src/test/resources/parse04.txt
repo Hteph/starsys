@@ -1,3 +1,0 @@
--[b][a,a,a][x] +c
-[d,d][e,e][x,x] +c
-+[f,f,f,f][i,i,i,i][x,x,x,x] +c
