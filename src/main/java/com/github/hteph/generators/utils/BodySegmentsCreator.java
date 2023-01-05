@@ -113,7 +113,7 @@ public class BodySegmentsCreator {
                                          .build());
 
             createSegment = limb.contains("+");
-        };
+        }
 
     }
 
