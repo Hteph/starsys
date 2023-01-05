@@ -396,8 +396,10 @@
         <div>
             <section>
                 <h2>Celestial</h2>
-                [eN = Earth normal]
-
+                [eN = compared Earth normal, eSun = compared to Earth Sun]
+                <div th:if="${failedToFindLife}">
+                    <i>Sadly failed to find a place with life after 30 tries, this is just an empty dead system, go back if you want to try again</i>
+                </div>
                 <table>
                     <tr>
                         <th>No</th>
