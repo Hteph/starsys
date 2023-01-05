@@ -3,21 +3,20 @@ package com.github.hteph.generators;
 import com.github.hteph.generators.namegenerator.MarkovGenerator;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class AsteroidNameGeneratorsTest {
+class NameGeneratorsTest {
     
     
     
     @Test
     void testNameGenerators(){
     
-        String[] femaleGreekNames= new String[1];
+        String[] femaleGreekNames;
     
         URL resource = getClass().getClassLoader().getResource("GreekFemaleNames.txt");
         

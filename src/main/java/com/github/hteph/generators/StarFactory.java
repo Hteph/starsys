@@ -25,7 +25,6 @@ public final class StarFactory {
     public static Star get(String systemName, char systemPosition, Star star) {
 
         List<String> descriptors = new ArrayList<>();
-        var randomNameGenerator = new AsteroidNameGenerator();
 
         double mass;
         int temperature;

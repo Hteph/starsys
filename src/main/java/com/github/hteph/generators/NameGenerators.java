@@ -28,31 +28,32 @@ public class NameGenerators {
     
     private void initNameGenerators() {
     
-        String[] femaleGreekNames= new String[1];
+        String[] defaultStringArray={"Phaethon", "Novaeangliae", "Anas", "Alba","Tragelaphus", "Lessonae"};
+    
+        String[] femaleGreekNames;
     
         URL resource = getClass().getClassLoader().getResource("GreekFemaleNames.txt");
-    
-        {
+        
             try {
                 femaleGreekNames = (new String(Files.readAllBytes(Paths.get(resource.toURI())))).split(" ");
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                log.error("Error in creating greek female namne generator");
+                femaleGreekNames = defaultStringArray;
             }
-        }
     
         femaleGreekNameGenerator = new MarkovGenerator(femaleGreekNames);
     
-        String[] femaleRomanNames= new String[1];
+        String[] femaleRomanNames;
     
         URL resourceRoman = getClass().getClassLoader().getResource("GreekFemaleNames.txt");
     
-        {
+        
             try {
                 femaleRomanNames = (new String(Files.readAllBytes(Paths.get(resourceRoman.toURI())))).split(" ");
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                log.error("Error in creating greek female namne generator");
+                femaleRomanNames = defaultStringArray;
             }
-        }
     
         femaleRomanNameGenerator = new MarkovGenerator(femaleRomanNames);
     }

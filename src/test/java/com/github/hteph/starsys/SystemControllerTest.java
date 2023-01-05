@@ -1,5 +1,6 @@
 package com.github.hteph.starsys;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.ui.Model;
 
+@Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class SystemControllerTest {
     
@@ -26,7 +28,9 @@ class SystemControllerTest {
     @Test
     void createSystem() {
         
-        var test = controller.createSystem("life", model);
+        //uses the legacy api for simplicity
+        
+        var test = controller.createSystem("Random", model);
         
         assertNotNull(controller);
     }

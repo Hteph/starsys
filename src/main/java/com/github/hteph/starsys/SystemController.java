@@ -17,10 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -73,34 +70,37 @@ public class SystemController {
 
     @PostMapping(path = "/system2")
     public String systemFacts(@RequestBody String request, Model model){
-
-        if(request.equals("name=")) request="name=random";
-        Map<String,String> requests = Arrays.stream(request.split("&"))
-                                            .map( s -> s.split("="))
-                                            .collect(Collectors.toMap( sa-> sa[0], sb ->sb[1]));
-
-        List<Biosphere> lifeList;
-        boolean findLife = requests.containsKey("life");
+    
         ArrayList<StellarObject> systemList;
+        List<Biosphere> lifeList;
+    
 
-
-        int safeCount=0;
-        do {
-            safeCount++;
-            var star = StarFactory.get(requests.getOrDefault("name","random"), 'A', null);
-            systemList = StarSystemGenerator.getSystem(star);
-            lifeList = ThymeleafUtils.getLife(systemList);
-
-            if(safeCount>20) throw new RuntimeException("No life found");
-        }while(findLife && lifeList.isEmpty());
-
-        lifeList.forEach(biosphere -> {
-            if(biosphere.getRespiration() != Breathing.PROTO) {
-                biosphere.setCreature(CreatureGenerator.generator(biosphere));
-            } else {
-                biosphere.setCreature(new Creature(biosphere.getHomeworld(),true));
-            }
-        });
+            if(request.equals("name=")) request="name=random";
+        
+            Map<String,String> requests = Arrays.stream(request.split("&"))
+                                                .map( s -> s.split("="))
+                                                .collect(Collectors.toMap( sa-> sa[0], sb ->sb[1]));
+            
+        
+            boolean findLife = requests.containsKey("life");
+        
+            int safeCount=0;
+            do {
+                safeCount++;
+                var star = StarFactory.get(requests.getOrDefault("name","random"), 'A', null);
+                systemList = StarSystemGenerator.getSystem(star);
+                lifeList = ThymeleafUtils.getLife(systemList);
+    
+                if(safeCount>20) throw new RuntimeException("No life found");
+            }while(findLife && lifeList.isEmpty());
+        
+            lifeList.forEach(biosphere -> {
+                if(biosphere.getRespiration() != Breathing.PROTO) {
+                    biosphere.setCreature(CreatureGenerator.generator(biosphere));
+                } else {
+                    biosphere.setCreature(new Creature(biosphere.getHomeworld(),true));
+                }
+            });
 
         model.addAttribute("systemName", systemList.get(0).getName());
         model.addAttribute("objects", systemList);

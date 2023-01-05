@@ -37,12 +37,11 @@ public class Creature implements Serializable {
     private CreatureBody body;
 
     public Creature(Homeworld place) {
-
-        AsteroidNameGenerator randomName;
+        
         try {
             
-            this.name = NameGenerators.femaleRomanNameGenerator.generate(3 + Dice.aLotOfd3(3) ) + " " +
-                NameGenerators.femaleRomanNameGenerator.generate(3 + Dice.aLotOfd3(3));
+            this.name = NameGenerators.femaleRomanNameGenerator.generate(8 ) + " " +
+                NameGenerators.femaleRomanNameGenerator.generate(8);
 
         } catch (Exception e) {
             this.name = place.getName().substring(0, 1 + place.getName().length() / 2) + "ians";

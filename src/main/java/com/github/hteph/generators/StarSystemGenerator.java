@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 
 import static com.github.hteph.tables.TableMaker.makeRoll;
@@ -47,7 +46,7 @@ public final class StarSystemGenerator {
                                            .limit(NUMBER_OF_ORBITS)
                                            .boxed()
                                            .map(TempOrbitalObject::new)
-                                           .collect(Collectors.toList());
+                                           .toList();
 
         var tempOrbitalObjects = new TreeSet<>(new tempOrbitalObjectComparator());
         tempOrbitalObjects.addAll(orbitalDistances);
