@@ -188,7 +188,5 @@ public class Planet extends StellarObject {
 
         return "<td>" + label + "</td>" + rangeband;
     }
-
-
 }
 

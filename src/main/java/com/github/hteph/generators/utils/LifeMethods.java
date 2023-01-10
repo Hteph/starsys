@@ -34,16 +34,17 @@ public class LifeMethods {
         else lifeIndex += 4;
 
         if (atmoPressure < 0.2) lifeIndex -= 5;
-        else if (atmoPressure > 5) lifeIndex -= 1;
+        else if (atmoPressure < 0.5) lifeIndex -= 3;
+        else if (atmoPressure > 5) lifeIndex -= 2;
         else lifeIndex +=1;
 
 
         if (hydrosphere < 1) lifeIndex -= 5;
-        else if (hydrosphere < 5) lifeIndex += 1;
+        else if (hydrosphere < 5) lifeIndex -= 1;
         else lifeIndex += 4;
 
 
-        if(magneticField < 0.3) lifeIndex += - 3;
+        if(magneticField < 0.3) lifeIndex -= 3;
         else if (magneticField > 5){
             //Perhaps exotic beings living of the Magnetic field energy?
             lifeIndex += 1;

@@ -3,17 +3,18 @@ package com.github.hteph.generators.utils;
 import com.github.hteph.repository.objects.TemperatureFacts;
 import com.github.hteph.utils.Dice;
 import com.github.hteph.utils.NumberUtilities;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.OptionalDouble;
 import java.util.stream.DoubleStream;
 
 import static com.github.hteph.utils.NumberUtilities.TWO;
 import static com.github.hteph.utils.NumberUtilities.sqrt;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class TempertureMethods {
 
     public static int findBaseTemp(double orbitalDistance, double luminosity) {
@@ -39,15 +40,9 @@ public class TempertureMethods {
         double[] winterTemperature = new double[10];
         double[] latitudeTemperature = new double[10];
         double[] baseTemperature = new double[10];
-
-        int baseModeration = 0;
-        baseModeration += (hydrosphere - 60) / 10;
-        baseModeration += (atmoPressure < 0.1) ? -3 : 1;
-        baseModeration += (int) atmoPressure;
-        baseModeration += (rotationalPeriod < 10) ? -3 : 1;
-        baseModeration += (int) (Math.sqrt(rotationalPeriod / 24)); //Shouldn't this be negative?
-        baseModeration += (int) (10 / axialTilt);
-
+    
+        int baseModeration = getBaseModeration(atmoPressure, hydrosphere, rotationalPeriod, axialTilt);
+    
         String atmoModeration;
         if (atmoPressure == 0) atmoModeration = "No";
         else if (atmoPressure > 10) atmoModeration = "Extreme";
@@ -55,22 +50,13 @@ public class TempertureMethods {
         else if (baseModeration > 2) atmoModeration = "High";
         else atmoModeration = "Average";
 
-        int atmoIndex;
-        switch (atmoModeration) {
-            case "High":
-                atmoIndex = 2;
-                break;
-            case "Average":
-                atmoIndex = 1;
-                break;
-            case "Extreme":
-                atmoIndex = 3;
-                break;
-            default:
-                atmoIndex = 0;
-                break;
-        }
-
+        int atmoIndex = switch (atmoModeration) {
+            case "High" -> 2;
+            case "Average" -> 1;
+            case "Extreme" -> 3;
+            default -> 0;
+        };
+    
         for (int i = 0; i < 10; i++) {
             latitudeTemperature[i] = temperatureRangeBand[atmoIndex][i] * surfaceTemp;
         }
@@ -111,8 +97,24 @@ public class TempertureMethods {
                                                                 .mapToInt(t -> (int) Math.ceil(t))
                                                                 .toArray());
     }
-
-
+    
+    private static int getBaseModeration(
+        double atmoPressure,
+        int hydrosphere,
+        double rotationalPeriod,
+        double axialTilt) {
+        
+        int baseModeration = 0;
+        baseModeration += (hydrosphere - 60) / 10;
+        baseModeration += (atmoPressure < 0.1) ? -3 : 1;
+        baseModeration += (int) atmoPressure;
+        baseModeration += (rotationalPeriod < 10) ? -3 : 1;
+        baseModeration += (int) (Math.sqrt(rotationalPeriod / 24)); //Shouldn't this be negative?
+        baseModeration += (int) (10 / axialTilt);
+        return baseModeration;
+    }
+    
+    
     public static int getSurfaceTemp(int baseTemperature,
                                      double atmoPressure,
                                      double greenhouseFactor) {

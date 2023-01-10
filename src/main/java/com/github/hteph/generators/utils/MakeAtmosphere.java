@@ -3,26 +3,14 @@ package com.github.hteph.generators.utils;
 import com.github.hteph.repository.objects.AtmosphericGases;
 import com.github.hteph.repository.objects.Planet;
 import com.github.hteph.repository.objects.Star;
-import com.github.hteph.repository.objects.TemperatureFacts;
 import com.github.hteph.tables.TableMaker;
 import com.github.hteph.utils.Dice;
-import com.github.hteph.utils.NumberUtilities;
 import com.github.hteph.utils.StreamUtilities;
 import com.github.hteph.utils.enums.HydrosphereDescription;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.DoubleStream;
 
 import static com.github.hteph.utils.NumberUtilities.sqrt;
 import static com.github.hteph.utils.NumberUtilities.squared;
@@ -37,6 +25,7 @@ public class MakeAtmosphere {
             var oxygen = atmoSet.stream().filter(gas -> gas.getName().equals("O2")).findFirst();
             
             oxygen.ifPresent(o2 -> {
+                
                 int percentage = (int) Math.min(30 / atmoPressure + Dice.d3(), 45 + Dice.d10());
                 o2.setPercentageInAtmo(percentage);
                 atmoSet.add(AtmosphericGases.builder()
@@ -44,10 +33,9 @@ public class MakeAtmosphere {
                                             .percentageInAtmo(100 - percentage)
                                             .build());
             });
-            
         }
         
-        var sumOfGasPercentage = atmoSet.stream()
+        int sumOfGasPercentage = atmoSet.stream()
                                         .map(AtmosphericGases::getPercentageInAtmo)
                                         .reduce(0, Integer::sum);
         if (sumOfGasPercentage > 100) {
@@ -58,10 +46,7 @@ public class MakeAtmosphere {
                     gas.setPercentageInAtmo(current - 1);
                 });
                 
-            } while (atmoSet.stream()
-                            .map(AtmosphericGases::getPercentageInAtmo)
-                            .reduce(0, Integer::sum) > 100);
-            
+            } while (isAbove100(atmoSet));
             
         }
         
@@ -78,8 +63,6 @@ public class MakeAtmosphere {
             atmoSet.add(newN2.build());
             atmoSet.add(AtmosphericGases.builder().name("Other").percentageInAtmo(1).build());
         }
-        
-        
     }
     
     public static void checkHydrographics(HydrosphereDescription hydrosphereDescription,
@@ -100,6 +83,7 @@ public class MakeAtmosphere {
                 && surfaceTemp > 274
                 && atmoPressure > 0
                 && hydrosphereDescription == HydrosphereDescription.LIQUID) {
+            
             if (MakeAtmosphere.isAboveBoilingpoint(surfaceTemp + latitudeWinterTemp[9], atmoPressure)) {
                 
                 planetBuilder.hydrosphereDescription(HydrosphereDescription.VAPOR)
@@ -147,6 +131,12 @@ public class MakeAtmosphere {
         }
         
         return polarSeaLimit;
+    }
+    
+    private static boolean isAbove100(Set<AtmosphericGases> atmoSet) {
+        return atmoSet.stream()
+                      .map(AtmosphericGases::getPercentageInAtmo)
+                      .reduce(0, Integer::sum) > 100;
     }
     
     public static int adjustForOxygen(double atmoPressure, Set<AtmosphericGases> atmosphericComposition) {
@@ -326,26 +316,14 @@ public class MakeAtmosphere {
         double tempGreenhouseGasEffect = 0;
         
         for (AtmosphericGases gas : atmosphericComposition) {
-            
+    
             switch (gas.getName()) {
-                case "CO2":
-                    tempGreenhouseGasEffect += gas.getPercentageInAtmo() * atmoPressure;
-                    break;
-                case "CH4":
-                    tempGreenhouseGasEffect += gas.getPercentageInAtmo() * atmoPressure * 4;
-                    break;
-                case "SO2":
-                case "NH3":
-                case "NO2":
-                case "H2S":
+                case "CO2" -> tempGreenhouseGasEffect += gas.getPercentageInAtmo() * atmoPressure;
+                case "CH4" -> tempGreenhouseGasEffect += gas.getPercentageInAtmo() * atmoPressure * 4;
+                case "SO2", "NH3", "NO2", "H2S" ->
                     tempGreenhouseGasEffect += gas.getPercentageInAtmo() * atmoPressure * 8;
-                    break;
-                case "H2SO4":
-                    tempGreenhouseGasEffect += gas.getPercentageInAtmo() * atmoPressure * 16;
-                    break;
-                default:
-                    tempGreenhouseGasEffect += gas.getPercentageInAtmo() * atmoPressure * 0;
-                    break;
+                case "H2SO4" -> tempGreenhouseGasEffect += gas.getPercentageInAtmo() * atmoPressure * 16;
+                default -> tempGreenhouseGasEffect += gas.getPercentageInAtmo() * atmoPressure * 0;
             }
         }
         
