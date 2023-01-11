@@ -831,7 +831,7 @@
                                         <ul>
                                             <div th:each="segment:${bio.getCreature().getBody().getBodyStructure()}">
                                                 <li>
-                                                    <span th:text="${segment.getSegmentType()}"></span>
+                                                    <span th:text="${segment.getSegmentType()}"></span> , <div th:each="organ:${segment.getOrgans}"><span th:text="${organ}"></span> </div>
                                                 </li>
                                             </div>
                                         </ul>

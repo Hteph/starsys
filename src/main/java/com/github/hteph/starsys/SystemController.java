@@ -99,8 +99,7 @@ public class SystemController {
             lifeList = ThymeleafUtils.getLife(systemList);
     
             if (safeCount > 30) {failedToFindLife = true;}
-        }
-        while (findLife && lifeList.isEmpty());
+        } while (findLife && lifeList.isEmpty());
         
         lifeList.forEach(biosphere -> {
             if (biosphere.getRespiration() != Breathing.PROTO) {
