@@ -332,9 +332,9 @@ public class MakeAtmosphere {
         var random = Dice.aLotOfd3(2) - 1;
         
         
-        return sqrt(1 + atmoPressure * 0.01 * random
-                            + tempGreenhouseGasEffect * 0.1
-                            + waterVaporFactor * 0.1);
+        return sqrt(1 + atmoPressure/100.0 * random
+                            + tempGreenhouseGasEffect/10.0
+                            + waterVaporFactor/10.0);
     }
     
     

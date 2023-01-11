@@ -64,7 +64,16 @@ public final class StarSystemGenerator {
 
 
         //Detailed bodies
-        //TODO This should be moved to a method
+        setTheSystemList(star, starSystemList, tempOrbitalObjects);
+        
+        star.setOrbitalObjects(starSystemList);
+        return starSystemList;
+    }
+    
+    private static void setTheSystemList(
+        Star star,
+        ArrayList<StellarObject> starSystemList,
+        TreeSet<TempOrbitalObject> tempOrbitalObjects) {
         int objectCounter = 1;
         int astroidBeltCounter = 1;
         for (TempOrbitalObject tempObject : tempOrbitalObjects) {
@@ -79,13 +88,15 @@ public final class StarSystemGenerator {
                 case 'J':
                     if (classificationName == null) classificationName = "Super Jovian";
                     if (description == null) description = "Large Gas Giant";
-                    starSystemList.add(JovianFactory.get(star.getArchiveID() + "." + numeral,
+                    starSystemList.add(JovianFactory.get(
+                        star.getArchiveID() + "." + numeral,
                                                          star.getName() + " " + numeral,
                                                          description,
                                                          classificationName,
                                                          BigDecimal.valueOf(tempObject.getOrbitDistance()),
                                                          tempObject.getOrbitObject(),
-                                                         star));
+                        star
+                    ));
                     objectCounter++;
                     break;
                 case 't':
@@ -97,13 +108,14 @@ public final class StarSystemGenerator {
                 case 'T':
                     if (classificationName == null) classificationName = "Terrestrial";
                     if (description == null) description = "Large Terrestrial";
-                    starSystemList.add(TerrestrialPlanetFactory.generate(star.getArchiveID() + "." + numeral,
+                    starSystemList.add(TerrestrialPlanetFactory.generate(
+                        star.getArchiveID() + "." + numeral,
                                                                          star.getName() + " " + numeral,
                                                                          description,
                                                                          classificationName,
                                                                          BigDecimal.valueOf(tempObject.getOrbitDistance()),
                                                                          tempObject.getOrbitObject(),
-                                                                         star,
+                        star,
                                                                          0));
                     objectCounter++;
                     break;
@@ -111,23 +123,26 @@ public final class StarSystemGenerator {
                 case 'c': //TODO this should use a special generator to allow for strange stuff as hulks, ancient
                     // stations etc etc
                     description = "Small caught object";
-                    starSystemList.add(TerrestrialPlanetFactory.generate(star.getArchiveID() + "." + numeral,
+                    starSystemList.add(TerrestrialPlanetFactory.generate(
+                        star.getArchiveID() + "." + numeral,
                                                                          star.getName() + " " + numeral,
                                                                          description,
                                                                          "Caught object",
                                                                          BigDecimal.valueOf(tempObject.getOrbitDistance()),
                                                                          'c',
-                                                                         star,
+                        star,
                                                                          0));
                     objectCounter++;
                     break;
                 case 'A':
-                    starSystemList.add(GenerateAsteroidBelt.generator(star.getArchiveID() + ".A" + objectCounter,
+                    starSystemList.add(GenerateAsteroidBelt.generator(
+                        star.getArchiveID() + ".A" + objectCounter,
                                                                          "Belt " + astroidBeltCounter,
                                                                          "Asteroid belt",
                                                                          tempObject,
-                                                                         star,
-                                                                         tempOrbitalObjects));
+                        star,
+                        tempOrbitalObjects
+                    ));
                     astroidBeltCounter++;
                     break;
 
@@ -137,11 +152,10 @@ public final class StarSystemGenerator {
             }
         }
         Collections.sort(starSystemList);
-        star.setOrbitalObjects(starSystemList);
-        return starSystemList;
     }
-
+    
     private static void setGeneralOrbitContent(double innerLimit, double snowLine, double outerLimit, TempOrbitalObject tempOrbitalObject) {
+        
         int[] outerNumbersList = {2, 3, 4, 5, 12, 14, 15, 17, 18};
         Character[] outerObjectList = {'E', 'c', 'A', 'j', 'E', 't', 'J', 'T', 'C'};
         int[] innerNumbersList = {2, 4, 8, 9, 14, 16, 17, 18};
@@ -164,8 +178,7 @@ public final class StarSystemGenerator {
         dominantGasGiant.setOrbitObject('J');
         if (Dice.d6(6)) {
             //Setting the next inner orbit of the Jovian to an ansteroidbelt
-            findPreviousOrbit(dominantGasGiant, tempOrbitalObjects)
-                    .ifPresent(s -> s.setOrbitObject('A'));
+            findPreviousOrbit(dominantGasGiant, tempOrbitalObjects).ifPresent(s -> s.setOrbitObject('A'));
         }
     }
 

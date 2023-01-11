@@ -5,6 +5,7 @@ import com.github.hteph.utils.Dice;
 import com.github.hteph.utils.NumberUtilities;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -14,6 +15,7 @@ import java.util.stream.DoubleStream;
 import static com.github.hteph.utils.NumberUtilities.TWO;
 import static com.github.hteph.utils.NumberUtilities.sqrt;
 
+@Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class TempertureMethods {
 
@@ -121,9 +123,9 @@ public class TempertureMethods {
 
 
         double surfaceTemp;
-        if (baseTemperature > 220 && baseTemperature < 400) {
+        if (atmoPressure > 0 && baseTemperature > 220 && baseTemperature < 400) {
 
-            surfaceTemp = (int) (baseTemperature * NumberUtilities.sqrt(1 + greenhouseFactor));
+            surfaceTemp = (int) (baseTemperature * NumberUtilities.sqrt(0.2 + greenhouseFactor));
 
         } else if (atmoPressure > 0) {
             surfaceTemp = 800d * (baseTemperature * greenhouseFactor)
@@ -132,6 +134,9 @@ public class TempertureMethods {
             surfaceTemp = 1200d * (baseTemperature * greenhouseFactor)
                     / (800d + baseTemperature * greenhouseFactor);
         }
+        
+        if(Math.abs( surfaceTemp-baseTemperature) >50 ) log.debug("Difference in base and actual temperature, base = {}, actual = {}, greenhouse = {}",baseTemperature, surfaceTemp, greenhouseFactor);
+        
         return (int) surfaceTemp;
     }
 
@@ -144,7 +149,7 @@ public class TempertureMethods {
         var maxDayIncreaseMultiple = 7.711577 + (0.2199364 - 7.711577) / Math.pow(1 + Math.pow(atmoPressure / 2017503d, 1.004679), 757641.3);
         var incomingRadiation = luminosity / sqrt(orbitDistance);
         var daytimeMax = Math.min(incomingRadiation * increasePerHourFactor * rotationPeriod / 2d,
-                                  Math.min(1000 + Dice._2d6() * 25, baseTemperature * incomingRadiation * maxDayIncreaseMultiple));
+                                  Math.min(1000 + Dice._2d6() * 25.0, baseTemperature * incomingRadiation * maxDayIncreaseMultiple));
 
 
         var decresePerHour = -0.5906138 + (19.28838 - -0.5906138) / Math.pow(1 + Math.pow(atmoPressure / 291099200d, 0.5804294), 172207.2);

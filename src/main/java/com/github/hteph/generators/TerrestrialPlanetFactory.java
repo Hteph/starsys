@@ -27,7 +27,7 @@ import static com.github.hteph.generators.utils.MakeAtmosphere.findGreenhouseGas
 import static com.github.hteph.generators.utils.PlanetaryUtils.*;
 import static com.github.hteph.utils.NumberUtilities.*;
 
-@NoArgsConstructor(access = AccessLevel.NONE)
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class TerrestrialPlanetFactory {
     
     public static Planet generate(
