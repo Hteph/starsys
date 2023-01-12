@@ -14,12 +14,16 @@
     <title>
         Star System Fact Sheet
     </title>
-<!--Tracking-->
-    <script>(function(n,i,v,r,s,c,x,z){
-        x=window.AwsRumClient={q:[],n:n,i:i,v:v,r:r,c:c};
-        window[n]=function(c,p){x.q.push({c:c,p:p});};
-        z=document.createElement('script');
-        z.async=true;z.src=s;document.head.insertBefore(z,document.getElementsByTagName('script')[0]);
+    <!--Tracking-->
+    <script>(function (n, i, v, r, s, c, x, z) {
+        x = window.AwsRumClient = {q: [], n: n, i: i, v: v, r: r, c: c};
+        window[n] = function (c, p) {
+            x.q.push({c: c, p: p});
+        };
+        z = document.createElement('script');
+        z.async = true;
+        z.src = s;
+        document.head.insertBefore(z, document.getElementsByTagName('script')[0]);
     })
     ('cwr',
         '5caeabbf-af84-43a5-b4f9-e9e68150dff4',
@@ -27,12 +31,12 @@
         'us-east-2',
         'https://client.rum.us-east-1.amazonaws.com/1.0.2/cwr.js',
         {
-        sessionSampleRate:1,
-        guestRoleArn:"arn:aws:iam::182651423265:role/RUM-Monitor-us-east-2-182651423265-3750697588361-Unauth",
-        identityPoolId:"us-east-2:fc6bcca8-4064-479d-b62f-5d473b0fa70f",
-        endpoint:"https://dataplane.rum.us-east-2.amazonaws.com",
-        telemetries:["performance","errors","http"],
-        allowCookies:true,enableXRay:false
+            sessionSampleRate: 1,
+            guestRoleArn: "arn:aws:iam::182651423265:role/RUM-Monitor-us-east-2-182651423265-3750697588361-Unauth",
+            identityPoolId: "us-east-2:fc6bcca8-4064-479d-b62f-5d473b0fa70f",
+            endpoint: "https://dataplane.rum.us-east-2.amazonaws.com",
+            telemetries: ["performance", "errors", "http"],
+            allowCookies: true, enableXRay: false
         });
     </script>
 
@@ -303,11 +307,12 @@
         margin: 2px;
     }
 
-    .parentCell:hover{
+    .parentCell:hover {
         background: lightyellow;
         color: darkgreen;
     }
-/*Details button*/
+
+    /*Details button*/
     .tooltip {
         display: none;
         position: fixed;
@@ -326,8 +331,9 @@
     .parentCell:hover span.tooltip {
         display: block;
     }
- /*download button   */
-    .download{
+
+    /*download button   */
+    .download {
         position: absolute;
         right: 5px;
         background: ivory;
@@ -336,7 +342,7 @@
         padding: 3px;
     }
 
-    .download:hover{
+    .download:hover {
         background: lightyellow;
         color: darkgreen;
     }
@@ -353,6 +359,10 @@
 </header>
 
 <main>
+    <button class="download" onclick="window.location.href='https://schedim.com';">
+        Restart
+    </button>
+
     <button class="download">
         <a href="#" onclick="downloadPage(this,event);" download>Download System Facts</a>
     </button>
@@ -831,7 +841,14 @@
                                         <ul>
                                             <div th:each="segment:${bio.getCreature().getBody().getBodyStructure()}">
                                                 <li>
-                                                    <span th:text="${segment.getSegmentType()}"></span> , <div th:each="organ:${segment.getOrgans}"><span th:text="${organ}"></span> </div>
+                                                    <span th:text="${segment.getSegmentType()}"></span>
+                                                    ;
+                                                    <small>
+                                                        <span th:each="organ:${segment.getOrgans}">
+                                                            ,
+                                                            <span th:text="${organ}"></span>
+                                                        </span>
+                                                    </small>
                                                 </li>
                                             </div>
                                         </ul>
