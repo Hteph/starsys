@@ -6,12 +6,16 @@ import com.github.hteph.utils.enums.AttributeEnum;
 import com.github.hteph.utils.enums.baseEnum;
 import lombok.Data;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
 @Data
-public class Attribute {
-	
+public class Attribute implements Serializable {
+
+	@Serial
+	private static final long serialVersionUID = 1L;
 	private String name;
 	private String description;
 	private int level;
@@ -38,7 +42,7 @@ public class Attribute {
     }
 
 	public HashMap<String, Attribute> getConditions() {
-		return new HashMap<String,Attribute>(conditions);
+		return new HashMap<>(conditions);
 	}
 
 	public Attribute addCondition(String name, String description) {

@@ -2,6 +2,7 @@ package com.github.hteph.generators;
 
 import com.codepoetics.protonpack.StreamUtils;
 import com.github.hteph.repository.objects.Planet;
+import com.github.hteph.utils.AsteroidNameGenerator;
 import com.github.hteph.utils.Dice;
 
 import java.math.BigDecimal;
@@ -91,11 +92,10 @@ public class GenerateMoonSystem {
                                      char size) {
         //TODO make a more fun identifier
         String identifier;
-
-
+        
         if (index < 26) identifier = "" + (char) ('a' + index);
         else if (index < 26 * 2) identifier = "" + (char) ('a' + (index / 26)-1) + (char) ('a' + index % 26);
-        else identifier = "" +('m')+ (int) (Math.random() * 10000);
+        else identifier = AsteroidNameGenerator.compose();
 
         String desc = size == 'm' ? "Minor Moon" : "Major Moon";
 

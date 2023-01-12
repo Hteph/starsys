@@ -178,7 +178,7 @@ public class CreatureGenerator {
                 lifeform.addAttribute("Warm Blooded", "The metabolism of this lifeform can support it in a wide range of temperatures");
                 break;
             case "Hyperactive":
-                lifeform.addAttribute("Hyperactive", "Is equally home in water as on land");
+                lifeform.addAttribute("Hyperactive", "Has a intense activity behaviour and is alert and in constant motion");
                 lifeform.addAttribute("Homeothermy", "The lifeform maintains a stable internal body temperature regardless of external influence.");
                 lifeform.addAttribute(AttributeEnum.SPEED, 1);
                 lifeform.addAttribute(AttributeEnum.LIFESPAN, -1);

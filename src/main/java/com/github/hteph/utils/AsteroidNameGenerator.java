@@ -7,8 +7,8 @@ import java.util.Random;
 @Slf4j
 public class AsteroidNameGenerator {
 
-    public String compose() {
-//Scientific garble is generated until AWS supports coretto 17 servers in Elastic Beanstalk
+    public static  String compose() {
+
         Random rand = new Random();
 
         StringBuilder name = new StringBuilder();

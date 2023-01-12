@@ -5,18 +5,21 @@ import com.github.hteph.tables.TableMaker;
 import com.github.hteph.tables.TectonicActivityTable;
 import com.github.hteph.utils.Dice;
 import com.github.hteph.utils.enums.HydrosphereDescription;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
 import static com.github.hteph.utils.NumberUtilities.sqrt;
 import static com.github.hteph.utils.NumberUtilities.squared;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class PlanetaryUtils {
 
-    public static String findTectonicGroup(boolean InnerZone, double density) {
+    public static String findTectonicGroup(boolean innerZone, double density) {
 
         String tempTectonics;
-        if (InnerZone) {
+        if (innerZone) {
             if (density < 0.7) {
                 if (Dice.d6() < 4) {
                     tempTectonics = "Silicates core";
@@ -44,36 +47,42 @@ public class PlanetaryUtils {
         return tempTectonics;
     }
 
-    public static double findAlbedo(boolean InnerZone,
-                                     double atmoPressure,
-                                     HydrosphereDescription hydrosphereDescription,
-                                     int hydrosphere) {
+    public static double findAlbedo(boolean innerZone,
+                                    double atmoPressure,
+                                    HydrosphereDescription hydrosphereDescription,
+                                    int hydrosphere) {
 
         int mod = 0;
         int[] randAlbedoArray;
         Double[] albedoBase = new Double[]{0.75, 0.85, 0.95, 1.05, 1.15};
 
-        if (InnerZone) {
+        if (innerZone) {
             randAlbedoArray = new int[]{0, 2, 4, 7, 10};
 
-            if (atmoPressure < 0.05) mod = 2;
+            if (atmoPressure < 0.05) {
+                mod = 2;
+            }
             if (atmoPressure > 50) {
                 mod = -4;
             } else if (atmoPressure > 5) {
                 mod = -2;
             }
             if (hydrosphere > 50
-                    && hydrosphereDescription.equals(HydrosphereDescription.ICE_SHEET)
-                    && mod > -2)
+                && hydrosphereDescription.equals(HydrosphereDescription.ICE_SHEET)
+                && mod > -2) {
                 mod = -2;
+            }
             if (hydrosphere > 90
-                    && hydrosphereDescription.equals(HydrosphereDescription.ICE_SHEET)
-                    && mod > -4)
+                && hydrosphereDescription.equals(HydrosphereDescription.ICE_SHEET)
+                && mod > -4) {
                 mod = -4;
+            }
 
         } else {
             randAlbedoArray = new int[]{0, 4, 6, 8, 10};
-            if (atmoPressure > 1) mod = 1;
+            if (atmoPressure > 1) {
+                mod = 1;
+            }
         }
         return TableMaker.makeRoll(Dice._2d6() + mod, randAlbedoArray, albedoBase) + (Dice.d10() - 1) * 0.01;
     }
@@ -98,16 +107,28 @@ public class PlanetaryUtils {
         return tectonicActivityGroup;
     }
 
-    public static double getMagneticField(double rotationalPeriod, String tectonicCore, String tectonicActivityGroup, Star orbitingAround, double density, double mass) {
+    public static double getMagneticField(double rotationalPeriod,
+                                          String tectonicCore,
+                                          String tectonicActivityGroup,
+                                          Star orbitingAround,
+                                          double density,
+                                          double mass) {
+
         double magneticField;
         if (tectonicCore.contains("metal")) {
             magneticField = 10 / (sqrt((rotationalPeriod / 24.0)))
-                    * squared(density)
-                    * sqrt(mass)
-                    / orbitingAround.getAge().doubleValue();
-            if (tectonicCore.contains("small")) magneticField *= 0.5;
-            if (tectonicCore.contains("medium")) magneticField *= 0.75;
-            if (tectonicActivityGroup.equals("Dead")) magneticField = Dice.d6() / 15.0;
+                            * squared(density)
+                            * sqrt(mass)
+                            / orbitingAround.getAge().doubleValue();
+            if (tectonicCore.contains("small")) {
+                magneticField *= 0.5;
+            }
+            if (tectonicCore.contains("medium")) {
+                magneticField *= 0.75;
+            }
+            if (tectonicActivityGroup.equals("Dead")) {
+                magneticField = Dice.d6() / 15.0;
+            }
         } else {
             magneticField = Dice.d6() / 20.0;
         }

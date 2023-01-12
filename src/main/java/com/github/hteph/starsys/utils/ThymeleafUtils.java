@@ -3,6 +3,8 @@ package com.github.hteph.starsys.utils;
 import com.github.hteph.repository.objects.Biosphere;
 import com.github.hteph.repository.objects.Planet;
 import com.github.hteph.repository.objects.StellarObject;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -11,17 +13,16 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ThymeleafUtils {
-    public ThymeleafUtils() {
-    }
 
-    public static List<Biosphere> getLife(ArrayList<StellarObject> systemList) {
+    public static List<Biosphere> getLife(List<StellarObject> systemList) {
 
         var planetStream = systemList.stream()
-                                     .filter(stellarObject -> stellarObject instanceof Planet);
+                                     .filter(Planet.class::isInstance);
 
         var moonStream = systemList.stream()
-                                   .filter(stellarObject -> stellarObject instanceof Planet)
+                                   .filter(Planet.class::isInstance)
                                    .map(stellarObject -> ((Planet) stellarObject).getMoonList())
                                    .flatMap(Collection::stream);
 
@@ -33,9 +34,9 @@ public class ThymeleafUtils {
 
     }
 
-    public static boolean hasMoons(ArrayList<StellarObject> systemList) {
+    public static boolean hasMoons(List<StellarObject> systemList) {
         return systemList.stream()
-                         .filter(o -> o instanceof Planet)
+                         .filter(Planet.class::isInstance)
                          .anyMatch(p -> ((Planet) p).getMoonList() != null && !((Planet) p).getMoonList().isEmpty());
     }
 }

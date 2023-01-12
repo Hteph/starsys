@@ -19,6 +19,8 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.github.hteph.utils.StringUtils.nicefyName;
+
 @Data
 @Builder
 @AllArgsConstructor
@@ -55,7 +57,7 @@ public class Creature implements Serializable {
 
         this.name = "microorganisms";
         this.homeworld = place;
-        this.description = "An ur-soup of microorganisms and basic building blocks of life";
+        this.description = proto?"A multicellular lifeform": "An ur-soup of microorganisms and basic building blocks of life";
 
     }
 
@@ -88,7 +90,7 @@ public class Creature implements Serializable {
             attributes.put(name, attribute);
             for (int i = 0; i > extras - 1; i--) attribute.decreaseLevel();//Compensating for the first "free" level.
         } else {
-            attribute = new Attribute(name, description);
+            attribute = new Attribute(nicefyName(name), description);
             attributes.put(name, attribute);
             for (int i = 0; i < extras; i++) attribute.increaseLevel();
         }
