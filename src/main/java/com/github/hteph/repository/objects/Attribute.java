@@ -48,7 +48,7 @@ public class Attribute implements Serializable {
 
 	public Attribute addCondition(String name, String description) { //I think this is wrong
 
-		log.info("Adding condition = {}", name);
+		log.debug("Adding condition = {}", name);
 		int i=0;
 		String suffix="";
 		while(hasCondition(name)) {

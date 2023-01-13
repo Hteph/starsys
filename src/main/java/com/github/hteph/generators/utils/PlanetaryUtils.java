@@ -21,11 +21,10 @@ public class PlanetaryUtils {
         String tempTectonics;
         if (innerZone) {
             if (density < 0.7) {
-                if (Dice.d6() < 4) {
-                    tempTectonics = "Silicates core";
-                } else {
-                    tempTectonics = "Silicates, small metal core";
-                }
+                tempTectonics = switch (Dice.d6()){
+                    case 1,2,3 ->"Silicates core";
+                    default ->"Silicates, small metal core";
+                };
             } else if (density < 1) {
                 tempTectonics = "Iron-nickel, medium metal core";
             } else {
@@ -37,11 +36,10 @@ public class PlanetaryUtils {
             } else if (density < 1) {
                 tempTectonics = "Silicate core";
             } else {
-                if (Dice.d6() < 4) {
-                    tempTectonics = "Silicates core";
-                } else {
-                    tempTectonics = "Silicates, small metal core";
-                }
+                tempTectonics = switch (Dice.d6()){
+                    case 1,2,3 ->"Silicates core";
+                    default ->"Silicates, small metal core";
+                };
             }
         }
         return tempTectonics;
@@ -89,11 +87,12 @@ public class PlanetaryUtils {
 
     public static double getDensity(BigDecimal orbitDistance, Star orbitingAround, double snowLine) {
         double density;
+
+        double resourceMod = orbitingAround.getAbundance()/50.0;
         if (orbitDistance.doubleValue() < snowLine) {
-            density = 0.3 + (Dice._2d6() - 2) * 0.127 / Math.pow(
-                    0.4 + (orbitDistance.doubleValue() / sqrt(orbitingAround.getLuminosity().doubleValue())), 0.67);
+            density = resourceMod + 0.3 + (Dice._2d6() - 2) * 0.127 / Math.pow(0.4 + (orbitDistance.doubleValue() / sqrt(orbitingAround.getLuminosity().doubleValue())), 0.67);
         } else {
-            density = 0.3 + (Dice._2d6() - 2) * 0.05;
+            density =resourceMod + 0.3 + (Dice._2d6() - 2) * 0.05;
         }
         return density;
     }

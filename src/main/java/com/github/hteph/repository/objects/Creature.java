@@ -67,7 +67,7 @@ public class Creature implements Serializable {
             log.warn("--------------Attribute: " + name + " has a null description ---------------------");
         }
 
-        log.info("Adding attribute = {}", name);
+        log.debug("Adding attribute = {}", name);
 
         if (hasAttribute(name)) {
             attributes.get(name.toLowerCase()).increaseLevel().addToDescription(description);

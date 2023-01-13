@@ -28,7 +28,7 @@ public class CreatureGenerator {
 
         var place = biosphere.getHomeworld();
 
-        log.info("Generate creature breathing = {}", biosphere.getRespiration());
+        log.debug("Generate creature breathing = {}", biosphere.getRespiration());
 
         Creature lifeform = new Creature(place);
         BaseEnvironmentTable environment = new BaseEnvironmentTable(biosphere);
@@ -71,7 +71,7 @@ public class CreatureGenerator {
         if (lifeform.hasAttribute("climber") || lifeform.hasAttribute("brachiator")) {
             bonus += 3;
         }
-        log.info("To check for flier = {}", lifeform.hasAttribute("flier"));
+        log.debug("To check for flier = {}", lifeform.hasAttribute("flier"));
 
         if (lifeform.hasAttribute("flier") && lifeform.getAttributes().get("flier").hasCondition("winged")) {
             bonus += 3;

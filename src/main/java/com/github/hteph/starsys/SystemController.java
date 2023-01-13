@@ -59,7 +59,7 @@ public class SystemController {
         
         lifeList.forEach(biosphere -> {
             if (biosphere.getRespiration() != Breathing.PROTO) {
-                log.info("This is the Breathing = {}", biosphere.getRespiration());
+                log.debug("This is the Breathing = {}", biosphere.getRespiration());
                 biosphere.setCreature(CreatureGenerator.generator(biosphere));
             } else {
                 biosphere.setCreature(new Creature(biosphere.getHomeworld(), true));
