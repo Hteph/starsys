@@ -10,10 +10,7 @@ import com.github.hteph.tables.EnvironmentalAttributesTable;
 import com.github.hteph.tables.TableMaker;
 import com.github.hteph.utils.Dice;
 import com.github.hteph.utils.NumberUtilities;
-import com.github.hteph.utils.enums.AttributeEnum;
-import com.github.hteph.utils.enums.ClimatePref;
-import com.github.hteph.utils.enums.EnvironmentalEnum;
-import com.github.hteph.utils.enums.Symmetry;
+import com.github.hteph.utils.enums.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -51,6 +48,26 @@ public class CreatureGenerator {
 
         return lifeform;
 
+    }
+
+    public static Creature generateApex(Biosphere biosphere){
+
+        var place = biosphere.getHomeworld();
+
+        Creature lifeform = new Creature(place);
+        lifeform.setThrophicLevel(TrophicLevels.CARNIVORE);
+
+        BaseEnvironmentTable environment = new BaseEnvironmentTable(biosphere);
+        EnvironmentalEnum[] baseEnvironment = environment.findBaseEnvironment();
+        if (baseEnvironment[1] != EnvironmentalEnum.NONE) {
+            lifeform.addAttribute("Dual Environment",
+                                  baseEnvironment[0].getDescription() + "(" + baseEnvironment[1].getDescription() + ")");
+            lifeform.setHabitat(baseEnvironment[1]);
+        } else {
+            lifeform.setHabitat(baseEnvironment[0]);
+        }
+
+        return lifeform;
     }
 
     private static void cleanAttributes(Creature lifeform) {
@@ -188,29 +205,27 @@ public class CreatureGenerator {
                 new String[]{"Slow Metabolism", "Cold Blooded", "Warm Blooded", "Hyperactive"}
         );
         switch (choice) {
-            case "Slow Metabolism":
+            case "Slow Metabolism" -> {
                 lifeform.addAttribute("Slow Metabolism", "The metabolic processes are so slow that the lifeform seems to live in another time paradigm. ");
                 lifeform.addAttribute(AttributeEnum.SPEED, -2)
                         .addToDescription("The slow metabolism of this creature lowers its reaction times");
                 lifeform.addAttribute(AttributeEnum.LIFESPAN, 2);
                 lifeform.addAttribute(AttributeEnum.SUSTENANCE, -2);
-                break;
-            case "Cold Blooded":
+            }
+            case "Cold Blooded" -> {
                 lifeform.addAttribute("Cold Blooded", "The lifeform is dependent on the ambient temperatue to be above a certain temperature threshold.");
                 lifeform.addAttribute("Ectothermy", "Controlling body temperature through external metabolic processes, such as by basking in the sun");
                 lifeform.addAttribute(AttributeEnum.LIFESPAN, 1);
                 lifeform.addAttribute(AttributeEnum.SUSTENANCE, -1);
-                break;
-            case "Warm Blooded":
-                lifeform.addAttribute("Warm Blooded", "The metabolism of this lifeform can support it in a wide range of temperatures");
-                break;
-            case "Hyperactive":
+            }
+            case "Warm Blooded" -> lifeform.addAttribute("Warm Blooded", "The metabolism of this lifeform can support it in a wide range of temperatures");
+            case "Hyperactive" -> {
                 lifeform.addAttribute("Hyperactive", "Has a intense activity behaviour and is alert and in constant motion");
                 lifeform.addAttribute("Homeothermy", "The lifeform maintains a stable internal body temperature regardless of external influence.");
                 lifeform.addAttribute(AttributeEnum.SPEED, 1);
                 lifeform.addAttribute(AttributeEnum.LIFESPAN, -1);
                 lifeform.addAttribute(AttributeEnum.SUSTENANCE, 2);
-                break;
+            }
         }
     }
 }

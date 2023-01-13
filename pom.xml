@@ -11,7 +11,7 @@
 
     <groupId>com.github.hteph</groupId>
     <artifactId>starsys</artifactId>
-    <version>0.6.4-SNAPSHOT</version>
+    <version>0.6.5-SNAPSHOT</version>
     <name>starsys</name>
     <description>A star system namegenerator</description>
 
