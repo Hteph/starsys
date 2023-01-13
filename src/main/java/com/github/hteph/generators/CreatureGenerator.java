@@ -3,8 +3,8 @@ package com.github.hteph.generators;
 
 import com.github.hteph.generators.utils.BodySegmentsCreator;
 import com.github.hteph.repository.objects.Biosphere;
-import com.github.hteph.repository.objects.CreatureBody;
 import com.github.hteph.repository.objects.Creature;
+import com.github.hteph.repository.objects.CreatureBody;
 import com.github.hteph.tables.BaseEnvironmentTable;
 import com.github.hteph.tables.EnvironmentalAttributesTable;
 import com.github.hteph.tables.TableMaker;
@@ -29,6 +29,7 @@ public class CreatureGenerator {
         var place = biosphere.getHomeworld();
 
         log.info("Generate creature breathing = {}", biosphere.getRespiration());
+
         Creature lifeform = new Creature(place);
         BaseEnvironmentTable environment = new BaseEnvironmentTable(biosphere);
         EnvironmentalEnum[] baseEnvironment = environment.findBaseEnvironment();
@@ -37,7 +38,9 @@ public class CreatureGenerator {
             lifeform.addAttribute("Dual Environment",
                                   baseEnvironment[0].getDescription() + "(" + baseEnvironment[1].getDescription() + ")");
             lifeform.setHabitat(baseEnvironment[1]);
-        } else lifeform.setHabitat(baseEnvironment[0]);
+        } else {
+            lifeform.setHabitat(baseEnvironment[0]);
+        }
 
         EnvironmentalAttributesTable.environmentalAttributes(lifeform, baseEnvironment);
         decideMetabolism(lifeform);
@@ -56,7 +59,7 @@ public class CreatureGenerator {
 
         keys.stream()
             .filter(key -> lifeform.getAttributes().get(key).getLevel() == 0)
-            .forEach(vestigial -> lifeform.getAttributes().get(vestigial).addToDescription("Only a vestigial presence" ));
+            .forEach(vestigial -> lifeform.getAttributes().get(vestigial).addToDescription("Only a vestigial presence"));
     }
 
     private static void basicBodyShape(Creature lifeform) {
@@ -65,19 +68,27 @@ public class CreatureGenerator {
 
         var bodyBuilder = CreatureBody.builder();
 
-        if (lifeform.hasAttribute("climber")
-                || lifeform.hasAttribute("brachiator")) bonus += 3;
-        if (lifeform.hasAttribute("flier")
-                && lifeform.getAttributes().get("flier").hasCondition("winged")) bonus += 3;
+        if (lifeform.hasAttribute("climber") || lifeform.hasAttribute("brachiator")) {
+            bonus += 3;
+        }
+        log.info("To check for flier = {}", lifeform.hasAttribute("flier"));
 
-        if (lifeform.hasAttribute("Aquatic")) bonus -= 3;
-        if (lifeform.getHabitat().equals(EnvironmentalEnum.EXOTIC)) bonus2 -= 6;
+        if (lifeform.hasAttribute("flier") && lifeform.getAttributes().get("flier").hasCondition("winged")) {
+            bonus += 3;
+        }
+
+        if (lifeform.hasAttribute("Aquatic")) {
+            bonus -= 3;
+        }
+        if (lifeform.getHabitat().equals(EnvironmentalEnum.EXOTIC)) {
+            bonus2 -= 6;
+        }
 
 
         if (Dice._3d6(10 + bonus + bonus2)) {// changed to 10 for testing, should be higher 14? 16?
             bodyBuilder.bodySymmetry(Symmetry.BILATERAL);
             lifeform.addToDescription("Bilateral body symmetry. ");
-            bodyBuilder.limbPerSegment(2*getMultiple(new int[]{2, 9, 12}));
+            bodyBuilder.limbPerSegment(2 * getMultiple(new int[]{2, 9, 12}));
 
         } else if (Dice._3d6(16 + bonus2)) {
             setOtherBodySymmetry(lifeform, bodyBuilder);
@@ -90,15 +101,13 @@ public class CreatureGenerator {
         lifeform.setBody(bodyBuilder.build());
     }
 
-    private static Integer getMultiple( int[] distribution) {
+    private static Integer getMultiple(int[] distribution) {
 
         return TableMaker.makeRoll(
                 Dice._2d6(),
                 distribution,
                 new Integer[]{1, 2, Dice.d6() + 2});
     }
-
-
 
 
     private static void gravityEffects(Creature lifeform) {
@@ -133,10 +142,12 @@ public class CreatureGenerator {
 
         switch (choice) {
             case "Acceleration Weakness":
-                lifeform.addAttribute("Acceleration Weakness", "The lifeform is sensitive to G-forces and may blackout or hemmorage at a much lower threshold than the average lifeform");
+                lifeform.addAttribute("Acceleration Weakness",
+                                      "The lifeform is sensitive to G-forces and may blackout or hemmorage at a much lower threshold than the average lifeform");
                 break;
             case "Space Sickness":
-                lifeform.addAttribute("Space Sickness", "The balance organs of the lifeform has a difficult time to handle free-fall and micro gravity, probably suffering from debilitating nausea");
+                lifeform.addAttribute("Space Sickness",
+                                      "The balance organs of the lifeform has a difficult time to handle free-fall and micro gravity, probably suffering from debilitating nausea");
                 break;
             default:
                 break;
@@ -146,14 +157,30 @@ public class CreatureGenerator {
     private static void decideMetabolism(Creature lifeform) {
 
         int bonus = 0;
-        if (lifeform.isClimatePref(ClimatePref.COLD)) bonus += 1;
-        if (lifeform.hasAttribute("Aquatic")) bonus -= 1;
-        if (lifeform.hasAttribute("Desert Dweller")) bonus -= 1;
-        if (lifeform.hasAttribute("Chaser")) bonus += 1;
-        if (lifeform.hasAttribute("Pouncer")) bonus += 1;
-        if (lifeform.hasAttribute("Herder")) bonus += 1;
-        if (lifeform.hasAttribute("Ergivore")) bonus -= 2;
-        if (lifeform.hasAttribute("Flier")) bonus += 1;
+        if (lifeform.isClimatePref(ClimatePref.COLD)) {
+            bonus += 1;
+        }
+        if (lifeform.hasAttribute("Aquatic")) {
+            bonus -= 1;
+        }
+        if (lifeform.hasAttribute("Desert Dweller")) {
+            bonus -= 1;
+        }
+        if (lifeform.hasAttribute("Chaser")) {
+            bonus += 1;
+        }
+        if (lifeform.hasAttribute("Pouncer")) {
+            bonus += 1;
+        }
+        if (lifeform.hasAttribute("Herder")) {
+            bonus += 1;
+        }
+        if (lifeform.hasAttribute("Ergivore")) {
+            bonus -= 2;
+        }
+        if (lifeform.hasAttribute("Flier")) {
+            bonus += 1;
+        }
 
         String choice = TableMaker.makeRoll(
                 Dice.d6() + bonus,

@@ -517,7 +517,8 @@ public class EnvironmentalAttributesTable {
                 lifeform.addAttribute(AttributeEnum.CONSTITUTION, -1);
             }
 
-            if (lifeform.getAttributes().get(FLIER.getName()).hasCondition("Balloon")) {
+            if (lifeform.getAttributes().containsKey(FLIER.getName().toLowerCase())
+                && lifeform.getAttributes().get(FLIER.getName().toLowerCase()).hasCondition("Balloon")) {
                 if (Dice._3d6(12)) {
                     lifeform.addAttribute("Phobia", "Sharp objects, mild. ");
                 }

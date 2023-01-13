@@ -5,12 +5,13 @@ package com.github.hteph.repository.objects;
 import com.github.hteph.utils.enums.AttributeEnum;
 import com.github.hteph.utils.enums.baseEnum;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
-
+@Slf4j
 @Data
 public class Attribute implements Serializable {
 
@@ -22,11 +23,11 @@ public class Attribute implements Serializable {
 	private HashMap<String, Attribute> conditions;
 	private AttributeEnum enumCode;
 
-    public Attribute(String name, String description) {
+    public Attribute(String name, String description, int level) {
 		
 		this.name=name;
 		this.description = description;
-		this.level=1;
+		this.level=level;
 		conditions = new HashMap<>();
 	}
 	
@@ -45,7 +46,9 @@ public class Attribute implements Serializable {
 		return new HashMap<>(conditions);
 	}
 
-	public Attribute addCondition(String name, String description) {
+	public Attribute addCondition(String name, String description) { //I think this is wrong
+
+		log.info("Adding condition = {}", name);
 		int i=0;
 		String suffix="";
 		while(hasCondition(name)) {
@@ -53,7 +56,7 @@ public class Attribute implements Serializable {
         suffix="+"+i;
 		}
 
-        conditions.putIfAbsent(name+suffix, new Attribute(name+suffix, description));
+        conditions.putIfAbsent((name+suffix).toLowerCase(), new Attribute(name+suffix, description, 0));
         return this;
 	}
 
@@ -64,7 +67,10 @@ public class Attribute implements Serializable {
 	    return this;
     }
 
-	public boolean hasCondition(String name) { return conditions.containsKey(name); }
+	public boolean hasCondition(String name) {
+
+		return !(conditions == null || conditions.isEmpty()) && conditions.containsKey(name.toLowerCase());
+	}
 
     @Override
     public String toString() {
