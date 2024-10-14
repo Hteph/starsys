@@ -10,6 +10,8 @@ import lombok.NoArgsConstructor;
 
 import java.util.TreeMap;
 
+import static com.github.hteph.starsys.enums.TrophicLevels.*;
+
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class DietTable {
 
@@ -316,9 +318,10 @@ public class DietTable {
                 lifeform.addAttribute("Mixed Ergivore",
                                       "They depend on energy for only part of their food. In fact, the ergivore part may be a symbiote, supplying nutrition in lean times in exchange for protection and waste products.");
                 lifeform.addAttribute("Dependency", "If the mixed ergivore does not receive 6 hours of the prefered energy type per day, it grows weak");
-                if (Math.random() < 0.3) {
+                int test = Dice.d6();
+                if (test<3) {
                     findCarnivoreSpeciality(lifeform);
-                } else if (Math.random() < 0.3) {
+                } else if (test<5) {
                     findOmnivoreSpeciality(lifeform);
                 } else {
                     findHerbivoreSpeciality(lifeform);

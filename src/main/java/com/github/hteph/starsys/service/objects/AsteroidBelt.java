@@ -5,6 +5,7 @@ import com.github.hteph.utils.NumberUtilities;
 import lombok.Data;
 import lombok.experimental.SuperBuilder;
 
+import java.io.Serial;
 import java.math.BigDecimal;
 import java.util.HashMap;
 
@@ -12,6 +13,7 @@ import java.util.HashMap;
 @SuperBuilder
 public class AsteroidBelt extends StellarObject{
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	private BigDecimal mass;
 	private BigDecimal eccentricity;

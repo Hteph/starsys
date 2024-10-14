@@ -4,6 +4,8 @@ import com.github.hteph.starsys.enums.*;
 import com.github.hteph.starsys.service.objects.Creature;
 import com.github.hteph.utils.Dice;
 
+import static com.github.hteph.starsys.enums.LocomotionModes.*;
+
 public class EnvironmentalAttributesTable {
     public static void environmentalAttributes(Creature lifeform, EnvironmentalEnum[] environ) {
         HydrosphereDescription liquidStatus;

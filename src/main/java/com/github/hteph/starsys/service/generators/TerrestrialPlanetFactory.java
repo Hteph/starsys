@@ -4,7 +4,6 @@ import com.github.hteph.starsys.service.generators.utils.LifeMethods;
 import com.github.hteph.starsys.service.generators.utils.MakeAtmosphere;
 import com.github.hteph.starsys.service.generators.utils.PlanetaryUtils;
 import com.github.hteph.starsys.service.generators.utils.TempertureMethods;
-import com.github.hteph.repository.objects.*;
 import com.github.hteph.starsys.service.objects.*;
 import com.github.hteph.starsys.service.objects.wrappers.Homeworld;
 import com.github.hteph.starsys.service.tables.FindAtmoPressure;

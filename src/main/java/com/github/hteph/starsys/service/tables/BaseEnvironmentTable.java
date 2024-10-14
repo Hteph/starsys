@@ -14,6 +14,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeMap;
 
+import static com.github.hteph.starsys.enums.EnvironmentalEnum.*;
+
 @Slf4j
 public class BaseEnvironmentTable {
 
@@ -60,7 +62,7 @@ public class BaseEnvironmentTable {
                 chance -= place.getHydrosphere() / 10;
             }
             if (enumClass.contains("c")) {
-                chance = (int) (chance / place.getTemperatureFacts().getSurfaceTemp() / 274.0);
+                chance = (int) (chance / (1.0*place.getTemperatureFacts().getSurfaceTemp()) / 274.0);
             }
             if (enumClass.contains("t")) {
                 chance = (int) (chance * place.getTemperatureFacts().getSurfaceTemp() / 274.0);

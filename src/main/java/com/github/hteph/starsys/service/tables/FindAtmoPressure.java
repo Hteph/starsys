@@ -2,9 +2,12 @@ package com.github.hteph.starsys.service.tables;
 
 import com.github.hteph.starsys.service.objects.AtmosphericGases;
 import com.github.hteph.utils.Dice;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.util.Set;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class FindAtmoPressure {
 
     public static double calculate(String tectonicActivityGroup,
@@ -21,42 +24,18 @@ public class FindAtmoPressure {
         if (hydrosphere > 0) mod += 1;
         if (boilingAtmo) mod -= 1;
 
-        switch (Dice._2d6() + mod) {
-            case 2:
-                pressure = (Dice._2d6()) * 0.005;
-                break;
-            case 3:
-                pressure = (Dice._2d6()) * 0.01;
-                break;
-            case 4:
-            case 5:
-                pressure = (Dice._2d6()) * 0.05;
-                break;
-            case 6:
-            case 7:
-                pressure = (Dice._2d6()) * 0.1;
-                break;
-            case 8:
-            case 9:
-            case 10:
-                pressure = (Dice._2d6()) * 0.2;
-                break;
-            case 11:
-                pressure = (Dice._2d6()) * 0.5;
-                break;
-            case 12:
-                pressure = Dice._2d6();
-                break;
-            case 13:
-                pressure = (Dice._2d6()) * 3;
-                break;
-            case 14:
-                pressure = (Dice._2d6()) * 5;
-                break;
-            default:
-                pressure = (Dice._2d6()) * 0.001;
-                break;
-        }
+        pressure = switch (Dice._2d6() + mod) {
+            case 2 -> (Dice._2d6()) * 0.005;
+            case 3 -> (Dice._2d6()) * 0.01;
+            case 4, 5 -> (Dice._2d6()) * 0.05;
+            case 6, 7 -> (Dice._2d6()) * 0.1;
+            case 8, 9, 10 -> (Dice._2d6()) * 0.2;
+            case 11 -> (Dice._2d6()) * 0.5;
+            case 12 -> Dice._2d6();
+            case 13 -> (Dice._2d6()) * 3;
+            case 14 -> (Dice._2d6()) * 5;
+            default -> (Dice._2d6()) * 0.001;
+        };
         if (atmoshericComposition.isEmpty()) pressure = 0;
         pressure *= mass;
         return pressure;
