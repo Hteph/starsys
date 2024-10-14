@@ -1,12 +1,12 @@
 package com.github.hteph.repository.objects;
 
+import com.github.hteph.starsys.service.objects.AtmosphericGases;
 import com.github.hteph.utils.StreamUtilities;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;

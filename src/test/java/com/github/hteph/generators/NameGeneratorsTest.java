@@ -1,6 +1,7 @@
 package com.github.hteph.generators;
 
-import com.github.hteph.generators.namegenerator.MarkovGenerator;
+import com.github.hteph.starsys.service.generators.NameGenerators;
+import com.github.hteph.utils.namegenerator.MarkovGenerator;
 import org.junit.jupiter.api.Test;
 
 import java.net.URL;

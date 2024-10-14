@@ -1,9 +1,10 @@
 package com.github.hteph.generators.utils;
 
-import com.github.hteph.repository.objects.Creature;
-import com.github.hteph.repository.objects.CreatureBody;
-import com.github.hteph.repository.objects.wrappers.Homeworld;
-import com.github.hteph.utils.enums.Symmetry;
+import com.github.hteph.starsys.service.objects.Creature;
+import com.github.hteph.starsys.service.objects.CreatureBody;
+import com.github.hteph.starsys.service.generators.utils.BodySegmentsCreator;
+import com.github.hteph.starsys.service.objects.wrappers.Homeworld;
+import com.github.hteph.starsys.enums.Symmetry;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;

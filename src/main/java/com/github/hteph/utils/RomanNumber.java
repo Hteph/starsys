@@ -8,7 +8,7 @@ import java.util.TreeMap;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class RomanNumber {
 
-        private final static TreeMap<Integer, String> map = new TreeMap<Integer, String>();
+    private static final TreeMap<Integer, String> map = new TreeMap<Integer, String>();
 
         static {
 

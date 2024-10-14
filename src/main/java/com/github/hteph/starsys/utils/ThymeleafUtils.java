@@ -1,12 +1,11 @@
 package com.github.hteph.starsys.utils;
 
-import com.github.hteph.repository.objects.Biosphere;
-import com.github.hteph.repository.objects.Planet;
-import com.github.hteph.repository.objects.StellarObject;
+import com.github.hteph.starsys.service.objects.Biosphere;
+import com.github.hteph.starsys.service.objects.Planet;
+import com.github.hteph.starsys.service.objects.StellarObject;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;

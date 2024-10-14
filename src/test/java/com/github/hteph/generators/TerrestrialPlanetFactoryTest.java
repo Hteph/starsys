@@ -1,6 +1,8 @@
 package com.github.hteph.generators;
 
 
+import com.github.hteph.starsys.service.generators.StarFactory;
+import com.github.hteph.starsys.service.generators.TerrestrialPlanetFactory;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;

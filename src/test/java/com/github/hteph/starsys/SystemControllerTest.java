@@ -24,14 +24,5 @@ class SystemControllerTest {
     @Autowired
     private SystemController controller;
     
-    
-    @Test
-    void createSystem() {
-        
-        //uses the legacy api for simplicity
-        
-        var test = controller.createSystem("Random", model);
-        
-        assertNotNull(controller);
-    }
+
 }

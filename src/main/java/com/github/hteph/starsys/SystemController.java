@@ -1,13 +1,13 @@
 package com.github.hteph.starsys;
 
-import com.github.hteph.generators.CreatureGenerator;
-import com.github.hteph.generators.StarFactory;
-import com.github.hteph.generators.StarSystemGenerator;
-import com.github.hteph.repository.objects.Biosphere;
-import com.github.hteph.repository.objects.Creature;
-import com.github.hteph.repository.objects.StellarObject;
+import com.github.hteph.starsys.service.generators.CreatureGenerator;
+import com.github.hteph.starsys.service.generators.StarFactory;
+import com.github.hteph.starsys.service.generators.StarSystemGenerator;
+import com.github.hteph.starsys.service.objects.Biosphere;
+import com.github.hteph.starsys.service.objects.Creature;
+import com.github.hteph.starsys.service.objects.StellarObject;
 import com.github.hteph.starsys.utils.ThymeleafUtils;
-import com.github.hteph.utils.enums.Breathing;
+import com.github.hteph.starsys.enums.Breathing;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
